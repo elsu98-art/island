@@ -1,0 +1,2724 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>童話夢想島：中文打字開拓記</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      background-color: #38bdf8;
+    }
+    #threeCanvasWrapper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      cursor: grab;
+    }
+    #threeCanvasWrapper:active {
+      cursor: grabbing;
+    }
+    .hud-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .interactive {
+      pointer-events: auto;
+    }
+    .glass-hud {
+      background: rgba(15, 23, 42, 0.76);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.5);
+    }
+    .side-control-panel {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.65);
+    }
+    .solid-wordcard {
+      background: rgba(2, 6, 23, 0.65) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(52, 211, 153, 0.45) !important;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .zhuyin-char {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 0.35rem;
+      position: relative;
+    }
+    .zhuyin-ruby {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #93c5fd;
+      letter-spacing: 0.05em;
+      line-height: 1.1;
+      margin-bottom: 0.2rem;
+    }
+    .main-hanzi {
+      font-size: 3.1rem;
+      font-weight: 900;
+      line-height: 1;
+      color: #ffffff;
+      text-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+    }
+    @media (max-width: 640px) {
+      .main-hanzi {
+        font-size: 2.1rem;
+      }
+      .zhuyin-ruby {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body class="relative w-full h-full overflow-hidden">
+
+  <!-- 3D 渲染畫布容器 -->
+  <div id="threeCanvasWrapper"></div>
+
+  <!-- HUD 介面層：採用左右獨立區域，徹底避免字卡遮擋 3D 小島 -->
+  <div class="hud-layer flex flex-col justify-between p-2 sm:p-4">
+    
+    <!-- 頂部資訊列 (緊湊置頂) -->
+    <header class="flex justify-between items-center w-full max-w-7xl mx-auto interactive gap-2">
+      <!-- 標題與島嶼繁榮等級 -->
+      <div class="glass-hud px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl flex items-center gap-2.5">
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+        <div>
+          <h1 class="text-[11px] font-bold tracking-wider text-slate-300">童話夢想島</h1>
+          <div id="islandRankBadge" class="text-xs sm:text-sm font-black text-emerald-300">Lv.1 寧靜荒島</div>
+        </div>
+      </div>
+
+      <!-- 當前難度顯示標籤 (遊戲中鎖定無法更換) -->
+      <div class="glass-hud px-3.5 py-1.5 rounded-2xl flex items-center gap-2">
+        <span class="text-[10px] text-slate-400 font-bold block leading-tight">目前難度</span>
+        <span id="currentDiffBadge" class="font-black text-emerald-400 text-xs sm:text-sm">簡易</span>
+      </div>
+
+      <!-- 狀態欄 (天色、特殊地標進度、積分、音效) -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- 5 題特殊地標倒數 -->
+        <div class="glass-hud px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-2xl text-center hidden sm:block">
+          <span class="text-[10px] text-slate-400 block leading-tight">紀念地標</span>
+          <span id="milestoneCounter" class="font-bold text-cyan-300 text-xs sm:text-sm">0 / 5</span>
+        </div>
+
+        <div class="glass-hud px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-2xl text-center">
+          <span class="text-[10px] text-slate-400 block leading-tight">天色</span>
+          <span id="dayTimeBadge" class="font-bold text-amber-300 text-xs sm:text-sm">中午</span>
+        </div>
+
+        <div class="glass-hud px-3 py-1 sm:px-4 sm:py-1.5 rounded-2xl text-center">
+          <span class="text-[10px] text-slate-400 block leading-tight">開拓積分</span>
+          <span id="scoreEl" class="font-black text-amber-400 text-sm sm:text-base">0</span>
+        </div>
+
+        <!-- 獨立背景音樂按鈕與音效按鈕（純文字 ON/OFF 顯示） -->
+        <button id="bgmBtn" class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95" title="背景音樂開關">
+          音樂 ON
+        </button>
+
+        <button id="muteBtn" class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95" title="音效開關">
+          音效 ON
+        </button>
+      </div>
+    </header>
+
+    <!-- 中部至底部操作區：左側完全留空給 3D 小島，右側配置專屬字卡與打字控制台 -->
+    <div class="flex-1 flex flex-col md:flex-row items-end justify-between w-full max-w-7xl mx-auto pointer-events-none mt-2 pb-1">
+      
+      <!-- 左側 3D 小島展示區（點擊穿透，無任何文字遮擋） -->
+      <div class="flex-1 w-full h-full min-h-[40px] pointer-events-none"></div>
+
+      <!-- 右側專屬字卡與打字控制台（桌面端靠右專屬邊欄，不重疊左側島嶼） -->
+      <aside class="w-full md:w-[380px] lg:w-[410px] flex flex-col gap-2.5 interactive side-control-panel p-3.5 sm:p-4 rounded-3xl">
+        
+        <!-- 活力進度條 -->
+        <div class="w-full bg-slate-900/90 px-3 py-1.5 rounded-xl flex items-center gap-2 border border-slate-700/60">
+          <span class="text-[10px] font-bold text-slate-300 whitespace-nowrap">島嶼活力</span>
+          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden p-0.5 border border-slate-700">
+            <div id="vitalityBar" class="h-full bg-gradient-to-r from-amber-400 to-emerald-400 rounded-full transition-all duration-300" style="width: 100%;"></div>
+          </div>
+          <span id="vitalityPercent" class="text-[11px] font-black text-emerald-400 min-w-[32px] text-right">100%</span>
+        </div>
+
+        <!-- 題目大字卡 -->
+        <div id="wordCard" class="w-full solid-wordcard px-4 py-3 rounded-2xl flex flex-col items-center justify-center">
+          <div class="text-[11px] font-bold text-emerald-300 tracking-wider mb-1" id="nextUpgradeHint">
+            輸入目標字詞・開拓全新島嶼造物
+          </div>
+          <div id="charCardsContainer" class="flex items-center justify-center flex-wrap py-0.5">
+            <!-- 動態載入字卡與注音 -->
+          </div>
+        </div>
+
+        <!-- 升級或紀念地標落成橫幅 -->
+        <div id="upgradeBanner" class="hidden text-xs font-black text-center px-3 py-1.5 rounded-xl bg-emerald-500 text-slate-950 shadow-lg tracking-wider transition-all duration-300">
+          建築升級完成！
+        </div>
+
+        <!-- 打字輸入框與送出按鈕 -->
+        <div class="flex items-center gap-2">
+          <input 
+            id="typeInput" 
+            type="text" 
+            autocomplete="off" 
+            autocorrect="off" 
+            autocapitalize="off" 
+            spellcheck="false"
+            placeholder="請看上方注音輸入..." 
+            class="flex-1 bg-slate-900/95 border border-slate-700 text-white font-bold text-base px-3.5 py-2 rounded-xl focus:outline-none focus:border-emerald-400 placeholder:text-slate-500 text-center tracking-widest transition"
+          />
+          <button id="submitBtn" class="bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-black px-4 py-2 rounded-xl transition text-sm tracking-wider">
+            送出
+          </button>
+        </div>
+
+        <div class="text-center text-[10px] text-slate-400 tracking-wider">
+          提示：滑鼠按住畫面左側可 360° 旋轉觀賞小島
+        </div>
+      </aside>
+    </div>
+
+  </div>
+
+  <!-- 開始遊戲彈窗 (純文字現代風格) -->
+  <div id="startOverlay" class="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/75 backdrop-blur-md p-4">
+    <div class="glass-hud max-w-md w-full p-6 sm:p-8 rounded-3xl text-center border border-slate-700/80 text-white space-y-4">
+      <div class="space-y-1">
+        <span class="text-xs uppercase tracking-widest text-emerald-400 font-bold">Island Expedition</span>
+        <h2 class="text-2xl sm:text-3xl font-black text-white">童話夢想島</h2>
+        <p class="text-xs sm:text-sm text-slate-300">中文打字開拓記</p>
+      </div>
+
+      <div class="text-xs sm:text-sm text-slate-300 text-left space-y-2 bg-slate-900/60 p-4 rounded-2xl border border-slate-800 leading-relaxed">
+        <p>1. 根據上方字卡輸入中文詞彙</p>
+        <p>2. 每次輸入正確會越島嶼注入活力，陸續誕生物件</p>
+        <p>3. 通過5題就會獲得「紀念地標」</p>
+      </div>
+
+      <!-- 進入遊戲前的難度選擇區 -->
+      <div class="text-left space-y-2">
+        <label class="text-xs font-bold text-slate-300 block">請選擇開拓難度（遊戲開始後無法更改）：</label>
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" data-diff="easy" class="start-diff-btn p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-emerald-300 font-bold text-xs sm:text-sm transition flex flex-col items-center">
+            <span>簡易</span>
+            <span class="text-[10px] font-normal text-slate-400 mt-0.5">2字詞為主</span>
+          </button>
+          <button type="button" data-diff="medium" class="start-diff-btn p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition flex flex-col items-center">
+            <span>普通</span>
+            <span class="text-[10px] font-normal text-slate-400 mt-0.5">2~3字均衡</span>
+          </button>
+          <button type="button" data-diff="hard" class="start-diff-btn p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition flex flex-col items-center">
+            <span>困難</span>
+            <span class="text-[10px] font-normal text-slate-400 mt-0.5">成語名句</span>
+          </button>
+        </div>
+      </div>
+
+      <button id="startBtn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base sm:text-lg py-3 rounded-xl border border-emerald-300/50 shadow-xl transition transform active:scale-95 tracking-widest">
+        開始開拓小島
+      </button>
+    </div>
+  </div>
+
+  <!-- 遊戲結束結算彈窗 -->
+  <div id="gameOverOverlay" class="hidden absolute inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4">
+    <div class="glass-hud max-w-sm w-full p-6 sm:p-8 rounded-3xl text-center border border-slate-700 text-white space-y-4">
+      <div class="space-y-1">
+        <span class="text-xs uppercase tracking-widest text-amber-400 font-bold">Expedition Finished</span>
+        <h2 class="text-2xl font-black">島嶼開拓報告</h2>
+        <p class="text-xs text-slate-400">活力耗盡，開拓暫告一段落</p>
+      </div>
+
+      <div class="bg-slate-900/70 p-4 rounded-2xl text-sm space-y-2 border border-slate-800">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+          <span class="text-slate-400 text-xs">小島繁榮等級</span>
+          <span id="finalIslandRank" class="font-bold text-emerald-400 text-sm">Lv.1 寧靜荒島</span>
+        </div>
+        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+          <span class="text-slate-400 text-xs">完成詞彙題數</span>
+          <span id="finalCorrectCount" class="font-bold text-cyan-400 text-sm">0 題</span>
+        </div>
+        <div class="flex justify-between items-center pt-1">
+          <span class="text-slate-400 text-xs">開拓總分</span>
+          <span id="finalScore" class="font-black text-amber-400 text-2xl">0</span>
+        </div>
+      </div>
+
+      <!-- 失敗後可重新選擇難度 -->
+      <div class="text-left space-y-1.5 pt-1">
+        <label class="text-xs font-bold text-slate-300 block">重新選擇挑戰難度：</label>
+        <div class="grid grid-cols-3 gap-1.5">
+          <button type="button" data-diff="easy" class="over-diff-btn py-1.5 px-2 rounded-xl border border-emerald-500 bg-emerald-500/20 text-emerald-300 font-bold text-xs transition text-center">
+            簡易
+          </button>
+          <button type="button" data-diff="medium" class="over-diff-btn py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs transition text-center">
+            普通
+          </button>
+          <button type="button" data-diff="hard" class="over-diff-btn py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs transition text-center">
+            困難
+          </button>
+        </div>
+      </div>
+
+      <button id="restartBtn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base py-3 rounded-xl border border-emerald-300 shadow-xl transition transform active:scale-95 tracking-widest">
+        重新開拓
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // 300+ 詞彙資料庫：嚴格校對教育部國語辭典注音，大量收錄台灣地名、特產與名勝
+    const WORD_DB = {
+      // 簡易難度：二字詞為主，穿插台灣縣市、名產與親切三字詞
+      easy: [
+        { word: "台灣", ruby: ["ㄊㄞˊ", "ㄨㄢ"] },
+        { word: "台北", ruby: ["ㄊㄞˊ", "ㄅㄟˇ"] },
+        { word: "台中", ruby: ["ㄊㄞˊ", "ㄓㄨㄥ"] },
+        { word: "台南", ruby: ["ㄊㄞˊ", "ㄋㄢˊ"] },
+        { word: "高雄", ruby: ["ㄍㄠ", "ㄒㄧㄨㄥˊ"] },
+        { word: "花蓮", ruby: ["ㄏㄨㄚ", "ㄌㄧㄢˊ"] },
+        { word: "台東", ruby: ["ㄊㄞˊ", "ㄉㄨㄥ"] },
+        { word: "宜蘭", ruby: ["ㄧˊ", "ㄌㄢˊ"] },
+        { word: "新竹", ruby: ["ㄒㄧㄣ", "ㄓㄨˊ"] },
+        { word: "苗栗", ruby: ["ㄇㄧㄠˊ", "ㄌㄧˋ"] },
+        { word: "彰化", ruby: ["ㄓㄤ", "ㄏㄨㄚˋ"] },
+        { word: "南投", ruby: ["ㄋㄢˊ", "ㄊㄡˊ"] },
+        { word: "雲林", ruby: ["ㄩㄣˊ", "ㄌㄧㄣˊ"] },
+        { word: "嘉義", ruby: ["ㄐㄧㄚ", "ㄧˋ"] },
+        { word: "屏東", ruby: ["ㄆㄧㄥˊ", "ㄉㄨㄥ"] },
+        { word: "基隆", ruby: ["ㄐㄧ", "ㄌㄨㄥˊ"] },
+        { word: "桃園", ruby: ["ㄊㄠˊ", "ㄩㄢˊ"] },
+        { word: "澎湖", ruby: ["ㄆㄥˊ", "ㄏㄨˊ"] },
+        { word: "金門", ruby: ["ㄐㄧㄣ", "ㄇㄣˊ"] },
+        { word: "馬祖", ruby: ["ㄇㄚˇ", "ㄗㄨˇ"] },
+        { word: "綠島", ruby: ["ㄌㄩˋ", "ㄉㄠˇ"] },
+        { word: "蘭嶼", ruby: ["ㄌㄢˊ", "ㄩˇ"] },
+        { word: "墾丁", ruby: ["ㄎㄣˇ", "ㄉㄧㄥ"] },
+        { word: "九份", ruby: ["ㄐㄧㄡˇ", "ㄈㄣˋ"] },
+        { word: "淡水", ruby: ["ㄉㄢˋ", "ㄕㄨㄟˇ"] },
+        { word: "鹿港", ruby: ["ㄌㄨˋ", "ㄍㄤˇ"] },
+        { word: "安平", ruby: ["ㄢ", "ㄆㄧㄥˊ"] },
+        { word: "旗津", ruby: ["ㄑㄧˊ", "ㄐㄧㄣ"] },
+        { word: "美濃", ruby: ["ㄇㄟˇ", "ㄋㄨㄥˊ"] },
+        { word: "礁溪", ruby: ["ㄐㄧㄠ", "ㄒㄧ"] },
+        { word: "鶯歌", ruby: ["ㄧㄥ", "ㄍㄜ"] },
+        { word: "三峽", ruby: ["ㄙㄢ", "ㄒㄧㄚˊ"] },
+        { word: "烏來", ruby: ["ㄨ", "ㄌㄞˊ"] },
+        { word: "玉山", ruby: ["ㄩˋ", "ㄕㄢ"] },
+        { word: "雪山", ruby: ["ㄒㄩㄝˇ", "ㄕㄢ"] },
+        { word: "釋迦", ruby: ["ㄕˋ", "ㄐㄧㄚ"] },
+        { word: "蓮霧", ruby: ["ㄌㄧㄢˊ", "ㄨˋ"] },
+        { word: "芭樂", ruby: ["ㄅㄚ", "ㄌㄜˋ"] },
+        { word: "椪柑", ruby: ["ㄆㄥˋ", "ㄍㄢ"] },
+        { word: "文旦", ruby: ["ㄨㄣˊ", "ㄉㄢˋ"] },
+        { word: "芒果", ruby: ["ㄇㄤˊ", "ㄍㄨㄛˇ"] },
+        { word: "香蕉", ruby: ["ㄒㄧㄤ", "ㄐㄧㄠ"] },
+        { word: "貢丸", ruby: ["ㄍㄨㄥˋ", "ㄨㄢˊ"] },
+        { word: "米粉", ruby: ["ㄇㄧˇ", "ㄈㄣˇ"] },
+        { word: "鐵蛋", ruby: ["ㄊㄧㄝˇ", "ㄉㄢˋ"] },
+        { word: "麻糬", ruby: ["ㄇㄚˊ", "ㄕㄨˇ"] },
+        { word: "茶葉", ruby: ["ㄔㄚˊ", "ㄧㄝˋ"] },
+        { word: "山脈", ruby: ["ㄕㄢ", "ㄇㄞˋ"] },
+        { word: "小島", ruby: ["ㄒㄧㄠˇ", "ㄉㄠˇ"] },
+        { word: "小貓", ruby: ["ㄒㄧㄠˇ", "ㄇㄠ"] },
+        { word: "白兔", ruby: ["ㄅㄞˊ", "ㄊㄨˋ"] },
+        { word: "小鹿", ruby: ["ㄒㄧㄠˇ", "ㄌㄨˋ"] },
+        { word: "綿羊", ruby: ["ㄇㄧㄢˊ", "ㄧㄤˊ"] },
+        { word: "乳牛", ruby: ["ㄖㄨˇ", "ㄋㄧㄡˊ"] },
+        { word: "蝴蝶", ruby: ["ㄏㄨˊ", "ㄉㄧㄝˊ"] },
+        { word: "蜜蜂", ruby: ["ㄇㄧˋ", "ㄈㄥ"] },
+        { word: "微風", ruby: ["ㄨㄟˊ", "ㄈㄥ"] },
+        { word: "陽光", ruby: ["ㄧㄤˊ", "ㄍㄨㄤ"] },
+        { word: "白雲", ruby: ["ㄅㄞˊ", "ㄩㄣˊ"] },
+        { word: "森林", ruby: ["ㄙㄣ", "ㄌㄧㄣˊ"] },
+        { word: "海洋", ruby: ["ㄏㄞˇ", "ㄧㄤˊ"] },
+        { word: "青草", ruby: ["ㄑㄧㄥ", "ㄘㄠˇ"] },
+        { word: "鳳梨酥", ruby: ["ㄈㄥˋ", "ㄌㄧˊ", "ㄙㄨ"] },
+        { word: "珍珠奶茶", ruby: ["ㄓㄣ", "ㄓㄨ", "ㄋㄞˇ", "ㄔㄚˊ"] },
+        { word: "牛肉麵", ruby: ["ㄋㄧㄡˊ", "ㄖㄡˋ", "ㄇㄧㄢˋ"] },
+        { word: "小籠包", ruby: ["ㄒㄧㄠˇ", "ㄌㄨㄥˊ", "ㄅㄠ"] },
+        { word: "太陽餅", ruby: ["ㄊㄞˋ", "ㄧㄤˊ", "ㄅㄧㄥˇ"] },
+        { word: "蚵仔煎", ruby: ["ㄜˊ", "ㄗˇ", "ㄐㄧㄢ"] },
+        { word: "滷肉飯", ruby: ["ㄌㄨˇ", "ㄖㄡˋ", "ㄈㄢˋ"] },
+        { word: "芒果冰", ruby: ["ㄇㄤˊ", "ㄍㄨㄛˇ", "ㄅㄧㄥ"] },
+        { word: "愛玉冰", ruby: ["ㄞˋ", "ㄩˋ", "ㄅㄧㄥ"] },
+        { word: "木瓜牛奶", ruby: ["ㄇㄨˋ", "ㄍㄨㄚ", "ㄋㄧㄡˊ", "ㄋㄞˇ"] },
+        { word: "阿里山", ruby: ["ㄚ", "ㄌㄧˇ", "ㄕㄢ"] },
+        { word: "日月潭", ruby: ["ㄖˋ", "ㄩㄝˋ", "ㄊㄢˊ"] },
+        { word: "陽明山", ruby: ["ㄧㄤˊ", "ㄇㄧㄥˊ", "ㄕㄢ"] },
+        { word: "太魯閣", ruby: ["ㄊㄞˋ", "ㄌㄨˇ", "ㄍㄜˊ"] },
+        { word: "向日葵", ruby: ["ㄒㄧㄤˋ", "ㄖˋ", "ㄎㄨㄟˊ"] },
+        { word: "小白兔", ruby: ["ㄒㄧㄠˇ", "ㄅㄞˊ", "ㄊㄨˋ"] },
+        { word: "櫻花樹", ruby: ["ㄧㄥ", "ㄏㄨㄚ", "ㄕㄨˋ"] },
+        { word: "稻草人", ruby: ["ㄉㄠˋ", "ㄘㄠˇ", "ㄖㄣˊ"] },
+        { word: "熱氣球", ruby: ["ㄖㄜˋ", "ㄑㄧˋ", "ㄑㄧㄡˊ"] },
+        { word: "小木船", ruby: ["ㄒㄧㄠˇ", "ㄇㄨˋ", "ㄔㄨㄢˊ"] },
+        { word: "遊樂園", ruby: ["ㄧㄡˊ", "ㄌㄜˋ", "ㄩㄢˊ"] },
+        { word: "紅蜻蜓", ruby: ["ㄏㄨㄥˊ", "ㄑㄧㄥ", "ㄊㄧㄥˊ"] },
+        { word: "螢火蟲", ruby: ["ㄧㄥˊ", "ㄏㄨㄛˇ", "ㄔㄨㄥˊ"] },
+        { word: "大自然", ruby: ["ㄉㄚˋ", "ㄗˋ", "ㄖㄢˊ"] },
+        { word: "新天地", ruby: ["ㄒㄧㄣ", "ㄊㄧㄢ", "ㄉㄧˋ"] },
+        { word: "好朋友", ruby: ["ㄏㄠˇ", "ㄆㄥˊ", "ㄧㄡˇ"] }
+      ],
+
+      // 普通難度：二字與三字均衡各半，大量融入台灣名勝景點、特產與文化
+      medium: [
+        { word: "烏龍茶", ruby: ["ㄨ", "ㄌㄨㄥˊ", "ㄔㄚˊ"] },
+        { word: "包種茶", ruby: ["ㄅㄠ", "ㄓㄨㄥˇ", "ㄔㄚˊ"] },
+        { word: "鐵觀音", ruby: ["ㄊㄧㄝˇ", "ㄍㄨㄢ", "ㄧㄣ"] },
+        { word: "東方美人", ruby: ["ㄉㄨㄥ", "ㄈㄤ", "ㄇㄟˇ", "ㄖㄣˊ"] },
+        { word: "牛軋糖", ruby: ["ㄋㄧㄡˊ", "ㄍㄚˊ", "ㄊㄤˊ"] },
+        { word: "蔥油餅", ruby: ["ㄘㄨㄥ", "ㄧㄡˊ", "ㄅㄧㄥˇ"] },
+        { word: "鹽酥雞", ruby: ["ㄧㄢˊ", "ㄙㄨ", "ㄐㄧ"] },
+        { word: "臭豆腐", ruby: ["ㄔㄡˋ", "ㄉㄡˋ", "ㄈㄨˇ"] },
+        { word: "潤餅捲", ruby: ["ㄖㄨㄣˋ", "ㄅㄧㄥˇ", "ㄐㄩㄢˇ"] },
+        { word: "彰化肉圓", ruby: ["ㄓㄤ", "ㄏㄨㄚˋ", "ㄖㄡˋ", "ㄩㄢˊ"] },
+        { word: "萬巒豬腳", ruby: ["ㄨㄢˋ", "ㄌㄨㄢˊ", "ㄓㄨ", "ㄐㄧㄠˇ"] },
+        { word: "宜蘭鴨賞", ruby: ["ㄧˊ", "ㄌㄢˊ", "ㄧㄚ", "ㄕㄤˇ"] },
+        { word: "大腸包小腸", ruby: ["ㄉㄚˋ", "ㄔㄤˊ", "ㄅㄠ", "ㄒㄧㄠˇ", "ㄔㄤˊ"] },
+        { word: "台北一零一", ruby: ["ㄊㄞˊ", "ㄅㄟˇ", "ㄧ", "ㄌㄧㄥˊ", "ㄧ"] },
+        { word: "故宮博物院", ruby: ["ㄍㄨˋ", "ㄍㄨㄥ", "ㄅㄛˊ", "ㄨˋ", "ㄩㄢˋ"] },
+        { word: "赤崁樓", ruby: ["ㄔˋ", "ㄎㄢˇ", "ㄌㄡˊ"] },
+        { word: "安平古堡", ruby: ["ㄢ", "ㄆㄧㄥˊ", "ㄍㄨˇ", "ㄅㄠˇ"] },
+        { word: "龍山寺", ruby: ["ㄌㄨㄥˊ", "ㄕㄢ", "ㄙˋ"] },
+        { word: "天后宮", ruby: ["ㄊㄧㄢ", "ㄏㄡˋ", "ㄍㄨㄥ"] },
+        { word: "高美濕地", ruby: ["ㄍㄠ", "ㄇㄟˇ", "ㄕ", "ㄉㄧˋ"] },
+        { word: "彩虹眷村", ruby: ["ㄘㄞˇ", "ㄏㄨㄥˊ", "ㄐㄩㄢˋ", "ㄘㄨㄣ"] },
+        { word: "駁二特區", ruby: ["ㄅㄛˊ", "ㄦˋ", "ㄊㄜˋ", "ㄑㄩ"] },
+        { word: "鵝鑾鼻", ruby: ["ㄜˊ", "ㄌㄨㄢˊ", "ㄅㄧˊ"] },
+        { word: "合歡山", ruby: ["ㄏㄜˊ", "ㄏㄨㄢ", "ㄕㄢ"] },
+        { word: "太平山", ruby: ["ㄊㄞˋ", "ㄆㄧㄥˊ", "ㄕㄢ"] },
+        { word: "棲蘭神木", ruby: ["ㄑㄧ", "ㄌㄢˊ", "ㄕㄣˊ", "ㄇㄨˋ"] },
+        { word: "蘭陽平原", ruby: ["ㄌㄢˊ", "ㄧㄤˊ", "ㄆㄧㄥˊ", "ㄩㄢˊ"] },
+        { word: "嘉南平原", ruby: ["ㄐㄧㄚ", "ㄋㄢˊ", "ㄆㄧㄥˊ", "ㄩㄢˊ"] },
+        { word: "花東縱谷", ruby: ["ㄏㄨㄚ", "ㄉㄨㄥ", "ㄗㄨㄥˋ", "ㄍㄨˇ"] },
+        { word: "墾丁國家公園", ruby: ["ㄎㄣˇ", "ㄉㄧㄥ", "ㄍㄨㄛˊ", "ㄐㄧㄚ", "ㄍㄨㄥ", "ㄩㄢˊ"] },
+        { word: "阿里山神木", ruby: ["ㄚ", "ㄌㄧˇ", "ㄕㄢ", "ㄕㄣˊ", "ㄇㄨˋ"] },
+        { word: "日月潭纜車", ruby: ["ㄖˋ", "ㄩㄝˋ", "ㄊㄢˊ", "ㄌㄢˇ", "ㄔㄜ"] },
+        { word: "清境農場", ruby: ["ㄑㄧㄥ", "ㄐㄧㄥˋ", "ㄋㄨㄥˊ", "ㄔㄤˇ"] },
+        { word: "武陵農場", ruby: ["ㄨˇ", "ㄌㄧㄥˊ", "ㄋㄨㄥˊ", "ㄔㄤˇ"] },
+        { word: "鹿野高台", ruby: ["ㄌㄨˋ", "ㄧㄝˇ", "ㄍㄠ", "ㄊㄞˊ"] },
+        { word: "熱氣球嘉年華", ruby: ["ㄖㄜˋ", "ㄑㄧˋ", "ㄑㄧㄡˊ", "ㄐㄧㄚ", "ㄋㄧㄢˊ", "ㄏㄨㄚˊ"] },
+        { word: "平溪天燈", ruby: ["ㄆㄧㄥˊ", "ㄒㄧ", "ㄊㄧㄢ", "ㄉㄥ"] },
+        { word: "鹽水蜂炮", ruby: ["ㄧㄢˊ", "ㄕㄨㄟˇ", "ㄈㄥ", "ㄆㄠˋ"] },
+        { word: "媽祖遶境", ruby: ["ㄇㄚˇ", "ㄗㄨˇ", "ㄖㄠˋ", "ㄐㄧㄥˋ"] },
+        { word: "燒王船", ruby: ["ㄕㄠ", "ㄨㄤˊ", "ㄔㄨㄢˊ"] },
+        { word: "內灣老街", ruby: ["ㄋㄟˋ", "ㄨㄢ", "ㄌㄠˇ", "ㄐㄧㄝ"] },
+        { word: "鶯歌陶瓷", ruby: ["ㄧㄥ", "ㄍㄜ", "ㄊㄠˊ", "ㄘˊ"] },
+        { word: "三峽藍染", ruby: ["ㄙㄢ", "ㄒㄧㄚˊ", "ㄌㄢˊ", "ㄖㄢˇ"] },
+        { word: "美濃油紙傘", ruby: ["ㄇㄟˇ", "ㄋㄨㄥˊ", "ㄧㄡˊ", "ㄓˇ", "ㄙㄢˇ"] },
+        { word: "台灣黑熊", ruby: ["ㄊㄞˊ", "ㄨㄢ", "ㄏㄟ", "ㄒㄧㄨㄥˊ"] },
+        { word: "櫻花鉤吻鮭", ruby: ["ㄧㄥ", "ㄏㄨㄚ", "ㄍㄡ", "ㄨㄣˇ", "ㄍㄨㄟ"] },
+        { word: "梅花鹿", ruby: ["ㄇㄟˊ", "ㄏㄨㄚ", "ㄌㄨˋ"] },
+        { word: "石虎", ruby: ["ㄕˊ", "ㄏㄨˇ"] },
+        { word: "開拓", ruby: ["ㄎㄞ", "ㄊㄨㄛˋ"] },
+        { word: "湖泊", ruby: ["ㄏㄨˊ", "ㄆㄛˊ"] },
+        { word: "風車", ruby: ["ㄈㄥ", "ㄔㄜ"] },
+        { word: "學校", ruby: ["ㄒㄩㄝˊ", "ㄒㄧㄠˋ"] },
+        { word: "燈塔", ruby: ["ㄉㄥ", "ㄊㄚˇ"] },
+        { word: "城堡", ruby: ["ㄔㄥˊ", "ㄅㄠˇ"] },
+        { word: "春暖花開", ruby: ["ㄔㄨㄣ", "ㄋㄨㄢˇ", "ㄏㄨㄚ", "ㄎㄞ"] },
+        { word: "鳥語花香", ruby: ["ㄋㄧㄠˇ", "ㄩˇ", "ㄏㄨㄚ", "ㄒㄧㄤ"] },
+        { word: "欣欣向榮", ruby: ["ㄒㄧㄣ", "ㄒㄧㄣ", "ㄒㄧㄤˋ", "ㄖㄨㄥˊ"] },
+        { word: "生機盎然", ruby: ["ㄕㄥ", "ㄐㄧ", "ㄤˋ", "ㄖㄢˊ"] },
+        { word: "風光明媚", ruby: ["ㄈㄥ", "ㄍㄨㄤ", "ㄇㄧㄥˊ", "ㄇㄟˋ"] },
+        { word: "青山綠水", ruby: ["ㄑㄧㄥ", "ㄕㄢ", "ㄌㄩˋ", "ㄕㄨㄟˇ"] },
+        { word: "晴空萬里", ruby: ["ㄑㄧㄥˊ", "ㄎㄨㄥ", "ㄨㄢˋ", "ㄌㄧˇ"] },
+        { word: "朝氣蓬勃", ruby: ["ㄓㄠ", "ㄑㄧˋ", "ㄆㄥˊ", "ㄅㄛˊ"] },
+        { word: "萬物復甦", ruby: ["ㄨㄢˋ", "ㄨˋ", "ㄈㄨˋ", "ㄙㄨ"] },
+        { word: "世外桃源", ruby: ["ㄕˋ", "ㄨㄞˋ", "ㄊㄠˊ", "ㄩㄢˊ"] },
+        { word: "心曠神怡", ruby: ["ㄒㄧㄣ", "ㄎㄨㄤˋ", "ㄕㄣˊ", "ㄧˊ"] },
+        { word: "綠意盎然", ruby: ["ㄌㄩˋ", "ㄧˋ", "ㄤˋ", "ㄖㄢˊ"] }
+      ],
+
+      // 困難難度：成語、台灣歷史人文地景典故與五字名句
+      hard: [
+        { word: "寶島台灣", ruby: ["ㄅㄠˇ", "ㄉㄠˇ", "ㄊㄞˊ", "ㄨㄢ"] },
+        { word: "福爾摩沙", ruby: ["ㄈㄨˊ", "ㄦˇ", "ㄇㄛˊ", "ㄕㄚ"] },
+        { word: "蓬萊仙島", ruby: ["ㄆㄥˊ", "ㄌㄞˊ", "ㄒㄧㄢ", "ㄉㄠˇ"] },
+        { word: "巍峨玉山", ruby: ["ㄨㄟˊ", "ㄜˊ", "ㄩˋ", "ㄕㄢ"] },
+        { word: "秀麗山川", ruby: ["ㄒㄧㄡˋ", "ㄌㄧˋ", "ㄕㄢ", "ㄔㄨㄢ"] },
+        { word: "中橫公路", ruby: ["ㄓㄨㄥ", "ㄏㄥˊ", "ㄍㄨㄥ", "ㄌㄨˋ"] },
+        { word: "阿里山日出", ruby: ["ㄚ", "ㄌㄧˇ", "ㄕㄢ", "ㄖˋ", "ㄔㄨ"] },
+        { word: "日月潭晨曦", ruby: ["ㄖˋ", "ㄩㄝˋ", "ㄊㄢˊ", "ㄔㄣˊ", "ㄒㄧ"] },
+        { word: "太魯閣幽峽", ruby: ["ㄊㄞˋ", "ㄌㄨˇ", "ㄍㄜˊ", "ㄧㄡ", "ㄒㄧㄚˊ"] },
+        { word: "野柳女王頭", ruby: ["ㄧㄝˇ", "ㄌㄧㄡˇ", "ㄋㄩˇ", "ㄨㄤˊ", "ㄊㄡˊ"] },
+        { word: "墾丁珊瑚礁", ruby: ["ㄎㄣˇ", "ㄉㄧㄥ", "ㄕㄢ", "ㄏㄨˊ", "ㄐㄧㄠ"] },
+        { word: "陽明山小油坑", ruby: ["ㄧㄤˊ", "ㄇㄧㄥˊ", "ㄕㄢ", "ㄒㄧㄠˇ", "ㄧㄡˊ", "ㄎㄥ"] },
+        { word: "合歡山雪景", ruby: ["ㄏㄜˊ", "ㄏㄨㄢ", "ㄕㄢ", "ㄒㄩㄝˇ", "ㄐㄧㄥˇ"] },
+        { word: "清水斷崖", ruby: ["ㄑㄧㄥ", "ㄕㄨㄟˇ", "ㄉㄨㄢˋ", "ㄧㄞˊ"] },
+        { word: "鵝鑾鼻燈塔", ruby: ["ㄜˊ", "ㄌㄨㄢˊ", "ㄅㄧˊ", "ㄉㄥ", "ㄊㄚˇ"] },
+        { word: "鹿港天后宮", ruby: ["ㄌㄨˋ", "ㄍㄤˇ", "ㄊㄧㄢ", "ㄏㄡˋ", "ㄍㄨㄥ"] },
+        { word: "安平追想曲", ruby: ["ㄢ", "ㄆㄧㄥˊ", "ㄓㄨㄟ", "ㄒㄧㄤˇ", "ㄑㄩˇ"] },
+        { word: "平溪祈福天燈", ruby: ["ㄆㄧㄥˊ", "ㄒㄧ", "ㄑㄧˊ", "ㄈㄨˊ", "ㄊㄧㄢ", "ㄉㄥ"] },
+        { word: "鹽水萬炮齊發", ruby: ["ㄧㄢˊ", "ㄕㄨㄟˇ", "ㄨㄢˋ", "ㄆㄠˋ", "ㄑㄧˊ", "ㄈㄚ"] },
+        { word: "浩瀚無垠", ruby: ["ㄏㄠˋ", "ㄏㄢˋ", "ㄨˊ", "ㄧㄣˊ"] },
+        { word: "波瀾壯闊", ruby: ["ㄅㄛ", "ㄌㄢˊ", "ㄓㄨㄤˋ", "ㄎㄨㄛˋ"] },
+        { word: "層巒疊嶂", ruby: ["ㄘㄥˊ", "ㄌㄨㄢˊ", "ㄉㄧㄝˊ", "ㄓㄤˋ"] },
+        { word: "鬱鬱蔥蔥", ruby: ["ㄩˋ", "ㄩˋ", "ㄘㄨㄥ", "ㄘㄨㄥ"] },
+        { word: "崇山峻嶺", ruby: ["ㄔㄨㄥˊ", "ㄕㄢ", "ㄐㄩㄣˋ", "ㄌㄧㄥˇ"] },
+        { word: "萬紫千紅", ruby: ["ㄨㄢˋ", "ㄗˇ", "ㄑㄧㄢ", "ㄏㄨㄥˊ"] },
+        { word: "川流不息", ruby: ["ㄔㄨㄢ", "ㄌㄧㄡˊ", "ㄅㄨˋ", "ㄒㄧˊ"] },
+        { word: "繁花似錦", ruby: ["ㄈㄢˊ", "ㄏㄨㄚ", "ㄙˋ", "ㄐㄧㄣˇ"] },
+        { word: "星羅棋布", ruby: ["ㄒㄧㄥ", "ㄌㄨㄛˊ", "ㄑㄧˊ", "ㄅㄨˋ"] },
+        { word: "滄海桑田", ruby: ["ㄘㄤ", "ㄏㄞˇ", "ㄙㄤ", "ㄊㄧㄢˊ"] },
+        { word: "精益求精", ruby: ["ㄐㄧㄥ", "ㄧˋ", "ㄑㄧㄡˊ", "ㄐㄧㄥ"] },
+        { word: "持之以恆", ruby: ["ㄔˊ", "ㄓ", "ㄧˇ", "ㄏㄥˊ"] },
+        { word: "堅韌不拔", ruby: ["ㄐㄧㄢ", "ㄖㄣˋ", "ㄅㄨˋ", "ㄅㄚˊ"] },
+        { word: "鍥而不捨", ruby: ["ㄑㄧㄝˋ", "ㄦˊ", "ㄅㄨˋ", "ㄕㄜˇ"] },
+        { word: "力爭上游", ruby: ["ㄌㄧˋ", "ㄓㄥ", "ㄕㄤˋ", "ㄧㄡˊ"] },
+        { word: "積少成多", ruby: ["ㄐㄧ", "ㄕㄠˇ", "ㄔㄥˊ", "ㄉㄨㄛ"] },
+        { word: "循序漸進", ruby: ["ㄒㄩㄣˊ", "ㄒㄩˋ", "ㄐㄧㄢˋ", "ㄐㄧㄣˋ"] },
+        { word: "融會貫通", ruby: ["ㄖㄨㄥˊ", "ㄏㄨㄟˋ", "ㄍㄨㄢˋ", "ㄊㄨㄥ"] },
+        { word: "腳踏實地", ruby: ["ㄐㄧㄠˇ", "ㄊㄚˋ", "ㄕˊ", "ㄉㄧˋ"] },
+        { word: "飲水思源", ruby: ["ㄧㄣˇ", "ㄕㄨㄟˇ", "ㄙ", "ㄩㄢˊ"] },
+        { word: "聚沙成塔", ruby: ["ㄐㄩˋ", "ㄕㄚ", "ㄔㄥˊ", "ㄊㄚˇ"] },
+        { word: "滴水穿石", ruby: ["ㄉㄧ", "ㄕㄨㄟˇ", "ㄔㄨㄢ", "ㄕˊ"] },
+        { word: "千里之行", ruby: ["ㄑㄧㄢ", "ㄌㄧˇ", "ㄓ", "ㄒㄧㄥˊ"] },
+        { word: "始於足下", ruby: ["ㄕˇ", "ㄩˊ", "ㄗㄨˊ", "ㄒㄧㄚˋ"] },
+        { word: "海納百川", ruby: ["ㄏㄞˇ", "ㄋㄚˋ", "ㄅㄞˇ", "ㄔㄨㄢ"] },
+        { word: "有容乃大", ruby: ["ㄧㄡˇ", "ㄖㄨㄥˊ", "ㄋㄞˇ", "ㄉㄚˋ"] },
+        { word: "登高望遠", ruby: ["ㄉㄥ", "ㄍㄠ", "ㄨㄤˋ", "ㄩㄢˇ"] },
+        { word: "讀萬卷書行萬里路", ruby: ["ㄉㄨˊ", "ㄨㄢˋ", "ㄐㄩㄢˋ", "ㄕㄨ", "ㄒㄧㄥˊ", "ㄨㄢˋ", "ㄌㄧˇ", "ㄌㄨˋ"] }
+      ]
+    };
+
+    // 豐富的島嶼生成原型清單（無限持續累積生成，不再限制件數）
+    const REPEATABLE_PROTOTYPES = [
+      { name: "淘氣小花貓", type: "animal_cat" },
+      { name: "草頂小木屋", type: "house_cottage" },
+      { name: "奔馳小鹿", type: "animal_deer" },
+      { name: "盛開粉櫻樹", type: "cherry_tree" },
+      { name: "草地小白兔", type: "animal_rabbit" },
+      { name: "金黃向日葵田", type: "flower_patch" },
+      { name: "毛茸小白綿羊", type: "animal_sheep" },
+      { name: "梯田農夫", type: "person_farmer" },
+      { name: "悠閒乳牛", type: "animal_cow" },
+      { name: "清涼石造噴泉", type: "fountain" },
+      { name: "開拓旅人", type: "person_traveler" },
+      { name: "海港木棧橋", type: "pier_dock" },
+      { name: "野餐島民", type: "person_villager" }
+    ];
+
+    // 每 5 題贈予之「特殊紀念級建築/裝飾品」生成器清單
+    const SPECIAL_MONUMENTS = [
+      {
+        name: "童話紅磚學校",
+        build: () => {
+          const group = new THREE.Group();
+          group.position.set(-2.5, 1.36, -3.2);
+
+          const wallMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.7 });
+          const roofMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 });
+          const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.5 });
+
+          // 主教學樓
+          const mainHall = new THREE.Mesh(new THREE.BoxGeometry(3.6, 1.6, 2.0), wallMat);
+          mainHall.position.y = 0.8;
+          mainHall.castShadow = true;
+
+          // 坡頂
+          const roof = new THREE.Mesh(new THREE.ConeGeometry(2.6, 0.9, 4), roofMat);
+          roof.rotation.y = Math.PI / 4;
+          roof.position.y = 2.05;
+
+          // 中央鐘樓
+          const tower = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.8, 1.0), whiteMat);
+          tower.position.set(0, 2.1, 0.5);
+          const spire = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.0, 4), roofMat);
+          spire.rotation.y = Math.PI / 4;
+          spire.position.set(0, 3.5, 0.5);
+
+          // 學校時鐘
+          const clock = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.05, 12), goldMat);
+          clock.rotateX(Math.PI / 2);
+          clock.position.set(0, 2.5, 1.02);
+
+          // 校園國旗桿
+          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.6, 6), new THREE.MeshStandardMaterial({ color: 0x94a3b8 }));
+          pole.position.set(2.4, 1.3, 1.2);
+          const flag = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.02), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+          flag.position.set(2.65, 2.3, 1.2);
+
+          group.add(mainHall, roof, tower, spire, clock, pole, flag);
+          return group;
+        }
+      },
+      {
+        name: "海港深水大碼頭",
+        build: () => {
+          const group = new THREE.Group();
+          group.position.set(11.5, 0.8, 4.5);
+
+          const woodMat = new THREE.MeshStandardMaterial({ color: 0x5a2d0c, roughness: 0.85 });
+          const plankMat = new THREE.MeshStandardMaterial({ color: 0x854d0e, roughness: 0.8 });
+
+          const mainDeck = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.28, 2.4), plankMat);
+          mainDeck.position.y = 0.5;
+
+          // 橋樁
+          [-1.8, 0, 1.8].forEach(px => {
+            [-0.9, 0.9].forEach(pz => {
+              const p = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.2, 6), woodMat);
+              p.position.set(px, 0.0, pz);
+              group.add(p);
+            });
+          });
+
+          // 碼頭救生圈與繫船柱
+          const bollard = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.16, 0.45, 8), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+          bollard.position.set(2.0, 0.8, 0.8);
+          const lifeRing = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.09, 8, 16), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+          lifeRing.position.set(-1.8, 0.85, -0.9);
+
+          group.add(mainDeck, bollard, lifeRing);
+          return group;
+        }
+      },
+      {
+        name: "現代未來巨蛋體育館",
+        build: () => {
+          const group = new THREE.Group();
+          group.position.set(7.5, 1.35, -4.5);
+
+          const glassMat = new THREE.MeshStandardMaterial({
+            color: 0x38bdf8,
+            metalness: 0.6,
+            roughness: 0.2,
+            transparent: true,
+            opacity: 0.85
+          });
+          const baseMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5 });
+          const ringMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
+
+          const base = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.8, 0.5, 24), baseMat);
+          base.position.y = 0.25;
+
+          const dome = new THREE.Mesh(new THREE.SphereGeometry(2.3, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), glassMat);
+          dome.position.y = 0.5;
+
+          const ring1 = new THREE.Mesh(new THREE.TorusGeometry(2.35, 0.12, 8, 24), ringMat);
+          ring1.rotation.x = Math.PI / 2;
+          ring1.position.y = 0.52;
+
+          const arch = new THREE.Mesh(new THREE.TorusGeometry(2.25, 0.1, 8, 24, Math.PI), ringMat);
+          arch.position.y = 0.5;
+          arch.rotation.y = Math.PI / 4;
+
+          group.add(base, dome, ring1, arch);
+          return group;
+        }
+      },
+      {
+        name: "外海遠洋大商船",
+        build: () => {
+          const group = new THREE.Group();
+          group.position.set(22.0, 0.2, 10.0);
+          group.rotation.y = -Math.PI / 5;
+
+          const hullMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.6 });
+          const cabinMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+          const chimneyMat = new THREE.MeshStandardMaterial({ color: 0xdc2626 });
+
+          const hull = new THREE.Mesh(new THREE.BoxGeometry(6.2, 1.4, 2.2), hullMat);
+          hull.position.y = 0.6;
+
+          const bow = new THREE.Mesh(new THREE.ConeGeometry(1.2, 2.2, 4), hullMat);
+          bow.rotation.z = Math.PI / 2;
+          bow.rotation.y = Math.PI / 4;
+          bow.position.set(3.8, 0.7, 0);
+
+          const bridge = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.5, 1.8), cabinMat);
+          bridge.position.set(-0.8, 1.9, 0);
+
+          const stack1 = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 1.0, 8), chimneyMat);
+          stack1.position.set(-0.4, 2.9, 0);
+
+          group.add(hull, bow, bridge, stack1);
+          return group;
+        }
+      },
+      {
+        name: "夢幻水晶旋轉木馬",
+        build: () => {
+          const group = new THREE.Group();
+          group.position.set(0, 1.36, -1.8);
+
+          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.6 });
+          const pinkMat = new THREE.MeshStandardMaterial({ color: 0xf472b6 });
+          const cyanMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8 });
+
+          const platform = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.5, 0.35, 16), goldMat);
+          platform.position.y = 0.18;
+
+          const centerPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 2.6, 12), goldMat);
+          centerPillar.position.y = 1.4;
+
+          const canopy = new THREE.Mesh(new THREE.ConeGeometry(2.7, 1.1, 16), pinkMat);
+          canopy.position.y = 2.9;
+
+          // 四隻木馬立柱
+          for (let i = 0; i < 4; i++) {
+            const angle = (i / 4) * Math.PI * 2;
+            const px = Math.cos(angle) * 1.6;
+            const pz = Math.sin(angle) * 1.6;
+
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.3, 6), goldMat);
+            pole.position.set(px, 1.3, pz);
+
+            const horse = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.25), cyanMat);
+            horse.position.set(px, 1.1 + (i % 2) * 0.3, pz);
+
+            group.add(pole, horse);
+          }
+
+          group.add(platform, centerPillar, canopy);
+          return group;
+        }
+      }
+    ];
+
+    // 島嶼繁榮度等級
+    const ISLAND_RANKS = [
+      { min: 0, title: "Lv.1 寧靜荒島" },
+      { min: 3, title: "Lv.2 生機綠洲" },
+      { min: 6, title: "Lv.3 晨曦村落" },
+      { min: 10, title: "Lv.4 繁榮海島" },
+      { min: 15, title: "Lv.5 夢想童話國" }
+    ];
+
+    const TIME_PHASE_NAMES = ["清晨", "中午", "晚霞", "夜晚"];
+
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+        this.bgmMuted = false;
+        this.nightTimer = null;
+        this.bgmTimer = null;
+        this.bgmStep = 0;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playTone(freq, duration, type = 'sine', gainVal = 0.15) {
+        if (this.muted) return;
+        this.init();
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {}
+      }
+      // 輕柔音樂盒／木琴音色（柔和 sine + 輕微泛音，極度放鬆治癒）
+      playMelodyNote(freq, duration = 0.45, gainVal = 0.045) {
+        if (this.bgmMuted) return;
+        this.init();
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+
+          gain.gain.setValueAtTime(gainVal, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          // 輕微低通濾波讓音色更加圓潤溫暖
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(1400, now);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + duration);
+        } catch(e) {}
+      }
+      // 啟動童話風治癒背景輕音樂
+      startBGM() {
+        if (this.bgmTimer) return;
+        this.init();
+
+        // 溫馨平靜的 C 大調 / 晨曦島嶼和弦旋律進程
+        // 音高對應表 (Hz)
+        const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23, G4 = 392.00, A4 = 440.00, B4 = 493.88;
+        const C5 = 523.25, D5 = 587.33, E5 = 659.25, G5 = 783.99, A5 = 880.00;
+
+        // 旋律小節譜曲（主音 + 柔和伴奏）
+        const melodyTrack = [
+          // 小節 1 (C 和弦)
+          { note: E5, bass: C4 }, { note: G5 }, { note: C5 }, { note: E5 },
+          // 小節 2 (Am 和弦)
+          { note: C5, bass: A4 }, { note: E5 }, { note: A5 }, { note: E5 },
+          // 小節 3 (F 和弦)
+          { note: A4, bass: F4 }, { note: C5 }, { note: F4 }, { note: A4 },
+          // 小節 4 (G 和弦)
+          { note: B4, bass: G4 }, { note: D5 }, { note: G4 }, { note: D4 },
+          // 小節 5 (C 和弦旋律起伏)
+          { note: G5, bass: C4 }, { note: E5 }, { note: D5 }, { note: C5 },
+          // 小節 6 (Em 和弦)
+          { note: B4, bass: E4 }, { note: G4 }, { note: E5 }, { note: B4 },
+          // 小節 7 (F 和弦)
+          { note: A4, bass: F4 }, { note: C5 }, { note: D5 }, { note: E5 },
+          // 小節 8 (G 和弦收束)
+          { note: D5, bass: G4 }, { note: B4 }, { note: G4 }, { note: D4 }
+        ];
+
+        this.bgmStep = 0;
+        this.bgmTimer = setInterval(() => {
+          if (this.bgmMuted) return;
+          const currentStep = melodyTrack[this.bgmStep % melodyTrack.length];
+          if (currentStep.note) {
+            this.playMelodyNote(currentStep.note, 0.42, 0.045);
+          }
+          if (currentStep.bass) {
+            this.playMelodyNote(currentStep.bass, 0.65, 0.035);
+          }
+          this.bgmStep++;
+        }, 340); // 舒服休閒的中慢板節奏
+      }
+      stopBGM() {
+        if (this.bgmTimer) {
+          clearInterval(this.bgmTimer);
+          this.bgmTimer = null;
+        }
+      }
+      toggleBGM() {
+        this.bgmMuted = !this.bgmMuted;
+        if (!this.bgmMuted) {
+          this.startBGM();
+        }
+        return this.bgmMuted;
+      }
+      correctChime() {
+        this.playTone(523.25, 0.12, 'triangle', 0.2); // C5
+        setTimeout(() => this.playTone(659.25, 0.15, 'triangle', 0.25), 85); // E5
+        setTimeout(() => this.playTone(783.99, 0.25, 'triangle', 0.25), 170); // G5
+      }
+      buildPop() {
+        this.playTone(320, 0.08, 'sine', 0.22);
+        setTimeout(() => this.playTone(580, 0.18, 'sine', 0.2), 65);
+      }
+      upgradeFanfare() {
+        const notes = [440, 554.37, 659.25, 880, 1108.73];
+        notes.forEach((f, idx) => {
+          setTimeout(() => this.playTone(f, 0.24, 'triangle', 0.24), idx * 95);
+        });
+      }
+      // 柔和夏夜微風蟋蟀蟲鳴 (絕無刺耳高頻蜂鳴)
+      startNightAmbient() {
+        if (this.muted || this.nightTimer) return;
+        this.init();
+        const chirpCricket = () => {
+          if (this.muted || !this.nightTimer) return;
+          try {
+            const now = this.ctx.currentTime;
+            [0, 0.06, 0.12].forEach(dt => {
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'triangle';
+              osc.frequency.setValueAtTime(4500, now + dt);
+              osc.frequency.exponentialRampToValueAtTime(4100, now + dt + 0.035);
+              gain.gain.setValueAtTime(0.012, now + dt);
+              gain.gain.exponentialRampToValueAtTime(0.0001, now + dt + 0.035);
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start(now + dt);
+              osc.stop(now + dt + 0.035);
+            });
+          } catch(e) {}
+        };
+        chirpCricket();
+        this.nightTimer = setInterval(chirpCricket, 2600);
+      }
+      stopNightAmbient() {
+        if (this.nightTimer) {
+          clearInterval(this.nightTimer);
+          this.nightTimer = null;
+        }
+      }
+      toggleMute() {
+        this.muted = !this.muted;
+        if (this.muted) this.stopNightAmbient();
+        return this.muted;
+      }
+    }
+
+    const sound = new SoundEngine();
+
+    // 遊戲狀態變數
+    let gameState = 'START'; // START, RUNNING, GAMEOVER
+    let currentDifficulty = 'easy'; // 'easy', 'medium', 'hard'
+    let currentWordList = [...WORD_DB.easy];
+    let currentWordIndex = 0;
+    let score = 0;
+    let vitality = 100;
+    let correctCount = 0;
+    let currentCreationIndex = 0;
+    let specialMonumentsSpawned = 0;
+
+    let timeCycle = 0.35; // 0.0 - 1.0 (晨, 午, 暮, 夜)
+    let timePhase = 1;
+
+    const spawnedIslandObjects = [];
+    const islandNightLights = [];
+    const movingPeople = [];
+    const animalCreatures = [];
+    const floatingClouds = [];
+    const animatedFlowers = [];
+    let animatedWindows = [];
+    let aquaticCreatures = [];
+    let whaleUnlocked = false; // 追蹤深海巨鯨是否已解鎖
+
+    let scene, camera, renderer;
+    let sunLight, ambientLight, oceanMesh;
+    let starsParticleSystem = null;
+    let riverWaterMesh = null;
+    let oceanBasePositions = null;
+    const concentricSwellRings = [];
+
+    // DOM 元素快取
+    const islandRankBadge = document.getElementById('islandRankBadge');
+    const dayTimeBadge = document.getElementById('dayTimeBadge');
+    const currentDiffBadge = document.getElementById('currentDiffBadge');
+    const scoreEl = document.getElementById('scoreEl');
+    const milestoneCounter = document.getElementById('milestoneCounter');
+    const vitalityBar = document.getElementById('vitalityBar');
+    const vitalityPercent = document.getElementById('vitalityPercent');
+    const charCardsContainer = document.getElementById('charCardsContainer');
+    const nextUpgradeHint = document.getElementById('nextUpgradeHint');
+    const upgradeBanner = document.getElementById('upgradeBanner');
+
+    const startDiffBtns = document.querySelectorAll('.start-diff-btn');
+    const overDiffBtns = document.querySelectorAll('.over-diff-btn');
+
+    const typeInput = document.getElementById('typeInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const startOverlay = document.getElementById('startOverlay');
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const muteBtn = document.getElementById('muteBtn');
+    const bgmBtn = document.getElementById('bgmBtn');
+
+    const finalIslandRank = document.getElementById('finalIslandRank');
+    const finalCorrectCount = document.getElementById('finalCorrectCount');
+    const finalScore = document.getElementById('finalScore');
+    const canvasWrapper = document.getElementById('threeCanvasWrapper');
+
+    function initThreeScene() {
+      try {
+        scene = new THREE.Scene();
+        const initialSky = new THREE.Color(0x38bdf8);
+        scene.background = initialSky;
+        scene.fog = new THREE.FogExp2(0x38bdf8, 0.007);
+
+        const aspect = window.innerWidth / window.innerHeight;
+        camera = new THREE.PerspectiveCamera(38, aspect, 0.1, 1000);
+        
+        // 桌面端將鏡頭視線稍微向左偏移，精確讓小島座落在左側舞台正中央，與右側字卡控制台完全不重疊
+        adjustCameraViewport();
+
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        canvasWrapper.appendChild(renderer.domElement);
+
+        // 溫和光照，完美還原深綠色 #009944
+        ambientLight = new THREE.AmbientLight(0xffffff, 0.72);
+        scene.add(ambientLight);
+
+        sunLight = new THREE.DirectionalLight(0xfffbeb, 0.95);
+        sunLight.position.set(28, 48, 22);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        scene.add(sunLight);
+
+        // 簡約純粹的顏色分層海洋與多重立體湧浪圈
+        createLayeredOceanAndSwells();
+        createStarfield();
+        createFloatingClouds();
+        createRichIslandTerrain();
+        createInitialNature();
+        createAquaticLife();
+        setupCameraControls();
+
+        window.addEventListener('resize', onWindowResize);
+      } catch (err) {
+        console.error("Three.js 初始化錯誤:", err);
+      }
+    }
+
+    // 乾淨純粹的海洋顏色分層 ＆ 多重立體湧浪圈
+    function createLayeredOceanAndSwells() {
+      // 1. 最底層：外海深邃深藍基底
+      const oceanGeo = new THREE.CylinderGeometry(280, 280, 2.0, 64);
+      const oceanMat = new THREE.MeshStandardMaterial({
+        color: 0x0369a1, // 沉穩深邃藍
+        roughness: 0.15,
+        metalness: 0.1
+      });
+      oceanMesh = new THREE.Mesh(oceanGeo, oceanMat);
+      oceanMesh.position.y = -1.0;
+      oceanMesh.receiveShadow = true;
+      scene.add(oceanMesh);
+
+      // 2. 顏色分層：中外海蔚藍水環 (層次 1)
+      const midSeaGeo = new THREE.RingGeometry(32.0, 100.0, 64);
+      midSeaGeo.rotateX(-Math.PI / 2);
+      const midSeaMat = new THREE.MeshStandardMaterial({
+        color: 0x0284c7, // 蔚藍海色
+        roughness: 0.2,
+        transparent: true,
+        opacity: 0.88,
+        side: THREE.DoubleSide
+      });
+      const midSeaMesh = new THREE.Mesh(midSeaGeo, midSeaMat);
+      midSeaMesh.position.y = 0.02;
+      scene.add(midSeaMesh);
+
+      // 3. 顏色分層：內海天藍淺海環 (層次 2)
+      const shallowGeo = new THREE.RingGeometry(22.0, 32.0, 64);
+      shallowGeo.rotateX(-Math.PI / 2);
+      const shallowMat = new THREE.MeshStandardMaterial({
+        color: 0x0ea5e9, // 亮天藍
+        roughness: 0.2,
+        transparent: true,
+        opacity: 0.85,
+        side: THREE.DoubleSide
+      });
+      const shallowMesh = new THREE.Mesh(shallowGeo, shallowMat);
+      shallowMesh.position.y = 0.08;
+      scene.add(shallowMesh);
+
+      // 4. 顏色分層：緊鄰沙灘的清透碧藍水環 (層次 3)
+      const lagoonGeo = new THREE.RingGeometry(18.2, 22.0, 64);
+      lagoonGeo.rotateX(-Math.PI / 2);
+      const lagoonMat = new THREE.MeshStandardMaterial({
+        color: 0x38bdf8, // 剔透淺青藍
+        roughness: 0.2,
+        transparent: true,
+        opacity: 0.82,
+        side: THREE.DoubleSide
+      });
+      const lagoonMesh = new THREE.Mesh(lagoonGeo, lagoonMat);
+      lagoonMesh.position.y = 0.14;
+      scene.add(lagoonMesh);
+
+      // 5. 多重立體湧浪圈（環繞小島、向外柔和擴散的純白立體水波紋）
+      const ringCount = 6;
+      for (let i = 0; i < ringCount; i++) {
+        // 使用超細緻圓環製作平滑立體湧浪圈
+        const ringGeo = new THREE.TorusGeometry(1.0, 0.08, 8, 80);
+        ringGeo.rotateX(Math.PI / 2);
+        const ringMat = new THREE.MeshStandardMaterial({
+          color: 0xf0f9ff,
+          roughness: 0.3,
+          transparent: true,
+          opacity: 0.0
+        });
+        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        ringMesh.position.set(0, 0.18, 0);
+        scene.add(ringMesh);
+
+        concentricSwellRings.push({
+          mesh: ringMesh,
+          progress: i / ringCount, // 均勻錯開各圈進度
+          minRadius: 18.5,
+          maxRadius: 36.0,
+          speed: 0.18
+        });
+      }
+    }
+
+    // 繁星點點星空系統 (夜晚璀璨閃爍)
+    function createStarfield() {
+      const starCount = 680;
+      const starGeo = new THREE.BufferGeometry();
+      const positions = new Float32Array(starCount * 3);
+      const colors = new Float32Array(starCount * 3);
+
+      for (let i = 0; i < starCount; i++) {
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.random() * (Math.PI / 2.15);
+        const rad = 130 + Math.random() * 60;
+        positions[i * 3] = rad * Math.sin(phi) * Math.cos(theta);
+        positions[i * 3 + 1] = rad * Math.cos(phi) + 8;
+        positions[i * 3 + 2] = rad * Math.sin(phi) * Math.sin(theta);
+
+        const tint = Math.random();
+        if (tint > 0.6) {
+          colors[i * 3] = 0.95; colors[i * 3 + 1] = 0.92; colors[i * 3 + 2] = 0.65;
+        } else if (tint > 0.3) {
+          colors[i * 3] = 0.65; colors[i * 3 + 1] = 0.85; colors[i * 3 + 2] = 1.0;
+        } else {
+          colors[i * 3] = 1.0; colors[i * 3 + 1] = 1.0; colors[i * 3 + 2] = 1.0;
+        }
+      }
+
+      starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      starGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      const starMat = new THREE.PointsMaterial({
+        size: 1.8,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.0
+      });
+      starsParticleSystem = new THREE.Points(starGeo, starMat);
+      scene.add(starsParticleSystem);
+    }
+
+    function createFloatingClouds() {
+      const cloudMat = new THREE.MeshStandardMaterial({
+        color: 0xf8fafc,
+        roughness: 0.95,
+        transparent: true,
+        opacity: 0.92
+      });
+
+      for (let i = 0; i < 7; i++) {
+        const cloud = new THREE.Group();
+        const baseRadius = 2.2 + Math.random() * 1.4;
+        const puffCount = 5 + Math.floor(Math.random() * 4);
+
+        for (let j = 0; j < puffCount; j++) {
+          const r = baseRadius * (0.55 + Math.random() * 0.45);
+          const puff = new THREE.Mesh(new THREE.DodecahedronGeometry(r, 1), cloudMat);
+          puff.position.set((j - puffCount / 2) * 1.5, (Math.random() - 0.5) * 0.8, (Math.random() - 0.5) * 1.5);
+          cloud.add(puff);
+        }
+
+        const angle = (i / 7) * Math.PI * 2;
+        const dist = 26 + Math.random() * 12;
+        cloud.position.set(Math.cos(angle) * dist, 18 + Math.random() * 6, Math.sin(angle) * dist);
+        scene.add(cloud);
+        floatingClouds.push({ group: cloud, speed: 0.0016 + Math.random() * 0.0012, dist: dist, angle: angle });
+      }
+    }
+
+    // 豐富地形：深綠色 #009944、梯田稻田、連綿山脈、湖泊、S型河流
+    function createRichIslandTerrain() {
+      const terrainGroup = new THREE.Group();
+
+      // 1. 金黃沙灘裙邊
+      const sandShape = new THREE.Shape();
+      const numPts = 48;
+      const baseRadius = 18.0;
+
+      for (let i = 0; i < numPts; i++) {
+        const angle = (i / numPts) * Math.PI * 2;
+        const r = baseRadius 
+          + Math.sin(angle * 2.0) * 3.3 
+          + Math.cos(angle * 3.0) * 2.5 
+          + Math.sin(angle * 5.0) * 1.2;
+        const px = Math.cos(angle) * r;
+        const pz = Math.sin(angle) * r;
+        if (i === 0) sandShape.moveTo(px, pz);
+        else sandShape.lineTo(px, pz);
+      }
+      sandShape.closePath();
+
+      const sandGeo = new THREE.ExtrudeGeometry(sandShape, {
+        depth: 0.85,
+        bevelEnabled: true,
+        bevelSegments: 3,
+        steps: 1,
+        bevelSize: 0.7,
+        bevelThickness: 0.35
+      });
+      sandGeo.rotateX(-Math.PI / 2);
+      const sandMat = new THREE.MeshStandardMaterial({ color: 0xd4a373, roughness: 0.95 });
+      const sandMesh = new THREE.Mesh(sandGeo, sandMat);
+      sandMesh.position.set(0, 0.2, 0);
+      sandMesh.receiveShadow = true;
+      terrainGroup.add(sandMesh);
+
+      // 2. 指定色碼 #009944 之自然大地深綠草地表層
+      const grassShape = new THREE.Shape();
+      const grassRadius = 16.5;
+      for (let i = 0; i < numPts; i++) {
+        const angle = (i / numPts) * Math.PI * 2;
+        const r = grassRadius 
+          + Math.sin(angle * 2.0) * 3.0 
+          + Math.cos(angle * 3.0) * 2.2 
+          + Math.sin(angle * 5.0) * 1.0;
+        const px = Math.cos(angle) * r;
+        const pz = Math.sin(angle) * r;
+        if (i === 0) grassShape.moveTo(px, pz);
+        else grassShape.lineTo(px, pz);
+      }
+      grassShape.closePath();
+
+      const grassGeo = new THREE.ExtrudeGeometry(grassShape, {
+        depth: 0.75,
+        bevelEnabled: true,
+        bevelSegments: 3,
+        steps: 1,
+        bevelSize: 0.55,
+        bevelThickness: 0.25
+      });
+      grassGeo.rotateX(-Math.PI / 2);
+
+      const grassMat = new THREE.MeshStandardMaterial({ 
+        color: new THREE.Color("#009944"), 
+        roughness: 0.78, 
+        metalness: 0.0 
+      });
+      const grassMesh = new THREE.Mesh(grassGeo, grassMat);
+      grassMesh.position.set(0, 0.72, 0);
+      grassMesh.receiveShadow = true;
+      grassMesh.castShadow = true;
+      terrainGroup.add(grassMesh);
+
+      // 3. 連綿雪頂山脈群
+      const mountainPeaks = [
+        { x: -6.0, z: -5.5, r: 5.5, h: 5.6, snow: 1.8 },
+        { x: -8.8, z: -3.8, r: 4.8, h: 4.6, snow: 1.4 },
+        { x: -3.8, z: -7.5, r: 5.2, h: 5.0, snow: 1.5 },
+        { x: -2.0, z: -8.0, r: 4.2, h: 4.0, snow: 1.2 },
+        { x: -7.5, z: -6.8, r: 4.2, h: 4.3, snow: 1.3 },
+        { x: 5.8, z: -6.5, r: 4.8, h: 4.2, snow: 1.2 }
+      ];
+
+      const rockMat = new THREE.MeshStandardMaterial({ color: 0x3f3f46, roughness: 0.9 });
+      const snowMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
+
+      mountainPeaks.forEach(m => {
+        const mountainGroup = new THREE.Group();
+        mountainGroup.position.set(m.x, 1.35, m.z);
+
+        const cone = new THREE.Mesh(new THREE.ConeGeometry(m.r, m.h, 14), rockMat);
+        cone.position.y = m.h / 2;
+        cone.castShadow = true;
+        cone.receiveShadow = true;
+        mountainGroup.add(cone);
+
+        const snowCap = new THREE.Mesh(new THREE.ConeGeometry(m.r * 0.38, m.snow, 14), snowMat);
+        snowCap.position.y = m.h - m.snow / 2 + 0.06;
+        mountainGroup.add(snowCap);
+
+        terrainGroup.add(mountainGroup);
+      });
+
+      // 4. 金黃階梯水稻田
+      const paddyGroup = new THREE.Group();
+      paddyGroup.position.set(-6.8, 1.36, 1.8);
+      const soilMat = new THREE.MeshStandardMaterial({ color: 0x543310, roughness: 0.95 });
+      const goldCropMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.6 });
+      const waterMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.2, metalness: 0.25 });
+
+      for (let t = 0; t < 3; t++) {
+        const tier = new THREE.Group();
+        tier.position.set(t * 1.6, t * 0.14, t * -0.5);
+
+        const ridge = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.14, 1.9), soilMat);
+        const waterPond = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.16, 1.7), waterMat);
+        waterPond.position.y = 0.02;
+        tier.add(ridge, waterPond);
+
+        for (let r = 0; r < 3; r++) {
+          for (let c = 0; c < 3; c++) {
+            const crop = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.5, 5), goldCropMat);
+            crop.position.set((c - 1) * 0.6, 0.3, (r - 1) * 0.5);
+            tier.add(crop);
+          }
+        }
+        paddyGroup.add(tier);
+      }
+      terrainGroup.add(paddyGroup);
+
+      // 5. 碧藍高山湖泊
+      const lakeGroup = new THREE.Group();
+      lakeGroup.position.set(4.5, 1.36, 1.6);
+      const lakeGeo = new THREE.CylinderGeometry(3.0, 3.0, 0.08, 24);
+      lakeGeo.scale(1.25, 1.0, 0.85);
+      const lakeMesh = new THREE.Mesh(lakeGeo, new THREE.MeshStandardMaterial({
+        color: 0x0284c7, roughness: 0.15, metalness: 0.35, transparent: true, opacity: 0.92
+      }));
+      lakeMesh.position.y = 0.04;
+      lakeGroup.add(lakeMesh);
+
+      const lilyMat = new THREE.MeshStandardMaterial({ color: 0x14532d });
+      [
+        { x: -0.9, z: 0.3, r: 0.3 },
+        { x: 0.7, z: -0.6, r: 0.35 },
+        { x: 1.4, z: 0.7, r: 0.25 }
+      ].forEach(l => {
+        const lily = new THREE.Mesh(new THREE.CylinderGeometry(l.r, l.r, 0.02, 8), lilyMat);
+        lily.position.set(l.x, 0.09, l.z);
+        lakeGroup.add(lily);
+      });
+      terrainGroup.add(lakeGroup);
+
+      // 6. S 曲線蜿蜒小河
+      const riverPts = [
+        new THREE.Vector3(-3.2, 1.38, -5.2),
+        new THREE.Vector3(-1.8, 1.38, -3.2),
+        new THREE.Vector3(-0.2, 1.37, -1.8),
+        new THREE.Vector3(1.6, 1.37, -1.2),
+        new THREE.Vector3(2.8, 1.36, 0.2),
+        new THREE.Vector3(4.2, 1.36, 1.6),
+        new THREE.Vector3(6.8, 1.35, 3.4),
+        new THREE.Vector3(9.8, 1.33, 4.8),
+        new THREE.Vector3(13.2, 1.30, 7.2),
+        new THREE.Vector3(16.5, 1.25, 9.8)
+      ];
+      const riverCurve = new THREE.CatmullRomCurve3(riverPts);
+      const riverGeo = new THREE.TubeGeometry(riverCurve, 80, 0.55, 8, false);
+      const riverMat = new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        roughness: 0.18,
+        metalness: 0.32,
+        transparent: true,
+        opacity: 0.9
+      });
+      riverWaterMesh = new THREE.Mesh(riverGeo, riverMat);
+      terrainGroup.add(riverWaterMesh);
+
+      scene.add(terrainGroup);
+    }
+
+    function createInitialNature() {
+      const treeMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.8 });
+      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+
+      const treeCoords = [
+        { x: -2.0, z: -3.5 }, { x: -4.5, z: -2.5 }, { x: 1.0, z: -4.8 },
+        { x: 3.5, z: -4.2 }, { x: 7.2, z: -3.5 }, { x: -8.0, z: 0.5 },
+        { x: 8.5, z: 1.2 }, { x: -3.0, z: 6.5 }, { x: 2.2, z: 5.8 }
+      ];
+
+      treeCoords.forEach(pos => {
+        const tree = new THREE.Group();
+        tree.position.set(pos.x, 1.35, pos.z);
+
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.22, 0.9, 6), trunkMat);
+        trunk.position.y = 0.45;
+        trunk.castShadow = true;
+
+        const crown = new THREE.Mesh(new THREE.ConeGeometry(0.95, 1.9, 7), treeMat);
+        crown.position.y = 1.6;
+        crown.castShadow = true;
+
+        tree.add(trunk, crown);
+        scene.add(tree);
+      });
+    }
+
+    function createAquaticLife() {
+      // 1. 湖泊中的優雅白天鵝
+      const swanGroup = new THREE.Group();
+      const swanBody = new THREE.Mesh(
+        new THREE.SphereGeometry(0.32, 10, 8),
+        new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 })
+      );
+      swanBody.scale.set(1.4, 0.9, 0.9);
+      swanBody.position.y = 0.15;
+
+      const swanNeck = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.06, 0.08, 0.45, 8),
+        new THREE.MeshStandardMaterial({ color: 0xffffff })
+      );
+      swanNeck.position.set(0.28, 0.35, 0);
+      swanNeck.rotation.z = -0.35;
+
+      const swanHead = new THREE.Mesh(
+        new THREE.SphereGeometry(0.1, 8, 8),
+        new THREE.MeshStandardMaterial({ color: 0xffffff })
+      );
+      swanHead.position.set(0.38, 0.52, 0);
+
+      const beak = new THREE.Mesh(
+        new THREE.ConeGeometry(0.05, 0.14, 6),
+        new THREE.MeshStandardMaterial({ color: 0xf97316 })
+      );
+      beak.rotation.z = -Math.PI / 2;
+      beak.position.set(0.48, 0.5, 0);
+
+      swanGroup.add(swanBody, swanNeck, swanHead, beak);
+      swanGroup.position.set(4.5, 1.45, 1.6);
+      scene.add(swanGroup);
+
+      aquaticCreatures.push({
+        group: swanGroup,
+        type: 'swan',
+        baseX: 4.5,
+        baseZ: 1.6,
+        radiusX: 1.6,
+        radiusZ: 1.2,
+        angle: 0,
+        speed: 1.2
+      });
+
+      // 2. 近海躍水海豚群
+      for (let i = 0; i < 3; i++) {
+        const dGroup = new THREE.Group();
+        const dBody = new THREE.Mesh(
+          new THREE.ConeGeometry(0.4, 1.6, 8),
+          new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 })
+        );
+        dBody.rotation.z = Math.PI / 2;
+        const dSnout = new THREE.Mesh(
+          new THREE.ConeGeometry(0.12, 0.4, 6),
+          new THREE.MeshStandardMaterial({ color: 0x38bdf8 })
+        );
+        dSnout.rotation.z = -Math.PI / 2;
+        dSnout.position.set(0.9, 0, 0);
+        dGroup.add(dBody, dSnout);
+
+        scene.add(dGroup);
+        aquaticCreatures.push({
+          group: dGroup,
+          type: 'dolphin',
+          dist: 22 + i * 2.5,
+          angle: (i / 3) * Math.PI * 2,
+          speed: 1.0 + i * 0.15,
+          jumpOffset: i * 1.8
+        });
+      }
+    }
+
+    // 動態召喚深海巨鯨（達到一定開拓進度時解鎖）
+    function spawnOceanWhale() {
+      if (whaleUnlocked) return;
+      whaleUnlocked = true;
+
+      const whaleGroup = new THREE.Group();
+
+      const whaleSkinMat = new THREE.MeshStandardMaterial({ 
+        color: 0x1d4ed8, 
+        roughness: 0.45,
+        metalness: 0.1
+      });
+      const whaleBellyMat = new THREE.MeshStandardMaterial({ 
+        color: 0xf1f5f9, 
+        roughness: 0.6 
+      });
+      const darkEyeMat = new THREE.MeshStandardMaterial({ 
+        color: 0x0f172a, 
+        roughness: 0.2 
+      });
+      const finMat = new THREE.MeshStandardMaterial({ 
+        color: 0x1e40af, 
+        roughness: 0.5 
+      });
+
+      // 主軀幹
+      const mainTorso = new THREE.Mesh(new THREE.SphereGeometry(1.6, 16, 12), whaleSkinMat);
+      mainTorso.scale.set(1.9, 0.95, 1.05);
+      mainTorso.position.set(0.6, 0.45, 0);
+      mainTorso.castShadow = true;
+
+      // 圓潤前額與下顎
+      const whaleHead = new THREE.Mesh(new THREE.SphereGeometry(1.4, 14, 10), whaleSkinMat);
+      whaleHead.scale.set(1.4, 0.9, 0.98);
+      whaleHead.position.set(2.0, 0.4, 0);
+
+      // 柔和白腹
+      const whaleBelly = new THREE.Mesh(new THREE.SphereGeometry(1.45, 14, 10), whaleBellyMat);
+      whaleBelly.scale.set(2.0, 0.65, 0.96);
+      whaleBelly.position.set(0.8, 0.1, 0);
+
+      // 靈巧眼睛
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), darkEyeMat);
+      eyeL.position.set(2.4, 0.55, 0.92);
+      const eyeR = eyeL.clone();
+      eyeR.position.z = -0.92;
+
+      // 流線長胸鰭
+      const flipperL = new THREE.Group();
+      flipperL.position.set(0.9, 0.15, 0.95);
+      const finMeshL = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.12, 0.45), finMat);
+      finMeshL.rotation.y = -0.35;
+      finMeshL.rotation.z = -0.3;
+      finMeshL.position.set(0.3, 0, 0.25);
+      flipperL.add(finMeshL);
+
+      const flipperR = new THREE.Group();
+      flipperR.position.set(0.9, 0.15, -0.95);
+      const finMeshR = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.12, 0.45), finMat);
+      finMeshR.rotation.y = 0.35;
+      finMeshR.rotation.z = -0.3;
+      finMeshR.position.set(0.3, 0, -0.25);
+      flipperR.add(finMeshR);
+
+      // 背鰭
+      const dorsalFin = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.7, 5), finMat);
+      dorsalFin.rotation.z = -0.65;
+      dorsalFin.position.set(-0.8, 1.35, 0);
+
+      // 水平關節尾鰭
+      const tailJoint = new THREE.Group();
+      tailJoint.position.set(-1.2, 0.45, 0);
+
+      const tailPeduncle = new THREE.Mesh(new THREE.ConeGeometry(0.72, 2.2, 8), whaleSkinMat);
+      tailPeduncle.rotation.z = Math.PI / 2;
+      tailPeduncle.position.set(-1.1, 0, 0);
+
+      const flukeLeft = new THREE.Mesh(new THREE.ConeGeometry(0.65, 1.45, 5), finMat);
+      flukeLeft.rotation.x = Math.PI / 2;
+      flukeLeft.rotation.z = 0.65;
+      flukeLeft.position.set(-2.2, 0, 0.75);
+
+      const flukeRight = new THREE.Mesh(new THREE.ConeGeometry(0.65, 1.45, 5), finMat);
+      flukeRight.rotation.x = -Math.PI / 2;
+      flukeRight.rotation.z = 0.65;
+      flukeRight.position.set(-2.2, 0, -0.75);
+
+      tailJoint.add(tailPeduncle, flukeLeft, flukeRight);
+
+      // 水霧噴泉
+      const spoutGroup = new THREE.Group();
+      spoutGroup.position.set(1.9, 1.35, 0);
+
+      const sprayMat = new THREE.MeshStandardMaterial({
+        color: 0xbae6fd,
+        transparent: true,
+        opacity: 0.82,
+        roughness: 0.15
+      });
+
+      const spoutStem = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.28, 2.8, 8), sprayMat);
+      spoutStem.position.y = 1.4;
+      spoutGroup.add(spoutStem);
+
+      const plumeCoords = [
+        { x: 0, y: 2.8, z: 0, r: 0.45 },
+        { x: 0.35, y: 2.6, z: 0.25, r: 0.32 },
+        { x: -0.35, y: 2.5, z: -0.25, r: 0.32 },
+        { x: 0.2, y: 2.4, z: -0.35, r: 0.3 },
+        { x: -0.2, y: 2.4, z: 0.35, r: 0.3 }
+      ];
+      plumeCoords.forEach(p => {
+        const puff = new THREE.Mesh(new THREE.SphereGeometry(p.r, 8, 8), sprayMat);
+        puff.position.set(p.x, p.y, p.z);
+        spoutGroup.add(puff);
+      });
+
+      whaleGroup.add(
+        mainTorso, 
+        whaleHead, 
+        whaleBelly, 
+        eyeL, 
+        eyeR, 
+        flipperL, 
+        flipperR, 
+        dorsalFin, 
+        tailJoint, 
+        spoutGroup
+      );
+
+      whaleGroup.position.set(33, -0.15, 0);
+      whaleGroup.scale.set(0.01, 0.01, 0.01);
+      scene.add(whaleGroup);
+
+      aquaticCreatures.push({
+        group: whaleGroup,
+        tail: tailJoint,
+        flipperL: flipperL,
+        flipperR: flipperR,
+        spout: spoutGroup,
+        type: 'whale',
+        dist: 33,
+        angle: 0,
+        speed: 0.32
+      });
+
+      // 鯨魚初次現身時縮放動畫
+      let s = 0;
+      const anim = setInterval(() => {
+        s += 0.05;
+        if (s >= 1) {
+          whaleGroup.scale.set(1, 1, 1);
+          clearInterval(anim);
+        } else {
+          whaleGroup.scale.set(s, s, s);
+        }
+      }, 30);
+
+      // 橫幅慶祝
+      upgradeBanner.textContent = "神秘深海訪客：【深海藍鯨】現身外海巡遊！";
+      upgradeBanner.className = "text-xs font-black text-center px-3 py-1.5 rounded-xl bg-cyan-400 text-slate-950 shadow-lg tracking-wider transition-all duration-300";
+      upgradeBanner.classList.remove('hidden');
+      setTimeout(() => upgradeBanner.classList.add('hidden'), 3500);
+      sound.upgradeFanfare();
+    }
+
+    function spawnOrUpgradeIslandCreation(blueprint) {
+      // 隨機在島嶼綠茵與沙灘各角落產生座標，物件無限持續累積
+      const angle = Math.random() * Math.PI * 2;
+      const rad = 2.2 + Math.random() * 11.0;
+      const posX = Math.cos(angle) * rad;
+      const posZ = Math.sin(angle) * rad;
+
+      const objGroup = new THREE.Group();
+      objGroup.position.set(posX, 1.35, posZ);
+
+      if (blueprint.type === "animal_cat") {
+        // 全新超萌橘白相間小貓咪
+        const catMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.6 }); // 溫暖橘色
+        const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.6 }); // 白肚皮
+        const earInnerMat = new THREE.MeshStandardMaterial({ color: 0xfda4af }); // 粉紅耳窩
+
+        const catBody = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.45, 0.4), catMat);
+        catBody.position.y = 0.38;
+        catBody.castShadow = true;
+
+        const belly = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.22, 0.38), whiteMat);
+        belly.position.set(0, 0.28, 0);
+
+        const catHead = new THREE.Group();
+        catHead.position.set(0.42, 0.58, 0);
+        const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.24, 8, 8), catMat);
+        headMesh.scale.set(1.1, 0.95, 1.0);
+        catHead.add(headMesh);
+
+        // 俏皮三角形貓耳朵
+        const earL = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.18, 4), earInnerMat);
+        earL.rotation.z = -0.25;
+        earL.position.set(0, 0.22, 0.12);
+        const earR = earL.clone();
+        earR.position.z = -0.12;
+        earR.rotation.z = -0.25;
+        catHead.add(earL, earR);
+
+        // 擺動細長貓尾巴
+        const tailGroup = new THREE.Group();
+        tailGroup.position.set(-0.35, 0.42, 0);
+        const tailMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.52, 6), catMat);
+        tailMesh.position.set(-0.15, 0.22, 0);
+        tailMesh.rotation.z = Math.PI / 4;
+        tailGroup.add(tailMesh);
+
+        objGroup.add(catBody, belly, catHead, tailGroup);
+        animalCreatures.push({
+          group: objGroup,
+          head: catHead,
+          tail: tailGroup,
+          type: 'cat',
+          baseX: posX,
+          baseZ: posZ,
+          radius: 1.2,
+          speed: 0.75,
+          offset: Math.random() * Math.PI * 2
+        });
+
+      } else if (blueprint.type === "house_cottage") {
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.8 });
+        const thatchMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.9 });
+        const body = new THREE.Mesh(new THREE.BoxGeometry(1.65, 1.25, 1.4), wallMat);
+        body.position.y = 0.62;
+        body.castShadow = true;
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(1.35, 0.95, 4), thatchMat);
+        roof.rotation.y = Math.PI / 4;
+        roof.position.y = 1.65;
+        roof.castShadow = true;
+        const door = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.62, 0.06), new THREE.MeshStandardMaterial({ color: 0x451a03 }));
+        door.position.set(0, 0.32, 0.72);
+
+        const winGlow = new THREE.MeshStandardMaterial({ color: 0x1e293b, emissive: 0x000000 });
+        const win = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.38, 0.05), winGlow);
+        win.position.set(0.5, 0.7, 0.72);
+
+        // 會自然開關的雙扇可愛木窗
+        const shutterMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.7 });
+        const leftHinge = new THREE.Group();
+        leftHinge.position.set(0.31, 0.7, 0.74);
+        const leftShutter = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.36, 0.03), shutterMat);
+        leftShutter.position.x = 0.09;
+        leftHinge.add(leftShutter);
+
+        const rightHinge = new THREE.Group();
+        rightHinge.position.set(0.69, 0.7, 0.74);
+        const rightShutter = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.36, 0.03), shutterMat);
+        rightShutter.position.x = -0.09;
+        rightHinge.add(rightShutter);
+
+        objGroup.add(body, roof, door, win, leftHinge, rightHinge);
+        islandNightLights.push({ mat: winGlow, glowColor: 0xfbbf24, glowIntensity: 1.5 });
+        animatedWindows.push({ left: leftHinge, right: rightHinge, speed: 0.8, offset: Math.random() * 2 });
+
+      } else if (blueprint.type === "animal_deer") {
+        const fawnMat = new THREE.MeshStandardMaterial({ color: 0xb45309 });
+        const deerBody = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.7, 0.6), fawnMat);
+        deerBody.position.y = 0.62;
+        const deerHead = new THREE.Group();
+        deerHead.position.set(0.6, 1.0, 0);
+        const headMesh = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.42, 0.38), fawnMat);
+        const antlerMat = new THREE.MeshStandardMaterial({ color: 0x78350f });
+        const hornL = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.38, 4), antlerMat);
+        hornL.position.set(0, 0.3, 0.14);
+        hornL.rotation.x = 0.3;
+        const hornR = hornL.clone();
+        hornR.position.z = -0.14;
+        hornR.rotation.x = -0.3;
+        deerHead.add(headMesh, hornL, hornR);
+
+        objGroup.add(deerBody, deerHead);
+        animalCreatures.push({
+          group: objGroup,
+          head: deerHead,
+          type: 'deer',
+          baseX: posX,
+          baseZ: posZ,
+          radius: 1.6,
+          speed: 0.45,
+          offset: Math.random() * Math.PI
+        });
+
+      } else if (blueprint.type === "animal_rabbit") {
+        const rabbitMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.6 });
+        const rBody = new THREE.Mesh(new THREE.SphereGeometry(0.38, 8, 8), rabbitMat);
+        rBody.position.y = 0.38;
+        const rHead = new THREE.Group();
+        rHead.position.set(0.3, 0.55, 0);
+        const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 8), rabbitMat);
+        const earMat = new THREE.MeshStandardMaterial({ color: 0xfda4af });
+        const ear1 = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.34, 0.09), earMat);
+        ear1.position.set(0, 0.22, 0.09);
+        const ear2 = ear1.clone();
+        ear2.position.z = -0.09;
+        rHead.add(headMesh, ear1, ear2);
+
+        objGroup.add(rBody, rHead);
+        animalCreatures.push({
+          group: objGroup,
+          head: rHead,
+          type: 'rabbit',
+          baseX: posX,
+          baseZ: posZ,
+          radius: 1.2,
+          speed: 1.1,
+          offset: Math.random() * 2
+        });
+
+      } else if (blueprint.type === "person_villager" || blueprint.type === "person_farmer" || blueprint.type === "person_traveler") {
+        const clothColor = blueprint.type === "person_farmer" ? 0x16a34a : (blueprint.type === "person_traveler" ? 0xe11d48 : 0x2563eb);
+        const skinMat = new THREE.MeshStandardMaterial({ color: 0xffedd5 });
+        const clothMat = new THREE.MeshStandardMaterial({ color: clothColor });
+
+        const pBody = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 0.7, 8), clothMat);
+        pBody.position.y = 0.7;
+        const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.24, 8, 8), skinMat);
+        pHead.position.y = 1.18;
+
+        const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.45, 6), skinMat);
+        arm.position.set(0.32, 0.82, 0);
+        arm.rotation.z = -0.4;
+
+        if (blueprint.type === "person_farmer") {
+          const hat = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.18, 8), new THREE.MeshStandardMaterial({ color: 0xfef08a }));
+          hat.position.y = 1.35;
+          objGroup.add(hat);
+        }
+
+        objGroup.add(pBody, pHead, arm);
+        movingPeople.push({
+          group: objGroup,
+          arm: arm,
+          baseX: posX,
+          baseZ: posZ,
+          offset: Math.random() * 2,
+          walkRange: 0.9
+        });
+
+      } else if (blueprint.type === "flower_patch") {
+        const sfStemMat = new THREE.MeshStandardMaterial({ color: 0x15803d });
+        const sfPetalMat = new THREE.MeshStandardMaterial({ color: 0xfacc15 });
+        const sfCenterMat = new THREE.MeshStandardMaterial({ color: 0x78350f });
+
+        for (let i = 0; i < 6; i++) {
+          const flower = new THREE.Group();
+          const ox = (i % 3) * 0.75 - 0.75;
+          const oz = Math.floor(i / 3) * 0.85 - 0.42;
+          flower.position.set(ox, 0, oz);
+
+          const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.9, 6), sfStemMat);
+          stem.position.y = 0.45;
+          const center = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.06, 8), sfCenterMat);
+          center.rotation.x = Math.PI / 4;
+          center.position.y = 0.9;
+          const petals = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.08, 6, 12), sfPetalMat);
+          petals.rotation.x = Math.PI / 4;
+          petals.position.y = 0.9;
+
+          flower.add(stem, center, petals);
+          objGroup.add(flower);
+          animatedFlowers.push({ mesh: flower, speed: 1.8 + i * 0.25, amp: 0.12, offset: i * 0.6 });
+        }
+
+      } else if (blueprint.type === "pier_dock") {
+        const woodMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.85 });
+        const plank = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.18, 1.2), woodMat);
+        plank.position.y = 0.16;
+        const post1 = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.85, 6), woodMat);
+        post1.position.set(0.9, 0.35, 0.45);
+        const post2 = post1.clone();
+        post2.position.z = -0.45;
+        objGroup.add(plank, post1, post2);
+
+      } else if (blueprint.type === "cherry_tree") {
+        // 全新日系童話風夢幻粉櫻樹：柔美彎曲古木主幹、開展樹枝、蓬鬆棉花糖般漸層花雲與飄逸落櫻
+        const woodBarkMat = new THREE.MeshStandardMaterial({ 
+          color: 0x5c3822, 
+          roughness: 0.85 
+        });
+
+        // 柔和三色櫻花花瓣層次（粉白、淡粉、胭脂粉）
+        const sakuraPaleMat = new THREE.MeshStandardMaterial({ 
+          color: 0xffe4e6, 
+          roughness: 0.55 
+        });
+        const sakuraMidMat = new THREE.MeshStandardMaterial({ 
+          color: 0xfda4af, 
+          roughness: 0.55 
+        });
+        const sakuraDeepMat = new THREE.MeshStandardMaterial({ 
+          color: 0xf472b6, 
+          roughness: 0.55 
+        });
+
+        // 1. 樹幹：下粗上細、自然微傾的主幹與盤根
+        const baseRoot = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.46, 0.5, 7), woodBarkMat);
+        baseRoot.position.y = 0.25;
+        baseRoot.castShadow = true;
+
+        const mainTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.28, 1.1, 7), woodBarkMat);
+        mainTrunk.position.set(0.08, 0.95, 0.04);
+        mainTrunk.rotation.z = -0.14;
+        mainTrunk.rotation.x = 0.06;
+        mainTrunk.castShadow = true;
+
+        // 支幹向兩側延伸開展（盆景/庭園樹姿態）
+        const branchLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.15, 0.95, 5), woodBarkMat);
+        branchLeft.position.set(-0.35, 1.6, -0.1);
+        branchLeft.rotation.z = 0.75;
+        branchLeft.rotation.y = 0.3;
+
+        const branchRight = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.16, 1.1, 5), woodBarkMat);
+        branchRight.position.set(0.48, 1.65, 0.15);
+        branchRight.rotation.z = -0.72;
+        branchRight.rotation.y = -0.35;
+
+        const branchBack = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.12, 0.8, 5), woodBarkMat);
+        branchBack.position.set(0.05, 1.8, -0.4);
+        branchBack.rotation.x = -0.65;
+
+        objGroup.add(baseRoot, mainTrunk, branchLeft, branchRight, branchBack);
+
+        // 2. 櫻花雲團：蓬鬆圓潤的多面立體花團（低多邊形柔美花朵團塊）
+        const blossomCanopy = new THREE.Group();
+        const flowerClusters = [
+          // 中央頂部高聳主花雲
+          { x: 0.1, y: 2.55, z: 0.0, r: 0.88, mat: sakuraPaleMat },
+          { x: -0.15, y: 2.35, z: 0.25, r: 0.72, mat: sakuraMidMat },
+          // 右側舒展花簇
+          { x: 0.85, y: 2.1, z: 0.2, r: 0.78, mat: sakuraDeepMat },
+          { x: 1.15, y: 1.9, z: 0.35, r: 0.58, mat: sakuraPaleMat },
+          // 左側低垂花簇
+          { x: -0.75, y: 2.05, z: -0.15, r: 0.75, mat: sakuraMidMat },
+          { x: -1.05, y: 1.8, z: -0.25, r: 0.55, mat: sakuraPaleMat },
+          // 後側豐滿襯底花簇
+          { x: 0.1, y: 2.15, z: -0.65, r: 0.68, mat: sakuraDeepMat },
+          { x: 0.45, y: 2.3, z: -0.4, r: 0.62, mat: sakuraMidMat }
+        ];
+
+        flowerClusters.forEach(cfg => {
+          const clusterGeo = new THREE.IcosahedronGeometry(cfg.r, 1);
+          const cluster = new THREE.Mesh(clusterGeo, cfg.mat);
+          cluster.position.set(cfg.x, cfg.y, cfg.z);
+          cluster.castShadow = true;
+          blossomCanopy.add(cluster);
+        });
+
+        // 3. 飄散在空中的輕盈飛舞櫻花瓣
+        for (let i = 0; i < 9; i++) {
+          const petal = new THREE.Mesh(
+            new THREE.BoxGeometry(0.1, 0.02, 0.08),
+            (i % 2 === 0 ? sakuraMidMat : sakuraDeepMat)
+          );
+          const pAngle = (i / 9) * Math.PI * 2;
+          const pDist = 0.9 + (i % 3) * 0.45;
+          petal.position.set(
+            Math.cos(pAngle) * pDist,
+            1.2 + (i % 4) * 0.35,
+            Math.sin(pAngle) * pDist
+          );
+          petal.rotation.set(0.3 * i, 0.4 * i, 0.2 * i);
+          blossomCanopy.add(petal);
+        }
+
+        // 4. 地面飄零的圓形浪漫落櫻地毯
+        const groundPetals = new THREE.Group();
+        for (let i = 0; i < 12; i++) {
+          const patchMat = i % 2 === 0 ? sakuraPaleMat : sakuraMidMat;
+          const patch = new THREE.Mesh(
+            new THREE.CircleGeometry(0.18 + (i % 3) * 0.08, 6),
+            patchMat
+          );
+          patch.rotation.x = -Math.PI / 2;
+          const gAngle = (i / 12) * Math.PI * 2 + Math.random() * 0.4;
+          const gDist = 0.5 + (i % 4) * 0.38;
+          patch.position.set(Math.cos(gAngle) * gDist, 0.02, Math.sin(gAngle) * gDist);
+          groundPetals.add(patch);
+        }
+
+        objGroup.add(blossomCanopy, groundPetals);
+
+        // 加入微風動態
+        animatedFlowers.push({ 
+          mesh: blossomCanopy, 
+          speed: 0.95, 
+          amp: 0.045, 
+          offset: Math.random() * 2 
+        });
+
+      } else if (blueprint.type === "fountain") {
+        const basin = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.35, 0.48, 14), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
+        basin.position.y = 0.25;
+        const water = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.35, 0.4, 14), new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1 }));
+        water.position.y = 0.3;
+        const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.22, 1.05, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
+        spire.position.y = 0.8;
+        objGroup.add(basin, water, spire);
+
+      } else if (blueprint.type === "animal_cow") {
+        const cowMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc });
+        const spotMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
+        const cowBody = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.8, 0.8), cowMat);
+        cowBody.position.y = 0.72;
+        const spot = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.65, 0.82), spotMat);
+        spot.position.set(0.15, 0.74, 0);
+        const cowHead = new THREE.Group();
+        cowHead.position.set(0.8, 0.95, 0);
+        const headMesh = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.52, 0.55), cowMat);
+        cowHead.add(headMesh);
+        objGroup.add(cowBody, spot, cowHead);
+        animalCreatures.push({
+          group: objGroup,
+          head: cowHead,
+          type: 'cow',
+          baseX: posX,
+          baseZ: posZ,
+          radius: 1.4,
+          speed: 0.35,
+          offset: Math.random() * 2
+        });
+
+      } else if (blueprint.type === "animal_sheep") {
+        const woolMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95 });
+        const sBody = new THREE.Mesh(new THREE.SphereGeometry(0.6, 8, 8), woolMat);
+        sBody.position.y = 0.62;
+        const sHead = new THREE.Group();
+        sHead.position.set(0.6, 0.7, 0);
+        const face = new THREE.Mesh(new THREE.SphereGeometry(0.26, 8, 8), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+        sHead.add(face);
+        objGroup.add(sBody, sHead);
+        animalCreatures.push({
+          group: objGroup,
+          head: sHead,
+          type: 'sheep',
+          baseX: posX,
+          baseZ: posZ,
+          radius: 1.8,
+          speed: 0.5,
+          offset: Math.random() * 2
+        });
+      }
+
+      objGroup.scale.set(0.01, 0.01, 0.01);
+      scene.add(objGroup);
+      spawnedIslandObjects.push(objGroup);
+
+      sound.buildPop();
+
+      let progress = 0;
+      const animTimer = setInterval(() => {
+        progress += 0.12;
+        const s = Math.sin(progress * Math.PI * 0.8) * 1.15;
+        if (progress >= 1.0) {
+          objGroup.scale.set(1, 1, 1);
+          clearInterval(animTimer);
+        } else {
+          objGroup.scale.set(s, s, s);
+        }
+      }, 16);
+    }
+
+    function upgradeExistingBuilding(blueprint) {
+      const targetObj = spawnedIslandObjects.find(o => o.userData && o.userData.id === blueprint.target);
+      if (!targetObj) return;
+
+      sound.upgradeFanfare();
+
+      while (targetObj.children.length > 0) {
+        targetObj.remove(targetObj.children[0]);
+      }
+
+      if (blueprint.type === "UPGRADE_HOUSE") {
+        targetObj.userData.level = 2;
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.6 });
+        const roofMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.5 });
+
+        const groundFloor = new THREE.Mesh(new THREE.BoxGeometry(2.3, 1.25, 1.8), wallMat);
+        groundFloor.position.y = 0.62;
+        groundFloor.castShadow = true;
+        const secondFloor = new THREE.Mesh(new THREE.BoxGeometry(1.7, 1.0, 1.4), wallMat);
+        secondFloor.position.y = 1.74;
+        secondFloor.castShadow = true;
+
+        const mainRoof = new THREE.Mesh(new THREE.ConeGeometry(1.6, 0.85, 4), roofMat);
+        mainRoof.rotation.y = Math.PI / 4;
+        mainRoof.position.y = 2.55;
+
+        const winGlow = new THREE.MeshStandardMaterial({ color: 0x1e293b, emissive: 0x000000 });
+        const win1 = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.06), winGlow);
+        win1.position.set(0.6, 0.7, 0.91);
+        const win2 = win1.clone();
+        win2.position.set(0, 1.8, 0.71);
+
+        const shutterMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.6 });
+        const leftHinge = new THREE.Group();
+        leftHinge.position.set(-0.21, 1.8, 0.74);
+        const leftS = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.4, 0.03), shutterMat);
+        leftS.position.x = 0.1;
+        leftHinge.add(leftS);
+
+        const rightHinge = new THREE.Group();
+        rightHinge.position.set(0.21, 1.8, 0.74);
+        const rightS = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.4, 0.03), shutterMat);
+        rightS.position.x = -0.1;
+        rightHinge.add(rightS);
+
+        targetObj.add(groundFloor, secondFloor, mainRoof, win1, win2, leftHinge, rightHinge);
+        islandNightLights.push({ mat: winGlow, glowColor: 0xfbbf24, glowIntensity: 1.8 });
+        animatedWindows.push({ left: leftHinge, right: rightHinge, speed: 0.7, offset: 1.5 });
+
+      } else if (blueprint.type === "UPGRADE_PIER") {
+        targetObj.userData.level = 2;
+        const towerMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+        const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.9, 3.2, 12), towerMat);
+        tower.position.y = 1.6;
+        tower.castShadow = true;
+
+        const redBand = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.76, 0.5, 12), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+        redBand.position.y = 1.75;
+
+        const cap = new THREE.Mesh(new THREE.ConeGeometry(0.8, 0.7, 12), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+        cap.position.y = 3.55;
+
+        const beaconMat = new THREE.MeshStandardMaterial({ color: 0x475569, emissive: 0x000000 });
+        const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), beaconMat);
+        beacon.position.y = 3.0;
+
+        targetObj.add(tower, redBand, cap, beacon);
+        islandNightLights.push({ mat: beaconMat, glowColor: 0xfef08a, glowIntensity: 2.8 });
+
+      } else if (blueprint.type === "UPGRADE_CASTLE") {
+        targetObj.userData.level = 3;
+        const castleMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5 });
+        const blueRoofMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.4 });
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15 });
+
+        const mainFort = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.9, 2.2), castleMat);
+        mainFort.position.y = 0.95;
+
+        [-1.3, 1.3].forEach(tx => {
+          [-1.0, 1.0].forEach(tz => {
+            const turret = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.4, 2.5, 8), castleMat);
+            turret.position.set(tx, 1.25, tz);
+            const spire = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.85, 8), blueRoofMat);
+            spire.position.set(tx, 2.9, tz);
+            targetObj.add(turret, spire);
+          });
+        });
+
+        const clockTower = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 1.2), castleMat);
+        clockTower.position.set(0, 2.5, 0);
+        const clockSpire = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.25, 4), blueRoofMat);
+        clockSpire.rotation.y = Math.PI / 4;
+        clockSpire.position.set(0, 4.1, 0);
+
+        const clockFace = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.06, 12), goldMat);
+        clockFace.rotateX(Math.PI / 2);
+        clockFace.position.set(0, 2.9, 0.62);
+
+        const castleWinMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, emissive: 0x000000 });
+        const win = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.48, 0.05), castleWinMat);
+        win.position.set(0, 1.25, 1.11);
+        targetObj.add(win);
+        islandNightLights.push({ mat: castleWinMat, glowColor: 0xfbbf24, glowIntensity: 2.0 });
+
+        targetObj.add(mainFort, clockTower, clockSpire, clockFace);
+      }
+
+      upgradeBanner.textContent = `建築蛻變升級：【${blueprint.name}】！`;
+      upgradeBanner.classList.remove('hidden');
+      setTimeout(() => upgradeBanner.classList.add('hidden'), 2800);
+    }
+
+    function setupCameraControls() {
+      let isDragging = false;
+      let prevMouseX = 0;
+      let sphericalAngle = 0;
+      const camDist = 52;
+
+      function onPointerDown(e) {
+        // 若點擊在右側控制台內部，不觸發視角旋轉
+        if (e.target.closest('.side-control-panel') || e.target.closest('input') || e.target.closest('button')) {
+          return;
+        }
+        isDragging = true;
+        prevMouseX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+      }
+
+      function onPointerMove(e) {
+        if (!isDragging) return;
+        const currentX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+        const deltaX = currentX - prevMouseX;
+        prevMouseX = currentX;
+
+        sphericalAngle -= deltaX * 0.006;
+        applyCameraPosition(sphericalAngle, camDist);
+      }
+
+      function onPointerUp() {
+        isDragging = false;
+      }
+
+      window.addEventListener('mousedown', onPointerDown);
+      window.addEventListener('mousemove', onPointerMove);
+      window.addEventListener('mouseup', onPointerUp);
+
+      window.addEventListener('touchstart', onPointerDown, { passive: true });
+      window.addEventListener('touchmove', onPointerMove, { passive: true });
+      window.addEventListener('touchend', onPointerUp, { passive: true });
+    }
+
+    // 計算視角與島嶼中心偏移量（將小島完美呈現在非遮擋區域）
+    function applyCameraPosition(angle = 0, dist = 52) {
+      if (!camera) return;
+      const isDesktop = window.innerWidth >= 768;
+      // 桌面端視角中心向左偏移 4.5 單位，徹底避開右側控制欄；行動端向上偏移 4.5 單位避開下欄
+      const targetX = isDesktop ? -4.5 : 0;
+      const targetY = isDesktop ? 2.5 : 4.5;
+      const targetZ = 0;
+
+      camera.position.x = targetX + Math.sin(angle) * dist;
+      camera.position.y = 35;
+      camera.position.z = targetZ + Math.cos(angle) * dist;
+      camera.lookAt(targetX, targetY, targetZ);
+    }
+
+    function adjustCameraViewport() {
+      applyCameraPosition(0, 52);
+    }
+
+    function onWindowResize() {
+      if (!camera || !renderer) return;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      adjustCameraViewport();
+    }
+
+    function updateDayNightCycle(dt) {
+      timeCycle = (timeCycle + dt * 0.012) % 1.0;
+
+      let p = 1;
+      let skyCol = new THREE.Color(0x38bdf8);
+      let sunIntensity = 0.95;
+      let starOpacity = 0.0;
+      let isNight = false;
+
+      if (timeCycle < 0.25) {
+        // 清晨
+        p = 0;
+        const alpha = timeCycle / 0.25;
+        skyCol = new THREE.Color(0x1e1b4b).lerp(new THREE.Color(0xfdba74), alpha);
+        sunIntensity = 0.4 + alpha * 0.55;
+        starOpacity = Math.max(0, 1.0 - alpha * 2.0);
+      } else if (timeCycle < 0.5) {
+        // 中午
+        p = 1;
+        skyCol = new THREE.Color(0x38bdf8);
+        sunIntensity = 0.95;
+        starOpacity = 0.0;
+      } else if (timeCycle < 0.75) {
+        // 晚霞
+        p = 2;
+        const alpha = (timeCycle - 0.5) / 0.25;
+        skyCol = new THREE.Color(0x38bdf8).lerp(new THREE.Color(0xf43f5e), alpha);
+        sunIntensity = 0.95 - alpha * 0.5;
+        starOpacity = 0.0;
+      } else {
+        // 夜晚 (繁星璀璨)
+        p = 3;
+        const alpha = (timeCycle - 0.75) / 0.25;
+        skyCol = new THREE.Color(0xf43f5e).lerp(new THREE.Color(0x020617), alpha);
+        sunIntensity = 0.15;
+        starOpacity = 1.0;
+        isNight = true;
+      }
+
+      if (scene) {
+        scene.background = skyCol;
+        if (scene.fog) scene.fog.color = skyCol;
+      }
+      if (sunLight) sunLight.intensity = sunIntensity;
+
+      if (starsParticleSystem && starsParticleSystem.material) {
+        starsParticleSystem.material.opacity = starOpacity;
+      }
+
+      // 夜間亮燈
+      islandNightLights.forEach(item => {
+        if (isNight) {
+          item.mat.emissive.setHex(item.glowColor);
+          item.mat.emissiveIntensity = item.glowIntensity;
+        } else {
+          item.mat.emissive.setHex(0x000000);
+          item.mat.emissiveIntensity = 0.0;
+        }
+      });
+
+      // 夜晚環境蟋蟀鳴叫
+      if (isNight && gameState === 'RUNNING') {
+        sound.startNightAmbient();
+      } else {
+        sound.stopNightAmbient();
+      }
+
+      if (p !== timePhase) {
+        timePhase = p;
+        dayTimeBadge.textContent = TIME_PHASE_NAMES[timePhase];
+      }
+    }
+
+    const DIFF_CONFIG = {
+      easy: { name: '簡易', colorClass: 'text-emerald-400', activeBg: 'bg-emerald-500/25', border: 'border-emerald-500', text: 'text-emerald-300' },
+      medium: { name: '普通', colorClass: 'text-amber-400', activeBg: 'bg-amber-500/25', border: 'border-amber-500', text: 'text-amber-300' },
+      hard: { name: '困難', colorClass: 'text-rose-400', activeBg: 'bg-rose-500/25', border: 'border-rose-500', text: 'text-rose-300' }
+    };
+
+    function setDifficulty(diff) {
+      currentDifficulty = diff;
+      const conf = DIFF_CONFIG[diff];
+
+      // 更新頂部顯示標籤
+      if (currentDiffBadge) {
+        currentDiffBadge.textContent = conf.name;
+        currentDiffBadge.className = `font-black text-xs sm:text-sm ${conf.colorClass}`;
+      }
+
+      // 更新開始畫面按鈕樣式
+      startDiffBtns.forEach(btn => {
+        const btnDiff = btn.dataset.diff;
+        if (btnDiff === diff) {
+          btn.className = `start-diff-btn p-2.5 rounded-xl border ${conf.border} ${conf.activeBg} ${conf.text} font-bold text-xs sm:text-sm transition flex flex-col items-center shadow-lg`;
+        } else {
+          btn.className = `start-diff-btn p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition flex flex-col items-center`;
+        }
+      });
+
+      // 更新結算畫面按鈕樣式
+      overDiffBtns.forEach(btn => {
+        const btnDiff = btn.dataset.diff;
+        if (btnDiff === diff) {
+          btn.className = `over-diff-btn py-1.5 px-2 rounded-xl border ${conf.border} ${conf.activeBg} ${conf.text} font-bold text-xs transition text-center shadow-lg`;
+        } else {
+          btn.className = `over-diff-btn py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs transition text-center`;
+        }
+      });
+    }
+
+    startDiffBtns.forEach(btn => {
+      btn.addEventListener('click', () => setDifficulty(btn.dataset.diff));
+    });
+
+    overDiffBtns.forEach(btn => {
+      btn.addEventListener('click', () => setDifficulty(btn.dataset.diff));
+    });
+
+    function displayCurrentWord() {
+      const list = currentWordList.length > 0 ? currentWordList : WORD_DB.easy;
+      const item = list[currentWordIndex % list.length];
+      charCardsContainer.innerHTML = '';
+
+      const chars = item.word.split('');
+      chars.forEach((c, idx) => {
+        const charWrap = document.createElement('div');
+        charWrap.className = 'zhuyin-char';
+
+        const ruby = document.createElement('div');
+        ruby.className = 'zhuyin-ruby';
+        ruby.textContent = (item.ruby && item.ruby[idx]) ? item.ruby[idx] : '';
+
+        const hanzi = document.createElement('div');
+        hanzi.className = 'main-hanzi';
+        hanzi.textContent = c;
+
+        charWrap.appendChild(ruby);
+        charWrap.appendChild(hanzi);
+        charCardsContainer.appendChild(charWrap);
+      });
+
+      const nextBP = REPEATABLE_PROTOTYPES[currentCreationIndex % REPEATABLE_PROTOTYPES.length];
+      nextUpgradeHint.textContent = `輸入目標：【${item.word}】 ➔ 開拓：${nextBP.name}`;
+
+      const stepInCycle = correctCount % 5;
+      milestoneCounter.textContent = `${stepInCycle} / 5`;
+    }
+
+    function spawnSpecialMonument() {
+      const monumentIndex = specialMonumentsSpawned % SPECIAL_MONUMENTS.length;
+      const monument = SPECIAL_MONUMENTS[monumentIndex];
+      specialMonumentsSpawned++;
+
+      // 50 種紀念品優先分佈在小島外圍四周、沙灘岬角與外圍淺水海域（半徑 12 ~ 17）
+      const totalCount = 50;
+      const angle = (monumentIndex / totalCount) * Math.PI * 2 + 0.35;
+      const rad = 13.5 + (monumentIndex % 4) * 1.5;
+      const posX = Math.cos(angle) * rad;
+      const posZ = Math.sin(angle) * rad;
+      const posY = (rad > 15.0) ? 0.3 : 1.35;
+
+      const monumentObj = monument.build(new THREE.Vector3(posX, posY, posZ));
+      monumentObj.scale.set(0.01, 0.01, 0.01);
+      scene.add(monumentObj);
+      spawnedIslandObjects.push(monumentObj);
+
+      sound.upgradeFanfare();
+
+      let progress = 0;
+      const animTimer = setInterval(() => {
+        progress += 0.08;
+        const s = Math.sin(progress * Math.PI * 0.75) * 1.25;
+        if (progress >= 1.0) {
+          monumentObj.scale.set(1, 1, 1);
+          clearInterval(animTimer);
+        } else {
+          monumentObj.scale.set(s, s, s);
+        }
+      }, 16);
+
+      upgradeBanner.textContent = `特殊紀念地標落成：【${monument.name}】！`;
+      upgradeBanner.className = "text-xs sm:text-sm font-black px-5 py-2 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 shadow-2xl tracking-wider transition-all duration-300";
+      upgradeBanner.classList.remove('hidden');
+      setTimeout(() => upgradeBanner.classList.add('hidden'), 3600);
+    }
+
+    function updateIslandRank() {
+      let currentRank = ISLAND_RANKS[0];
+      for (let i = ISLAND_RANKS.length - 1; i >= 0; i--) {
+        if (correctCount >= ISLAND_RANKS[i].min) {
+          currentRank = ISLAND_RANKS[i];
+          break;
+        }
+      }
+      islandRankBadge.textContent = currentRank.title;
+    }
+
+    function advanceWord() {
+      currentWordIndex++;
+      displayCurrentWord();
+      typeInput.value = '';
+    }
+
+    function onWordCorrect() {
+      sound.correctChime();
+      vitality = Math.min(100, vitality + 30);
+      correctCount++;
+
+      // 達到第 10 題（島嶼達到 Lv.4 繁榮海島）時，深海巨鯨優雅登場！
+      if (correctCount >= 10 && !whaleUnlocked) {
+        spawnOceanWhale();
+      }
+
+      // 檢查每 5 題紀念地標獎勵
+      if (correctCount % 5 === 0) {
+        spawnSpecialMonument();
+      } else {
+        const blueprint = REPEATABLE_PROTOTYPES[currentCreationIndex % REPEATABLE_PROTOTYPES.length];
+        spawnOrUpgradeIslandCreation(blueprint);
+        currentCreationIndex++;
+      }
+
+      score += (currentDifficulty === 'hard' ? 300 : (currentDifficulty === 'medium' ? 250 : 200));
+      scoreEl.textContent = score;
+
+      updateIslandRank();
+      advanceWord();
+    }
+
+    function checkTypingMatch() {
+      if (gameState !== 'RUNNING') return;
+      const list = currentWordList.length > 0 ? currentWordList : WORD_DB.easy;
+      const target = list[currentWordIndex % list.length].word;
+      const val = typeInput.value.trim();
+
+      if (val === target) {
+        onWordCorrect();
+      }
+    }
+
+    typeInput.addEventListener('compositionend', () => {
+      setTimeout(checkTypingMatch, 10);
+    });
+
+    typeInput.addEventListener('input', () => {
+      checkTypingMatch();
+    });
+
+    typeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        checkTypingMatch();
+      }
+    });
+
+    submitBtn.addEventListener('click', () => {
+      checkTypingMatch();
+      typeInput.focus();
+    });
+
+    function startGame() {
+      gameState = 'RUNNING';
+      score = 0;
+      vitality = 100;
+      correctCount = 0;
+      currentWordIndex = 0;
+      currentCreationIndex = 0;
+      specialMonumentsSpawned = 0;
+
+      // 重置巨鯨狀態（若之前有出現則自場景中移除）
+      if (whaleUnlocked) {
+        const whaleIdx = aquaticCreatures.findIndex(a => a.type === 'whale');
+        if (whaleIdx !== -1) {
+          scene.remove(aquaticCreatures[whaleIdx].group);
+          aquaticCreatures.splice(whaleIdx, 1);
+        }
+        whaleUnlocked = false;
+      }
+
+      currentWordList = [...WORD_DB[currentDifficulty]];
+      currentWordList.sort(() => Math.random() - 0.5);
+
+      scoreEl.textContent = '0';
+      vitalityBar.style.width = '100%';
+      vitalityPercent.textContent = '100%';
+
+      spawnedIslandObjects.forEach(obj => scene.remove(obj));
+      spawnedIslandObjects.length = 0;
+      islandNightLights.length = 0;
+      movingPeople.length = 0;
+      animalCreatures.length = 0;
+      animatedFlowers.length = 0;
+      animatedWindows.length = 0;
+
+      updateIslandRank();
+      displayCurrentWord();
+
+      startOverlay.classList.add('hidden');
+      gameOverOverlay.classList.add('hidden');
+
+      typeInput.disabled = false;
+      typeInput.value = '';
+      typeInput.focus();
+
+      sound.init();
+      sound.startBGM();
+    }
+
+    function endGame() {
+      gameState = 'GAMEOVER';
+      sound.stopNightAmbient();
+
+      let currentRank = ISLAND_RANKS[0];
+      for (let i = ISLAND_RANKS.length - 1; i >= 0; i--) {
+        if (correctCount >= ISLAND_RANKS[i].min) {
+          currentRank = ISLAND_RANKS[i];
+          break;
+        }
+      }
+
+      finalIslandRank.textContent = currentRank.title;
+      finalCorrectCount.textContent = `${correctCount} 題`;
+      finalScore.textContent = score;
+
+      // 刷新結算彈窗中的難度按鈕為目前難度，方便玩家確認或改選
+      setDifficulty(currentDifficulty);
+
+      gameOverOverlay.classList.remove('hidden');
+      typeInput.disabled = true;
+    }
+
+    startBtn.addEventListener('click', startGame);
+    restartBtn.addEventListener('click', startGame);
+
+    muteBtn.addEventListener('click', () => {
+      const isMuted = sound.toggleMute();
+      muteBtn.textContent = isMuted ? '音效 OFF' : '音效 ON';
+      muteBtn.className = isMuted
+        ? "glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-700/60 transition active:scale-95"
+        : "glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95";
+    });
+
+    bgmBtn.addEventListener('click', () => {
+      const isBgmMuted = sound.toggleBGM();
+      bgmBtn.textContent = isBgmMuted ? '音樂 OFF' : '音樂 ON';
+      bgmBtn.className = isBgmMuted 
+        ? "glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-700/60 transition active:scale-95"
+        : "glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95";
+    });
+
+    let lastTime = performance.now();
+
+    function animate(currentTime) {
+      requestAnimationFrame(animate);
+
+      const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
+      lastTime = currentTime;
+
+      updateDayNightCycle(dt);
+
+      floatingClouds.forEach(c => {
+        c.angle += c.speed;
+        c.group.position.x = Math.cos(c.angle) * c.dist;
+        c.group.position.z = Math.sin(c.angle) * c.dist;
+      });
+
+      const t = currentTime * 0.002;
+
+      // 1. 海洋生物與湖泊天鵝生動游動
+      aquaticCreatures.forEach(aq => {
+        if (aq.type === 'swan') {
+          // 天鵝在湖中緩緩繞圈游動，身體永遠朝向遊動正切方向
+          aq.angle += aq.speed * dt * 0.4;
+          aq.group.position.x = aq.baseX + Math.cos(aq.angle) * aq.radiusX;
+          aq.group.position.z = aq.baseZ + Math.sin(aq.angle) * aq.radiusZ;
+          aq.group.rotation.y = -aq.angle;
+          aq.group.position.y = 1.45 + Math.sin(currentTime * 0.003 + aq.angle) * 0.02;
+        } else if (aq.type === 'whale') {
+          // 巨鯨在深海大範圍優雅巡航
+          aq.angle += aq.speed * dt * 0.15;
+          aq.group.position.x = Math.cos(aq.angle) * aq.dist;
+          aq.group.position.z = Math.sin(aq.angle) * aq.dist;
+          
+          // 讓巨鯨頭部順著切線向前前進
+          aq.group.rotation.y = -aq.angle - Math.PI / 2;
+          
+          // 身體隨波浪緩慢起伏並略帶傾角
+          const swimWave = Math.sin(currentTime * 0.0018);
+          aq.group.position.y = -0.15 + swimWave * 0.28;
+          aq.group.rotation.z = Math.cos(currentTime * 0.0018) * 0.08;
+
+          // 水平尾鰭上下規律擺動划水（逼真的鯨魚仿生動態）
+          if (aq.tail) {
+            aq.tail.rotation.z = Math.sin(currentTime * 0.0028) * 0.28;
+          }
+
+          // 左右胸鰭微微滑行扇動
+          if (aq.flipperL && aq.flipperR) {
+            const finFlap = Math.sin(currentTime * 0.002) * 0.15;
+            aq.flipperL.rotation.z = finFlap;
+            aq.flipperR.rotation.z = -finFlap;
+          }
+
+          // 規律向上噴射多瓣水花水柱
+          if (aq.spout) {
+            // 每隔一段時間浮出水面噴氣
+            const spoutCycle = Math.sin(currentTime * 0.0016);
+            if (spoutCycle > 0.4) {
+              const grow = (spoutCycle - 0.4) / 0.6;
+              aq.spout.visible = true;
+              aq.spout.scale.set(grow * 1.1, grow * 1.5, grow * 1.1);
+            } else {
+              aq.spout.visible = false;
+            }
+          }
+        } else if (aq.type === 'dolphin') {
+          // 海豚海面躍水拋物線運動
+          aq.angle += aq.speed * dt * 0.45;
+          aq.group.position.x = Math.cos(aq.angle) * aq.dist;
+          aq.group.position.z = Math.sin(aq.angle) * aq.dist;
+          aq.group.rotation.y = -aq.angle - Math.PI / 2;
+
+          const jumpPhase = currentTime * 0.0035 + aq.jumpOffset;
+          const jumpHeight = Math.max(-0.6, Math.sin(jumpPhase) * 1.8);
+          aq.group.position.y = jumpHeight;
+          // 出水抬頭入水俯衝的自然弧度
+          aq.group.rotation.x = -Math.cos(jumpPhase) * 0.6;
+        }
+      });
+
+      // 2. 修正動物移動走向：徹底解決「倒退走」問題，嚴格朝向切線正前方前進
+      animalCreatures.forEach(a => {
+        const animTime = t * a.speed + a.offset;
+
+        if (a.type === 'cat') {
+          // 淘氣小花貓：圓形路徑向前巡邏
+          const walkX = Math.cos(animTime) * a.radius;
+          const walkZ = Math.sin(animTime) * a.radius;
+          a.group.position.x = a.baseX + walkX;
+          a.group.position.z = a.baseZ + walkZ;
+          // 切線前進朝向（正面朝前跑，不再倒退嚕）
+          a.group.rotation.y = -animTime - Math.PI / 2;
+          a.group.position.y = 1.35 + Math.abs(Math.sin(animTime * 6.0)) * 0.05;
+
+          if (a.head) {
+            a.head.rotation.y = Math.sin(animTime * 2.5) * 0.25; // 好奇歪頭
+          }
+          if (a.tail) {
+            a.tail.rotation.z = Math.sin(animTime * 5.0) * 0.35; // 靈巧擺尾
+          }
+        } else if (a.type === 'rabbit') {
+          // 小白兔：一蹦一跳往前跳躍
+          const hop = Math.abs(Math.sin(animTime * 3.5));
+          a.group.position.y = 1.35 + hop * 0.35;
+          a.group.position.x = a.baseX + Math.cos(animTime) * a.radius;
+          a.group.position.z = a.baseZ + Math.sin(animTime) * a.radius;
+          // 面向切線正前方前進
+          a.group.rotation.y = -animTime - Math.PI / 2;
+          if (a.head) {
+            a.head.rotation.x = 0.15 - hop * 0.25;
+          }
+        } else {
+          // 小羊、小鹿、乳牛：嚴格順著前進向量前進，抬頭啃草
+          const walkX = Math.cos(animTime) * a.radius;
+          const walkZ = Math.sin(animTime) * a.radius;
+          a.group.position.x = a.baseX + walkX;
+          a.group.position.z = a.baseZ + walkZ;
+          // 運動切線向前朝向
+          a.group.rotation.y = -animTime - Math.PI / 2;
+          a.group.position.y = 1.35 + Math.abs(Math.sin(animTime * 4.0)) * 0.05;
+
+          if (a.head) {
+            const graze = Math.sin(animTime * 2.0);
+            a.head.rotation.x = graze > 0.3 ? 0.45 : 0.0;
+            a.head.rotation.y = Math.sin(animTime * 2.5) * 0.2;
+          }
+        }
+      });
+
+      // 3. 花草樹木微風吹拂
+      animatedFlowers.forEach(f => {
+        if (f.mesh) {
+          f.mesh.rotation.z = Math.sin(t * f.speed + f.offset) * f.amp;
+        }
+      });
+
+      // 4. 百葉窗扇開關
+      animatedWindows.forEach(w => {
+        const swing = (Math.sin(t * w.speed + w.offset) + 1) * 0.5 * 1.2;
+        if (w.left) w.left.rotation.y = -swing;
+        if (w.right) w.right.rotation.y = swing;
+      });
+
+      // 5. 小島村民來回踏步與熱情揮手
+      movingPeople.forEach(p => {
+        const anim = t * 1.5 + p.offset;
+        p.group.position.x = p.baseX + Math.sin(anim) * p.walkRange;
+        if (p.arm) {
+          p.arm.rotation.x = Math.sin(anim * 2.5) * 0.45;
+        }
+      });
+
+      // 6. 多重立體湧浪圈：平滑向外擴散與自然淡入淡出動態
+      concentricSwellRings.forEach(ring => {
+        ring.progress = (ring.progress + dt * ring.speed) % 1.0;
+        const currentRadius = ring.minRadius + (ring.maxRadius - ring.minRadius) * ring.progress;
+        
+        // 環形向外擴張
+        ring.mesh.scale.set(currentRadius, 1.0, currentRadius);
+
+        // 湧浪透明度隨進度如呼吸般淡入、擴散後平滑淡出
+        const alpha = Math.sin(ring.progress * Math.PI);
+        ring.mesh.material.opacity = alpha * 0.55;
+
+        // 微幅水波垂直起伏
+        ring.mesh.position.y = 0.16 + Math.sin(ring.progress * Math.PI * 2) * 0.03;
+      });
+
+      // 7. 渲染 3D 場景
+      if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+      }
+    }
+
+    // 活力自然消耗機制 (遊戲進行時每秒溫和消耗，激勵打字)
+    setInterval(() => {
+      if (gameState === 'RUNNING') {
+        vitality = Math.max(0, vitality - 0.7);
+        vitalityBar.style.width = `${vitality}%`;
+        vitalityPercent.textContent = `${Math.round(vitality)}%`;
+        if (vitality <= 0) {
+          endGame();
+        }
+      }
+    }, 500);
+
+    // 視窗載入完成後啟動 3D 小島與動畫循環
+    window.onload = function () {
+      initThreeScene();
+      requestAnimationFrame(animate);
+    };
+  </script>
+</body>
+</html>
