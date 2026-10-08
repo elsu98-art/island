@@ -390,28 +390,36 @@
   <div id="startOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md">
     <div class="max-w-md w-full flex flex-col gap-2">
       <div class="w-full bg-slate-900/95 border-2 border-emerald-500/40 rounded-3xl p-6 sm:p-8 text-center shadow-2xl">
-        <h2 class="text-2xl font-black text-white mb-1">童話夢想島：中文打字開拓記</h2>
+        <h2 class="text-2xl font-black text-white mb-1">我的夢想島</h2>
         
-        <!-- 簡潔 3 點說明 -->
+        <!-- 遊戲簡介說明 -->
         <div class="bg-slate-800/80 rounded-2xl p-4 my-5 text-left text-xs sm:text-sm text-slate-200 space-y-2 border border-slate-700">
           <p class="flex items-start gap-2">
             <span class="font-bold text-emerald-400">1.</span>
-            <span>根據上方字卡輸入中文詞彙</span>
+            <span>根據字卡的題目鍵盤打字，輸入中文詞彙</span>
           </p>
           <p class="flex items-start gap-2">
             <span class="font-bold text-emerald-400">2.</span>
-            <span>每次輸入正確會為島嶼注入活力，陸續誕生物件</span>
+            <span>輸入正確會為島嶼注入活力，誕生新物件</span>
           </p>
           <p class="flex items-start gap-2">
             <span class="font-bold text-emerald-400">3.</span>
-            <span>通過 5 題獲得「紀念地標」（共 100 種地標與傳奇明星！）</span>
+            <span>每5題獲得「紀念地標」，還有傳奇明星準備登島</span>
+          </p>
+          <p class="flex items-start gap-2">
+            <span class="font-bold text-emerald-400">4.</span>
+            <span>滿50級解鎖綠洲效果，美麗島嶼變成螢幕保護程式</span>
           </p>
         </div>
 
         <!-- 難度選擇區 -->
         <div class="mb-6">
-          <div class="text-xs font-bold text-slate-400 mb-2">選擇本次開拓難度（遊戲中鎖定）：</div>
-          <div class="grid grid-cols-3 gap-2">
+          <div class="text-xs font-bold text-slate-400 mb-2">選擇本次開拓難度（遊戲中不能再次選擇）：</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button data-diff="superEasy" class="start-diff-btn p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition flex flex-col items-center">
+              <span>超簡單</span>
+              <span class="text-[10px] text-slate-400 mt-0.5">單字為主</span>
+            </button>
             <button data-diff="easy" class="start-diff-btn p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/25 text-emerald-300 font-bold text-xs sm:text-sm transition flex flex-col items-center shadow-lg">
               <span>簡易</span>
               <span class="text-[10px] text-slate-400 mt-0.5">2字詞為主</span>
@@ -444,9 +452,6 @@
   <!-- 遊戲結算視窗 -->
   <div id="gameOverOverlay" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
     <div class="max-w-md w-full bg-slate-900/95 border-2 border-rose-500/40 rounded-3xl p-6 sm:p-8 text-center shadow-2xl">
-      <div class="w-16 h-16 mx-auto mb-3 bg-rose-500/20 rounded-2xl flex items-center justify-center border border-rose-400/40">
-        <span class="text-3xl font-black text-rose-300">休</span>
-      </div>
       <h2 class="text-2xl font-black text-white mb-1">島嶼開拓報告</h2>
       <p class="text-xs text-slate-400 mb-4">島嶼活力已耗盡，稍作休息再次啟程吧！</p>
 
@@ -464,7 +469,8 @@
       <!-- 結算難度重選 -->
       <div class="mb-5">
         <div class="text-xs font-bold text-slate-400 mb-2">重新選擇挑戰難度：</div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button data-diff="superEasy" class="over-diff-btn py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs transition text-center">超簡單</button>
           <button data-diff="easy" class="over-diff-btn py-1.5 px-2 rounded-xl border border-emerald-500 bg-emerald-500/25 text-emerald-300 font-bold text-xs transition text-center shadow-lg">簡易</button>
           <button data-diff="medium" class="over-diff-btn py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs transition text-center">普通</button>
           <button data-diff="hard" class="over-diff-btn py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs transition text-center">困難</button>
@@ -486,195 +492,261 @@
   <script>
     // 300+ 豐富詞彙庫 (嚴格注音校準、涵蓋台灣地名名產、景點成語)
     const WORD_DB = {
+      superEasy: [
+        { word: "小", ruby: ["ㄒㄧㄠˇ"] },
+        { word: "大", ruby: ["ㄉㄚˋ"] },
+        { word: "花", ruby: ["ㄏㄨㄚ"] },
+        { word: "果", ruby: ["ㄍㄨㄛˇ"] },
+        { word: "地", ruby: ["ㄉㄧˋ"] },
+        { word: "土", ruby: ["ㄊㄨˇ"] },
+        { word: "貓", ruby: ["ㄇㄠ"] },
+        { word: "狗", ruby: ["ㄍㄡˇ"] },
+        { word: "豬", ruby: ["ㄓㄨ"] },
+        { word: "眼", ruby: ["ㄧㄢˇ"] },
+        { word: "水", ruby: ["ㄕㄨㄟˇ"] },
+        { word: "電", ruby: ["ㄉㄧㄢˋ"] },
+        { word: "桌", ruby: ["ㄓㄨㄛ"] },
+        { word: "鞋", ruby: ["ㄒㄧㄝˊ"] },
+        { word: "雨", ruby: ["ㄩˇ"] },
+        { word: "中", ruby: ["ㄓㄨㄥ"] },
+        { word: "樹", ruby: ["ㄕㄨˋ"] },
+        { word: "葉", ruby: ["ㄧㄝˋ"] },
+        { word: "鼠", ruby: ["ㄕㄨˇ"] },
+        { word: "兔", ruby: ["ㄊㄨˋ"] },
+        { word: "龍", ruby: ["ㄌㄨㄥˊ"] },
+        { word: "白", ruby: ["ㄅㄞˊ"] },
+        { word: "黃", ruby: ["ㄏㄨㄤˊ"] },
+        { word: "藍", ruby: ["ㄌㄢˊ"] },
+        { word: "紅", ruby: ["ㄏㄨㄥˊ"] },
+        { word: "綠", ruby: ["ㄌㄩˋ"] },
+        { word: "學", ruby: ["ㄒㄩㄝˊ"] },
+        { word: "一", ruby: ["ㄧ"] },
+        { word: "二", ruby: ["ㄦˋ"] },
+        { word: "三", ruby: ["ㄙㄢ"] },
+        { word: "四", ruby: ["ㄙˋ"] },
+        { word: "五", ruby: ["ㄨˇ"] },
+        { word: "六", ruby: ["ㄌㄧㄡˋ"] },
+        { word: "七", ruby: ["ㄑㄧ"] },
+        { word: "八", ruby: ["ㄅㄚ"] },
+        { word: "九", ruby: ["ㄐㄧㄡˇ"] },
+        { word: "十", ruby: ["ㄕˊ"] },
+        { word: "零", ruby: ["ㄌㄧㄥˊ"] },
+        { word: "百", ruby: ["ㄅㄞˇ"] },
+        { word: "千", ruby: ["ㄑㄧㄢ"] },
+        { word: "萬", ruby: ["ㄨㄢˋ"] },
+        { word: "億", ruby: ["ㄧˋ"] },
+        { word: "兆", ruby: ["ㄓㄠˋ"] },
+        { word: "牛", ruby: ["ㄋㄧㄡˊ"] },
+        { word: "虎", ruby: ["ㄏㄨˇ"] },
+        { word: "船", ruby: ["ㄔㄨㄢˊ"] },
+        { word: "車", ruby: ["ㄔㄜ"] },
+        { word: "金", ruby: ["ㄐㄧㄣ"] },
+        { word: "張", ruby: ["ㄓㄤ"] },
+        { word: "陳", ruby: ["ㄔㄣˊ"] },
+        { word: "謝", ruby: ["ㄒㄧㄝˋ"] },
+        { word: "林", ruby: ["ㄌㄧㄣˊ"] },
+        { word: "吳", ruby: ["ㄨˊ"] },
+        { word: "郭", ruby: ["ㄍㄨㄛ"] },
+        { word: "趙", ruby: ["ㄓㄠˋ"] },
+        { word: "海", ruby: ["ㄏㄞˇ"] },
+        { word: "愛", ruby: ["ㄞˋ"] },
+        { word: "仁", ruby: ["ㄖㄣˊ"] },
+        { word: "國", ruby: ["ㄍㄨㄛˊ"] },
+        { word: "東", ruby: ["ㄉㄨㄥ"] },
+        { word: "西", ruby: ["ㄒㄧ"] },
+        { word: "南", ruby: ["ㄋㄢˊ"] },
+        { word: "北", ruby: ["ㄅㄟˇ"] },
+        { word: "台", ruby: ["ㄊㄞˊ"] },
+        { word: "灣", ruby: ["ㄨㄢ"] }
+      ],
       easy: [
-        { word: "小島", ruby: ["ㄒㄧㄠˇ", "ㄉㄠˇ"] },
-        { word: "森林", ruby: ["ㄙㄣ", "ㄌㄧㄣˊ"] },
-        { word: "白雲", ruby: ["ㄅㄞˊ", "ㄩㄣˊ"] },
-        { word: "微風", ruby: ["ㄨㄟˊ", "ㄈㄥ"] },
-        { word: "晨曦", ruby: ["ㄔㄣˊ", "ㄒㄧ"] },
-        { word: "星空", ruby: ["ㄒㄧㄥ", "ㄎㄨㄥ"] },
-        { word: "花朵", ruby: ["ㄏㄨㄚ", "ㄉㄨㄛˇ"] },
-        { word: "青草", ruby: ["ㄑㄧㄥ", "ㄘㄠˇ"] },
-        { word: "山脈", ruby: ["ㄕㄢ", "ㄇㄞˋ"] },
-        { word: "清泉", ruby: ["ㄑㄧㄥ", "ㄑㄩㄢˊ"] },
-        { word: "大地", ruby: ["ㄉㄚˋ", "ㄉㄧˋ"] },
-        { word: "陽光", ruby: ["ㄧㄤˊ", "ㄍㄨㄤ"] },
-        { word: "彩虹", ruby: ["ㄘㄞˇ", "ㄏㄨㄥˊ"] },
-        { word: "流水", ruby: ["ㄌㄧㄡˊ", "ㄕㄨㄟˇ"] },
-        { word: "海浪", ruby: ["ㄏㄞˇ", "ㄌㄤˋ"] },
-        { word: "沙灘", ruby: ["ㄕㄚ", "ㄊㄢ"] },
-        { word: "湖泊", ruby: ["ㄏㄨˊ", "ㄆㄛˊ"] },
-        { word: "藍天", ruby: ["ㄌㄢˊ", "ㄊㄧㄢ"] },
-        { word: "落葉", ruby: ["ㄌㄨㄛˋ", "ㄧㄝˋ"] },
-        { word: "樹木", ruby: ["ㄕㄨˋ", "ㄇㄨˋ"] },
-        { word: "小溪", ruby: ["ㄒㄧㄠˇ", "ㄒㄧ"] },
-        { word: "春風", ruby: ["ㄔㄨㄣ", "ㄈㄥ"] },
-        { word: "秋月", ruby: ["ㄑㄧㄡ", "ㄩㄝˋ"] },
-        { word: "綠芽", ruby: ["ㄌㄩˋ", "ㄧㄚˊ"] },
-        { word: "白雪", ruby: ["ㄅㄞˊ", "ㄒㄩㄝˇ"] },
-        { word: "稻田", ruby: ["ㄉㄠˋ", "ㄊㄧㄢˊ"] },
-        { word: "小貓", ruby: ["ㄒㄧㄠˇ", "ㄇㄠ"] },
-        { word: "白兔", ruby: ["ㄅㄞˊ", "ㄊㄨˋ"] },
-        { word: "水牛", ruby: ["ㄕㄨㄟˇ", "ㄋㄧㄡˊ"] },
-        { word: "綿羊", ruby: ["ㄇㄧㄢˊ", "ㄧㄤˊ"] },
-        { word: "小鳥", ruby: ["ㄒㄧㄠˇ", "ㄋㄧㄠˇ"] },
-        { word: "蝴蝶", ruby: ["ㄏㄨˊ", "ㄉㄧㄝˊ"] },
-        { word: "蜻蜓", ruby: ["ㄑㄧㄥ", "ㄊㄧㄥˊ"] },
-        { word: "松鼠", ruby: ["ㄙㄨㄥ", "ㄕㄨˇ"] },
-        { word: "梅花鹿", ruby: ["ㄇㄟˊ", "ㄏㄨㄚ", "ㄌㄨˋ"] },
-        { word: "天鵝", ruby: ["ㄊㄧㄢ", "ㄜˊ"] },
-        { word: "海豚", ruby: ["ㄏㄞˇ", "ㄊㄨㄣˊ"] },
-        { word: "藍鯨", ruby: ["ㄌㄢˊ", "ㄐㄧㄥ"] },
-        { word: "翠鳥", ruby: ["ㄘㄨㄟˋ", "ㄋㄧㄠˇ"] },
-        { word: "金魚", ruby: ["ㄐㄧㄣ", "ㄩˊ"] },
-        { word: "蜜蜂", ruby: ["ㄇㄧˋ", "ㄈㄥ"] },
-        { word: "小木屋", ruby: ["ㄒㄧㄠˇ", "ㄇㄨˋ", "ㄨ"] },
-        { word: "花園", ruby: ["ㄏㄨㄚ", "ㄩㄢˊ"] },
-        { word: "水車", ruby: ["ㄕㄨㄟˇ", "ㄔㄜ"] },
-        { word: "燈塔", ruby: ["ㄉㄥ", "ㄊㄚˇ"] },
-        { word: "小橋", ruby: ["ㄒㄧㄠˇ", "ㄑㄧㄠˊ"] },
-        { word: "風車", ruby: ["ㄈㄥ", "ㄔㄜ"] },
-        { word: "涼亭", ruby: ["ㄌㄧㄤˊ", "ㄊㄧㄥˊ"] },
-        { word: "水井", ruby: ["ㄕㄨㄟˇ", "ㄐㄧㄥˇ"] },
-        { word: "石階", ruby: ["ㄕˊ", "ㄐㄧㄝ"] },
-        { word: "竹籬", ruby: ["ㄓㄨˊ", "ㄌㄧˊ"] },
-        { word: "台北", ruby: ["ㄊㄞˊ", "ㄅㄟˇ"] },
-        { word: "高雄", ruby: ["ㄍㄠ", "ㄒㄩㄥˊ"] },
-        { word: "台中", ruby: ["ㄊㄞˊ", "ㄓㄨㄥ"] },
-        { word: "台南", ruby: ["ㄊㄞˊ", "ㄋㄢˊ"] },
-        { word: "花蓮", ruby: ["ㄏㄨㄚ", "ㄌㄧㄢˊ"] },
-        { word: "台東", ruby: ["ㄊㄞˊ", "ㄉㄨㄥ"] },
-        { word: "宜蘭", ruby: ["ㄧˊ", "ㄌㄢˊ"] },
+        { word: "台灣", ruby: ["ㄊㄞˊ", "ㄨㄢ"] },
+        { word: "東海", ruby: ["ㄉㄨㄥ", "ㄏㄞˇ"] },
+        { word: "玉山", ruby: ["ㄩˋ", "ㄕㄢ"] },
         { word: "墾丁", ruby: ["ㄎㄣˇ", "ㄉㄧㄥ"] },
         { word: "九份", ruby: ["ㄐㄧㄡˇ", "ㄈㄣˋ"] },
         { word: "淡水", ruby: ["ㄉㄢˋ", "ㄕㄨㄟˇ"] },
-        { word: "鹿港", ruby: ["ㄌㄨˋ", "ㄍㄤˇ"] },
-        { word: "安平", ruby: ["ㄢ", "ㄆㄧㄥˊ"] },
-        { word: "金門", ruby: ["ㄐㄧㄣ", "ㄇㄣˊ"] },
-        { word: "馬祖", ruby: ["ㄇㄚˇ", "ㄗㄨˇ"] },
-        { word: "綠島", ruby: ["ㄌㄩˋ", "ㄉㄠˇ"] },
-        { word: "蘭嶼", ruby: ["ㄌㄢˊ", "ㄩˇ"] },
-        { word: "鶯歌", ruby: ["ㄧㄥ", "ㄍㄜ"] },
-        { word: "三峽", ruby: ["ㄙㄢ", "ㄒㄧㄚˊ"] },
-        { word: "旗津", ruby: ["ㄑㄧˊ", "ㄐㄧㄣ"] },
-        { word: "美濃", ruby: ["ㄇㄟˇ", "ㄋㄨㄥˊ"] },
-        { word: "鳳梨酥", ruby: ["ㄈㄥˋ", "ㄌㄧˊ", "ㄙㄨ"] },
-        { word: "牛軋糖", ruby: ["ㄋㄧㄡˊ", "ㄍㄚˊ", "ㄊㄤˊ"] },
-        { word: "太陽餅", ruby: ["ㄊㄞˋ", "ㄧㄤˊ", "ㄅㄧㄥˇ"] },
-        { word: "滷肉飯", ruby: ["ㄌㄨˇ", "ㄖㄡˋ", "ㄈㄢˋ"] },
-        { word: "牛肉麵", ruby: ["ㄋㄧㄡˊ", "ㄖㄡˋ", "ㄇㄧㄢˋ"] },
-        { word: "小籠包", ruby: ["ㄒㄧㄠˇ", "ㄌㄨㄥˊ", "ㄅㄠ"] },
-        { word: "蚵仔煎", ruby: ["ㄜˊ", "ㄗˇ", "ㄐㄧㄢ"] },
-        { word: "珍珠奶茶", ruby: ["ㄓㄣ", "ㄓㄨ", "ㄋㄞˇ", "ㄔㄚˊ"] },
-        { word: "芒果冰", ruby: ["ㄇㄤˊ", "ㄍㄨㄛˇ", "ㄅㄧㄥ"] },
-        { word: "愛玉冰", ruby: ["ㄞˋ", "ㄩˋ", "ㄅㄧㄥ"] },
-        { word: "烏龍茶", ruby: ["ㄨ", "ㄌㄨㄥˊ", "ㄔㄚˊ"] },
-        { word: "釋迦", ruby: ["ㄕˋ", "ㄐㄧㄚ"] },
-        { word: "蓮霧", ruby: ["ㄌㄧㄢˊ", "ㄨˋ"] },
-        { word: "芭樂", ruby: ["ㄅㄚ", "ㄌㄜˋ"] },
-        { word: "文旦", ruby: ["ㄨㄣˊ", "ㄉㄢˋ"] },
-        { word: "甘蔗", ruby: ["ㄍㄢ", "ㄓㄜˋ"] },
-        { word: "芋頭", ruby: ["ㄩˋ", "ㄊㄡˊ"] },
-        { word: "蕃薯", ruby: ["ㄈㄢ", "ㄕㄨˇ"] },
-        { word: "向日葵", ruby: ["ㄒㄧㄤˋ", "ㄖˋ", "ㄎㄨㄟˊ"] },
+        { word: "北投", ruby: ["ㄅㄟˇ", "ㄊㄡˊ"] },
+        { word: "平溪", ruby: ["ㄆㄧㄥˊ", "ㄒㄧ"] },
+        { word: "野柳", ruby: ["ㄧㄝˇ", "ㄌㄧㄡˇ"] },
+        { word: "燈塔", ruby: ["ㄉㄥ", "ㄊㄚˇ"] },
+        { word: "海邊", ruby: ["ㄏㄞˇ", "ㄅㄧㄢ"] },
+        { word: "沙灘", ruby: ["ㄕㄚ", "ㄊㄢ"] },
+        { word: "海島", ruby: ["ㄏㄞˇ", "ㄉㄠˇ"] },
+        { word: "海風", ruby: ["ㄏㄞˇ", "ㄈㄥ"] },
+        { word: "山林", ruby: ["ㄕㄢ", "ㄌㄧㄣˊ"] },
+        { word: "山谷", ruby: ["ㄕㄢ", "ㄍㄨˇ"] },
+        { word: "河流", ruby: ["ㄏㄜˊ", "ㄌㄧㄡˊ"] },
+        { word: "湖水", ruby: ["ㄏㄨˊ", "ㄕㄨㄟˇ"] },
+        { word: "瀑布", ruby: ["ㄆㄨˋ", "ㄅㄨˋ"] },
+        { word: "彩虹", ruby: ["ㄘㄞˇ", "ㄏㄨㄥˊ"] },
+        { word: "日出", ruby: ["ㄖˋ", "ㄔㄨ"] },
+        { word: "日落", ruby: ["ㄖˋ", "ㄌㄨㄛˋ"] },
+        { word: "月亮", ruby: ["ㄩㄝˋ", "ㄌㄧㄤˋ"] },
+        { word: "星星", ruby: ["ㄒㄧㄥ", "ㄒㄧㄥ"] },
+        { word: "太陽", ruby: ["ㄊㄞˋ", "ㄧㄤˊ"] },
+        { word: "地球", ruby: ["ㄉㄧˋ", "ㄑㄧㄡˊ"] },
+        { word: "世界", ruby: ["ㄕˋ", "ㄐㄧㄝˋ"] },
+        { word: "白雲", ruby: ["ㄅㄞˊ", "ㄩㄣˊ"] },
+        { word: "藍天", ruby: ["ㄌㄢˊ", "ㄊㄧㄢ"] },
+        { word: "森林", ruby: ["ㄙㄣ", "ㄌㄧㄣˊ"] },
+        { word: "草原", ruby: ["ㄘㄠˇ", "ㄩㄢˊ"] },
+        { word: "微風", ruby: ["ㄨㄟˊ", "ㄈㄥ"] },
+        { word: "春風", ruby: ["ㄔㄨㄣ", "ㄈㄥ"] },
+        { word: "花朵", ruby: ["ㄏㄨㄚ", "ㄉㄨㄛˇ"] },
+        { word: "小草", ruby: ["ㄒㄧㄠˇ", "ㄘㄠˇ"] },
+        { word: "綠葉", ruby: ["ㄌㄩˋ", "ㄧㄝˋ"] },
+        { word: "晨光", ruby: ["ㄔㄣˊ", "ㄍㄨㄤ"] },
+        { word: "夕陽", ruby: ["ㄒㄧˋ", "ㄧㄤˊ"] },
+        { word: "日本", ruby: ["ㄖˋ", "ㄅㄣˇ"] },
+        { word: "韓國", ruby: ["ㄏㄢˊ", "ㄍㄨㄛˊ"] },
+        { word: "印度", ruby: ["ㄧㄣˋ", "ㄉㄨˋ"] },
+        { word: "泰國", ruby: ["ㄊㄞˋ", "ㄍㄨㄛˊ"] },
+        { word: "越南", ruby: ["ㄩㄝˋ", "ㄋㄢˊ"] },
+        { word: "美國", ruby: ["ㄇㄟˇ", "ㄍㄨㄛˊ"] },
+        { word: "英國", ruby: ["ㄧㄥ", "ㄍㄨㄛˊ"] },
+        { word: "法國", ruby: ["ㄈㄚˇ", "ㄍㄨㄛˊ"] },
+        { word: "德國", ruby: ["ㄉㄜˊ", "ㄍㄨㄛˊ"] },
+        { word: "巴黎", ruby: ["ㄅㄚ", "ㄌㄧˊ"] },
+        { word: "倫敦", ruby: ["ㄌㄨㄣˊ", "ㄉㄨㄣ"] },
+        { word: "東京", ruby: ["ㄉㄨㄥ", "ㄐㄧㄥ"] },
+        { word: "首爾", ruby: ["ㄕㄡˇ", "ㄦˇ"] },
+        { word: "紐約", ruby: ["ㄋㄧㄡˇ", "ㄩㄝ"] },
+        { word: "羅馬", ruby: ["ㄌㄨㄛˊ", "ㄇㄚˇ"] },
+        { word: "京都", ruby: ["ㄐㄧㄥ", "ㄉㄨ"] },
+        { word: "香港", ruby: ["ㄒㄧㄤ", "ㄍㄤˇ"] },
+        { word: "澳門", ruby: ["ㄠˋ", "ㄇㄣˊ"] },
+        { word: "大象", ruby: ["ㄉㄚˋ", "ㄒㄧㄤˋ"] },
+        { word: "熊貓", ruby: ["ㄒㄩㄥˊ", "ㄇㄠ"] },
+        { word: "老虎", ruby: ["ㄌㄠˇ", "ㄏㄨˇ"] },
+        { word: "獅子", ruby: ["ㄕ", "˙ㄗ"] },
+        { word: "小鹿", ruby: ["ㄒㄧㄠˇ", "ㄌㄨˋ"] },
+        { word: "小羊", ruby: ["ㄒㄧㄠˇ", "ㄧㄤˊ"] },
+        { word: "小牛", ruby: ["ㄒㄧㄠˇ", "ㄋㄧㄡˊ"] },
+        { word: "小狗", ruby: ["ㄒㄧㄠˇ", "ㄍㄡˇ"] },
+        { word: "小貓", ruby: ["ㄒㄧㄠˇ", "ㄇㄠ"] },
+        { word: "小兔", ruby: ["ㄒㄧㄠˇ", "ㄊㄨˋ"] },
+        { word: "小鳥", ruby: ["ㄒㄧㄠˇ", "ㄋㄧㄠˇ"] },
+        { word: "企鵝", ruby: ["ㄑㄧˋ", "ㄜˊ"] },
+        { word: "海豚", ruby: ["ㄏㄞˇ", "ㄊㄨㄣˊ"] },
+        { word: "藍鯨", ruby: ["ㄌㄢˊ", "ㄐㄧㄥ"] },
+        { word: "竹子", ruby: ["ㄓㄨˊ", "˙ㄗ"] },
         { word: "櫻花", ruby: ["ㄧㄥ", "ㄏㄨㄚ"] },
-        { word: "杜鵑", ruby: ["ㄉㄨˋ", "ㄐㄩㄢ"] },
         { word: "荷花", ruby: ["ㄏㄜˊ", "ㄏㄨㄚ"] },
-        { word: "茉莉", ruby: ["ㄇㄛˋ", "ㄌㄧˋ"] },
-        { word: "水仙", ruby: ["ㄕㄨㄟˇ", "ㄒㄧㄢ"] },
-        { word: "玫瑰", ruby: ["ㄇㄟˊ", "ㄍㄨㄟ"] },
-        { word: "百合", ruby: ["ㄅㄞˇ", "ㄏㄜˊ"] },
-        { word: "茶花", ruby: ["ㄔㄚˊ", "ㄏㄨㄚ"] },
-        { word: "桂花", ruby: ["ㄍㄨㄟˋ", "ㄏㄨㄚ"] }
+        { word: "米飯", ruby: ["ㄇㄧˇ", "ㄈㄢˋ"] },
+        { word: "麵包", ruby: ["ㄇㄧㄢˋ", "ㄅㄠ"] },
+        { word: "壽司", ruby: ["ㄕㄡˋ", "ㄙ"] },
+        { word: "拉麵", ruby: ["ㄌㄚ", "ㄇㄧㄢˋ"] },
+        { word: "披薩", ruby: ["ㄆㄧ", "ㄙㄚˋ"] },
+        { word: "漢堡", ruby: ["ㄏㄢˋ", "ㄅㄠˇ"] },
+        { word: "蘋果", ruby: ["ㄆㄧㄥˊ", "ㄍㄨㄛˇ"] },
+        { word: "西瓜", ruby: ["ㄒㄧ", "ㄍㄨㄚ"] },
+        { word: "香蕉", ruby: ["ㄒㄧㄤ", "ㄐㄧㄠ"] },
+        { word: "草莓", ruby: ["ㄘㄠˇ", "ㄇㄟˊ"] },
+        { word: "咖啡", ruby: ["ㄎㄚ", "ㄈㄟ"] },
+        { word: "茶葉", ruby: ["ㄔㄚˊ", "ㄧㄝˋ"] },
+        { word: "可可", ruby: ["ㄎㄜˇ", "ㄎㄜˇ"] },
+        { word: "牛奶", ruby: ["ㄋㄧㄡˊ", "ㄋㄞˇ"] },
+        { word: "果汁", ruby: ["ㄍㄨㄛˇ", "ㄓ"] },
+        { word: "城堡", ruby: ["ㄔㄥˊ", "ㄅㄠˇ"] },
+        { word: "花園", ruby: ["ㄏㄨㄚ", "ㄩㄢˊ"] },
+        { word: "木屋", ruby: ["ㄇㄨˋ", "ㄨ"] },
+        { word: "學校", ruby: ["ㄒㄩㄝˊ", "ㄒㄧㄠˋ"] },
+        { word: "朋友", ruby: ["ㄆㄥˊ", "ㄧㄡˇ"] },
+        { word: "快樂", ruby: ["ㄎㄨㄞˋ", "ㄌㄜˋ"] },
+        { word: "阿里山", ruby: ["ㄚ", "ㄌㄧˇ", "ㄕㄢ"] },
+        { word: "日月潭", ruby: ["ㄖˋ", "ㄩㄝˋ", "ㄊㄢˊ"] }
       ],
       medium: [
-        { word: "日月潭", ruby: ["ㄖˋ", "ㄩㄝˋ", "ㄊㄢˊ"] },
-        { word: "阿里山", ruby: ["ㄚ", "ㄌㄧˇ", "ㄕㄢ"] },
-        { word: "太魯閣", ruby: ["ㄊㄞˋ", "ㄌㄨˇ", "ㄍㄜˊ"] },
-        { word: "玉山峰", ruby: ["ㄩˋ", "ㄕㄢ", "ㄈㄥ"] },
-        { word: "陽明山", ruby: ["ㄧㄤˊ", "ㄇㄧㄥˊ", "ㄕㄢ"] },
-        { word: "清境農場", ruby: ["ㄑㄧㄥ", "ㄐㄧㄥˋ", "ㄋㄨㄥˊ", "ㄔㄤˇ"] },
-        { word: "高美濕地", ruby: ["ㄍㄠ", "ㄇㄟˇ", "ㄕ", "ㄉㄧˋ"] },
-        { word: "野柳岬", ruby: ["ㄧㄝˇ", "ㄌㄧㄡˇ", "ㄐㄧㄚˇ"] },
-        { word: "赤崁樓", ruby: ["ㄔˋ", "ㄎㄢˇ", "ㄌㄡˊ"] },
-        { word: "安平古堡", ruby: ["ㄢ", "ㄆㄧㄥˊ", "ㄍㄨˇ", "ㄅㄠˇ"] },
-        { word: "鵝鑾鼻", ruby: ["ㄜˊ", "ㄌㄨㄢˊ", "ㄅㄧˊ"] },
-        { word: "三仙台", ruby: ["ㄙㄢ", "ㄒㄧㄢ", "ㄊㄞˊ"] },
-        { word: "合歡山", ruby: ["ㄏㄜˊ", "ㄏㄨㄢ", "ㄕㄢ"] },
-        { word: "太平山", ruby: ["ㄊㄞˋ", "ㄆㄧㄥˊ", "ㄕㄢ"] },
-        { word: "吉野櫻", ruby: ["ㄐㄧˊ", "ㄧㄝˇ", "ㄧㄥ"] },
-        { word: "落羽松", ruby: ["ㄌㄨㄛˋ", "ㄩˇ", "ㄙㄨㄥ"] },
-        { word: "黑面琵鷺", ruby: ["ㄏㄟ", "ㄇㄧㄢˋ", "ㄆㄧˊ", "ㄌㄨˋ"] },
+        { word: "台北故宮", ruby: ["ㄊㄞˊ", "ㄅㄟˇ", "ㄍㄨˋ", "ㄍㄨㄥ"] },
+        { word: "國立故宮博物院", ruby: ["ㄍㄨㄛˊ", "ㄌㄧˋ", "ㄍㄨˋ", "ㄍㄨㄥ", "ㄅㄛˊ", "ㄨˋ", "ㄩㄢˋ"] },
+        { word: "中正紀念堂", ruby: ["ㄓㄨㄥ", "ㄓㄥˋ", "ㄐㄧˋ", "ㄋㄧㄢˋ", "ㄊㄤˊ"] },
+        { word: "國父紀念館", ruby: ["ㄍㄨㄛˊ", "ㄈㄨˋ", "ㄐㄧˋ", "ㄋㄧㄢˋ", "ㄍㄨㄢˇ"] },
+        { word: "台北一零一", ruby: ["ㄊㄞˊ", "ㄅㄟˇ", "ㄧ", "ㄌㄧㄥˊ", "ㄧ"] },
+        { word: "龍山寺", ruby: ["ㄌㄨㄥˊ", "ㄕㄢ", "ㄙˋ"] },
+        { word: "淡水老街", ruby: ["ㄉㄢˋ", "ㄕㄨㄟˇ", "ㄌㄠˇ", "ㄐㄧㄝ"] },
+        { word: "九份老街", ruby: ["ㄐㄧㄡˇ", "ㄈㄣˋ", "ㄌㄠˇ", "ㄐㄧㄝ"] },
+        { word: "鶯歌陶瓷", ruby: ["ㄧㄥ", "ㄍㄜ", "ㄊㄠˊ", "ㄘˊ"] },
+        { word: "三峽老街", ruby: ["ㄙㄢ", "ㄒㄧㄚˊ", "ㄌㄠˇ", "ㄐㄧㄝ"] },
+        { word: "日月潭環湖", ruby: ["ㄖˋ", "ㄩㄝˋ", "ㄊㄢˊ", "ㄏㄨㄢˊ", "ㄏㄨˊ"] },
+        { word: "阿里山日出", ruby: ["ㄚ", "ㄌㄧˇ", "ㄕㄢ", "ㄖˋ", "ㄔㄨ"] },
+        { word: "玉山國家公園", ruby: ["ㄩˋ", "ㄕㄢ", "ㄍㄨㄛˊ", "ㄐㄧㄚ", "ㄍㄨㄥ", "ㄩㄢˊ"] },
+        { word: "太魯閣國家公園", ruby: ["ㄊㄞˋ", "ㄌㄨˇ", "ㄍㄜˊ", "ㄍㄨㄛˊ", "ㄐㄧㄚ", "ㄍㄨㄥ", "ㄩㄢˊ"] },
+        { word: "墾丁國家公園", ruby: ["ㄎㄣˇ", "ㄉㄧㄥ", "ㄍㄨㄛˊ", "ㄐㄧㄚ", "ㄍㄨㄥ", "ㄩㄢˊ"] },
+        { word: "東北角", ruby: ["ㄉㄨㄥ", "ㄅㄟˇ", "ㄐㄧㄠˇ"] },
+        { word: "綠島潛水", ruby: ["ㄌㄩˋ", "ㄉㄠˇ", "ㄑㄧㄢˊ", "ㄕㄨㄟˇ"] },
+        { word: "蘭嶼飛魚", ruby: ["ㄌㄢˊ", "ㄩˇ", "ㄈㄟ", "ㄩˊ"] },
+        { word: "澎湖花火", ruby: ["ㄆㄥˊ", "ㄏㄨˊ", "ㄏㄨㄚ", "ㄏㄨㄛˇ"] },
+        { word: "金門古厝", ruby: ["ㄐㄧㄣ", "ㄇㄣˊ", "ㄍㄨˇ", "ㄘㄨㄛˋ"] },
+        { word: "馬祖藍眼淚", ruby: ["ㄇㄚˇ", "ㄗㄨˇ", "ㄌㄢˊ", "ㄧㄢˇ", "ㄌㄟˋ"] },
         { word: "台灣黑熊", ruby: ["ㄊㄞˊ", "ㄨㄢ", "ㄏㄟ", "ㄒㄩㄥˊ"] },
-        { word: "石虎", ruby: ["ㄕˊ", "ㄏㄨˇ"] },
-        { word: "帝雉", ruby: ["ㄉㄧˋ", "ㄓˋ"] },
-        { word: "藍腹鷴", ruby: ["ㄌㄢˊ", "ㄈㄨˋ", "ㄒㄧㄢˊ"] },
-        { word: "綠蠵龜", ruby: ["ㄌㄩˋ", "ㄒㄧ", "ㄍㄨㄟ"] },
-        { word: "飛魚祭", ruby: ["ㄈㄟ", "ㄩˊ", "ㄐㄧˋ"] },
-        { word: "東港黑鮪", ruby: ["ㄉㄨㄥ", "ㄍㄤˇ", "ㄏㄟ", "ㄨㄟˇ"] },
-        { word: "大甲媽祖", ruby: ["ㄉㄚˋ", "ㄐㄧㄚˇ", "ㄇㄚˇ", "ㄗㄨˇ"] },
-        { word: "平溪天燈", ruby: ["ㄆㄧㄥˊ", "ㄒㄧ", "ㄊㄧㄢ", "ㄉㄥ"] },
-        { word: "鹽水蜂炮", ruby: ["ㄧㄢˊ", "ㄕㄨㄟˇ", "ㄈㄥ", "ㄆㄠˋ"] },
-        { word: "宜蘭童玩", ruby: ["ㄧˊ", "ㄌㄢˊ", "ㄊㄨㄥˊ", "ㄨㄢˊ"] },
-        { word: "原民豐年", ruby: ["ㄩㄢˊ", "ㄇㄧㄣˊ", "ㄈㄥ", "ㄋㄧㄢˊ"] },
-        { word: "包種茶", ruby: ["ㄅㄠ", "ㄓㄨㄥˇ", "ㄔㄚˊ"] },
-        { word: "東方美人", ruby: ["ㄉㄨㄥ", "ㄈㄤ", "ㄇㄟˇ", "ㄖㄣˊ"] },
-        { word: "金萱茶", ruby: ["ㄐㄧㄣ", "ㄒㄩㄢ", "ㄔㄚˊ"] },
-        { word: "鐵觀音", ruby: ["ㄊㄧㄝˇ", "ㄍㄨㄢ", "ㄧㄣ"] },
-        { word: "古早味", ruby: ["ㄍㄨˇ", "ㄗㄠˇ", "ㄨㄟˋ"] },
-        { word: "大腸包小腸", ruby: ["ㄉㄚˋ", "ㄔㄤˊ", "ㄅㄠ", "ㄒㄧㄠˇ", "ㄔㄤˊ"] },
-        { word: "彰化肉圓", ruby: ["ㄓㄤ", "ㄏㄨㄚˋ", "ㄖㄡˋ", "ㄩㄢˊ"] },
-        { word: "嘉義雞肉飯", ruby: ["ㄐㄧㄚ", "ㄧˋ", "ㄐㄧ", "ㄖㄡˋ", "ㄈㄢˋ"] },
-        { word: "新竹貢丸", ruby: ["ㄒㄧㄣ", "ㄓㄨˊ", "ㄍㄨㄥˋ", "ㄨㄢˊ"] },
-        { word: "萬巒豬腳", ruby: ["ㄨㄢˋ", "ㄌㄨㄢˊ", "ㄓㄨ", "ㄐㄧㄠˇ"] },
-        { word: "台南擔仔麵", ruby: ["ㄊㄞˊ", "ㄋㄢˊ", "ㄉㄢˋ", "ㄗˇ", "ㄇㄧㄢˋ"] },
-        { word: "深坑豆腐", ruby: ["ㄕㄣ", "ㄎㄥ", "ㄉㄡˋ", "ㄈㄨˇ"] },
-        { word: "金門貢糖", ruby: ["ㄐㄧㄣ", "ㄇㄣˊ", "ㄍㄨㄥˋ", "ㄊㄤˊ"] },
-        { word: "宜蘭牛舌餅", ruby: ["ㄧˊ", "ㄌㄢˊ", "ㄋㄧㄡˊ", "ㄕㄜˊ", "ㄅㄧㄥˇ"] },
-        { word: "春暖花開", ruby: ["ㄔㄨㄣ", "ㄋㄨㄢˇ", "ㄏㄨㄚ", "ㄎㄞ"] },
-        { word: "風和日麗", ruby: ["ㄈㄥ", "ㄏㄜˊ", "ㄖˋ", "ㄌㄧˋ"] },
-        { word: "鳥語花香", ruby: ["ㄋㄧㄠˇ", "ㄩˇ", "ㄏㄨㄚ", "ㄒㄧㄤ"] },
-        { word: "碧海藍天", ruby: ["ㄅㄧˋ", "ㄏㄞˇ", "ㄌㄢˊ", "ㄊㄧㄢ"] },
-        { word: "山明水秀", ruby: ["ㄕㄢ", "ㄇㄧㄥˊ", "ㄕㄨㄟˇ", "ㄒㄧㄡˋ"] },
-        { word: "綠樹成蔭", ruby: ["ㄌㄩˋ", "ㄕㄨˋ", "ㄔㄥˊ", "ㄧㄣ"] },
-        { word: "欣欣向榮", ruby: ["ㄒㄧㄣ", "ㄒㄧㄣ", "ㄒㄧㄤˋ", "ㄖㄨㄥˊ"] },
-        { word: "萬紫千紅", ruby: ["ㄨㄢˋ", "ㄗˇ", "ㄑㄧㄢ", "ㄏㄨㄥˊ"] },
-        { word: "生機盎然", ruby: ["ㄕㄥ", "ㄐㄧ", "ㄤˋ", "ㄖㄢˊ"] },
-        { word: "繁花似錦", ruby: ["ㄈㄢˊ", "ㄏㄨㄚ", "ㄙˋ", "ㄐㄧㄣˇ"] },
-        { word: "微風徐徐", ruby: ["ㄨㄟˊ", "ㄈㄥ", "ㄒㄩˊ", "ㄒㄩˊ"] },
-        { word: "細水長流", ruby: ["ㄒㄧˋ", "ㄕㄨㄟˇ", "ㄔㄤˊ", "ㄌㄧㄡˊ"] },
-        { word: "白雲悠悠", ruby: ["ㄅㄞˊ", "ㄩㄣˊ", "ㄧㄡ", "ㄧㄡ"] },
-        { word: "月朗星稀", ruby: ["ㄩㄝˋ", "ㄌㄤˇ", "ㄒㄧㄥ", "ㄒㄧ"] },
-        { word: "草木皆春", ruby: ["ㄘㄠˇ", "ㄇㄨˋ", "ㄐㄧㄝ", "ㄔㄨㄣ"] }
+        { word: "台灣獼猴", ruby: ["ㄊㄞˊ", "ㄨㄢ", "ㄇㄧˊ", "ㄏㄡˊ"] },
+        { word: "台灣藍鵲", ruby: ["ㄊㄞˊ", "ㄨㄢ", "ㄌㄢˊ", "ㄑㄩㄝˋ"] },
+        { word: "櫻花鉤吻鮭", ruby: ["ㄧㄥ", "ㄏㄨㄚ", "ㄍㄡ", "ㄨㄣˇ", "ㄍㄨㄟ"] },
+        { word: "黑面琵鷺", ruby: ["ㄏㄟ", "ㄇㄧㄢˋ", "ㄆㄧˊ", "ㄌㄨˋ"] },
+        { word: "石虎保育", ruby: ["ㄕˊ", "ㄏㄨˇ", "ㄅㄠˇ", "ㄩˋ"] },
+        { word: "海洋保育", ruby: ["ㄏㄞˇ", "ㄧㄤˊ", "ㄅㄠˇ", "ㄩˋ"] },
+        { word: "森林保育", ruby: ["ㄙㄣ", "ㄌㄧㄣˊ", "ㄅㄠˇ", "ㄩˋ"] },
+        { word: "生態旅遊", ruby: ["ㄕㄥ", "ㄊㄞˋ", "ㄌㄩˇ", "ㄧㄡˊ"] },
+        { word: "世界地圖", ruby: ["ㄕˋ", "ㄐㄧㄝˋ", "ㄉㄧˋ", "ㄊㄨˊ"] },
+        { word: "世界遺產", ruby: ["ㄕˋ", "ㄐㄧㄝˋ", "ㄧˊ", "ㄔㄢˇ"] },
+        { word: "聯合國", ruby: ["ㄌㄧㄢˊ", "ㄏㄜˊ", "ㄍㄨㄛˊ"] },
+        { word: "世界和平", ruby: ["ㄕˋ", "ㄐㄧㄝˋ", "ㄏㄜˊ", "ㄆㄧㄥˊ"] },
+        { word: "國際交流", ruby: ["ㄍㄨㄛˊ", "ㄐㄧˋ", "ㄐㄧㄠ", "ㄌㄧㄡˊ"] },
+        { word: "文化交流", ruby: ["ㄨㄣˊ", "ㄏㄨㄚˋ", "ㄐㄧㄠ", "ㄌㄧㄡˊ"] },
+        { word: "世界文化", ruby: ["ㄕˋ", "ㄐㄧㄝˋ", "ㄨㄣˊ", "ㄏㄨㄚˋ"] },
+        { word: "古文明", ruby: ["ㄍㄨˇ", "ㄨㄣˊ", "ㄇㄧㄥˊ"] },
+        { word: "希臘神話", ruby: ["ㄒㄧ", "ㄌㄚˋ", "ㄕㄣˊ", "ㄏㄨㄚˋ"] },
+        { word: "羅馬帝國", ruby: ["ㄌㄨㄛˊ", "ㄇㄚˇ", "ㄉㄧˋ", "ㄍㄨㄛˊ"] },
+        { word: "埃及文明", ruby: ["ㄞ", "ㄐㄧˊ", "ㄨㄣˊ", "ㄇㄧㄥˊ"] },
+        { word: "萬里長城", ruby: ["ㄨㄢˋ", "ㄌㄧˇ", "ㄔㄤˊ", "ㄔㄥˊ"] },
+        { word: "富士山雪景", ruby: ["ㄈㄨˋ", "ㄕˋ", "ㄕㄢ", "ㄒㄩㄝˇ", "ㄐㄧㄥˇ"] },
+        { word: "巴黎鐵塔", ruby: ["ㄅㄚ", "ㄌㄧˊ", "ㄊㄧㄝˇ", "ㄊㄚˇ"] },
+        { word: "倫敦大笨鐘", ruby: ["ㄌㄨㄣˊ", "ㄉㄨㄣ", "ㄉㄚˋ", "ㄅㄣˋ", "ㄓㄨㄥ"] },
+        { word: "紐約自由女神", ruby: ["ㄋㄧㄡˇ", "ㄩㄝ", "ㄗˋ", "ㄧㄡˊ", "ㄋㄩˇ", "ㄕㄣˊ"] },
+        { word: "澳洲大堡礁", ruby: ["ㄠˋ", "ㄓㄡ", "ㄉㄚˋ", "ㄅㄠˇ", "ㄐㄧㄠ"] },
+        { word: "南極冰原", ruby: ["ㄋㄢˊ", "ㄐㄧˊ", "ㄅㄧㄥ", "ㄩㄢˊ"] },
+        { word: "北極冰原", ruby: ["ㄅㄟˇ", "ㄐㄧˊ", "ㄅㄧㄥ", "ㄩㄢˊ"] },
+        { word: "太平洋島國", ruby: ["ㄊㄞˋ", "ㄆㄧㄥˊ", "ㄧㄤˊ", "ㄉㄠˇ", "ㄍㄨㄛˊ"] },
+        { word: "海洋垃圾", ruby: ["ㄏㄞˇ", "ㄧㄤˊ", "ㄌㄜˋ", "ㄙㄜˋ"] },
+        { word: "全球暖化", ruby: ["ㄑㄩㄢˊ", "ㄑㄧㄡˊ", "ㄋㄨㄢˇ", "ㄏㄨㄚˋ"] },
+        { word: "再生能源", ruby: ["ㄗㄞˋ", "ㄕㄥ", "ㄋㄥˊ", "ㄩㄢˊ"] },
+        { word: "太陽能", ruby: ["ㄊㄞˋ", "ㄧㄤˊ", "ㄋㄥˊ"] },
+        { word: "風力發電", ruby: ["ㄈㄥ", "ㄌㄧˋ", "ㄈㄚ", "ㄉㄧㄢˋ"] },
+        { word: "人工智慧", ruby: ["ㄖㄣˊ", "ㄍㄨㄥ", "ㄓˋ", "ㄏㄨㄟˋ"] },
+        { word: "太空探索", ruby: ["ㄊㄞˋ", "ㄎㄨㄥ", "ㄊㄢˋ", "ㄙㄨㄛˇ"] },
+        { word: "國際太空站", ruby: ["ㄍㄨㄛˊ", "ㄐㄧˋ", "ㄊㄞˋ", "ㄎㄨㄥ", "ㄓㄢˋ"] },
+        { word: "火星探險", ruby: ["ㄏㄨㄛˇ", "ㄒㄧㄥ", "ㄊㄢˋ", "ㄒㄧㄢˇ"] }
       ],
       hard: [
-        { word: "台北一零一", ruby: ["ㄊㄞˊ", "ㄅㄟˇ", "ㄧ", "ㄌㄧㄥˊ", "ㄧ"] },
-        { word: "故宮博物院", ruby: ["ㄍㄨˋ", "ㄍㄨㄥ", "ㄅㄛˊ", "ㄨˋ", "ㄩㄢˋ"] },
-        { word: "櫻花鉤吻鮭", ruby: ["ㄧㄥ", "ㄏㄨㄚ", "ㄍㄡ", "ㄨㄣˇ", "ㄍㄨㄟ"] },
-        { word: "野柳女王頭", ruby: ["ㄧㄝˇ", "ㄌㄧㄡˇ", "ㄋㄩˇ", "ㄨㄤˊ", "ㄊㄡˊ"] },
-        { word: "阿里山神木", ruby: ["ㄚ", "ㄌㄧˇ", "ㄕㄢ", "ㄕㄣˊ", "ㄇㄨˋ"] },
-        { word: "蘭嶼地下屋", ruby: ["ㄌㄢˊ", "ㄩˇ", "ㄉㄧˋ", "ㄒㄧㄚˋ", "ㄨ"] },
-        { word: "鹿港龍山寺", ruby: ["ㄌㄨˋ", "ㄍㄤˇ", "ㄌㄨㄥˊ", "ㄕㄢ", "ㄙˋ"] },
-        { word: "淡水紅毛城", ruby: ["ㄉㄢˋ", "ㄕㄨㄟˇ", "ㄏㄨㄥˊ", "ㄇㄠˊ", "ㄔㄥˊ"] },
-        { word: "恆春古城門", ruby: ["ㄏㄥˊ", "ㄔㄨㄣ", "ㄍㄨˇ", "ㄔㄥˊ", "ㄇㄣˊ"] },
-        { word: "大溪老街景", ruby: ["ㄉㄚˋ", "ㄒㄧ", "ㄌㄠˇ", "ㄐㄧㄝ", "ㄐㄧㄥˇ"] },
-        { word: "金門風獅爺", ruby: ["ㄐㄧㄣ", "ㄇㄣˊ", "ㄈㄥ", "ㄕ", "ㄧㄝˊ"] },
-        { word: "綠島朝日溫泉", ruby: ["ㄌㄩˋ", "ㄉㄠˇ", "ㄓㄠ", "ㄖˋ", "ㄨㄣ", "ㄑㄩㄢˊ"] },
-        { word: "七星潭礫灘", ruby: ["ㄑㄧ", "ㄒㄧㄥ", "ㄊㄢˊ", "ㄌㄧˋ", "ㄊㄢ"] },
-        { word: "合歡山積雪", ruby: ["ㄏㄜˊ", "ㄏㄨㄢ", "ㄕㄢ", "ㄐㄧ", "ㄒㄩㄝˇ"] },
-        { word: "世外桃源景", ruby: ["ㄕˋ", "ㄨㄞˋ", "ㄊㄠˊ", "ㄩㄢˊ", "ㄐㄧㄥˇ"] },
-        { word: "海闊天空闊", ruby: ["ㄏㄞˇ", "ㄎㄨㄛˋ", "ㄊㄧㄢ", "ㄎㄨㄥ", "ㄎㄨㄛˋ"] },
-        { word: "落霞與孤鶩齊飛", ruby: ["ㄌㄨㄛˋ", "ㄒㄧㄚˊ", "ㄩˇ", "ㄍㄨ", "ㄨˋ", "ㄑㄧˊ", "ㄈㄟ"] },
-        { word: "秋水共長天一色", ruby: ["ㄑㄧㄡ", "ㄕㄨㄟˇ", "ㄍㄨㄥˋ", "ㄔㄤˊ", "ㄊㄧㄢ", "ㄧ", "ㄙㄜˋ"] },
-        { word: "百聞不如一見", ruby: ["ㄅㄞˇ", "ㄨㄣˊ", "ㄅㄨˋ", "ㄖㄨˊ", "ㄧ", "ㄐㄧㄢˋ"] },
-        { word: "千里之行始於足下", ruby: ["ㄑㄧㄢ", "ㄌㄧˇ", "ㄓ", "ㄒㄧㄥˊ", "ㄕˇ", "ㄩˊ", "ㄗㄨˊ", "ㄒㄧㄚˋ"] },
-        { word: "讀萬卷書行萬里路", ruby: ["ㄉㄨˊ", "ㄨㄢˋ", "ㄐㄩㄢˋ", "ㄕㄨ", "ㄒㄧㄥˊ", "ㄨㄢˋ", "ㄌㄧˇ", "ㄌㄨˋ"] },
-        { word: "聚沙成塔集腋成裘", ruby: ["ㄐㄩˋ", "ㄕㄚ", "ㄔㄥˊ", "ㄊㄚˇ", "ㄐㄧˊ", "ㄧㄝˋ", "ㄔㄥˊ", "ㄑㄧㄡˊ"] },
-        { word: "水到渠成風調雨順", ruby: ["ㄕㄨㄟˇ", "ㄉㄠˋ", "ㄑㄩˊ", "ㄔㄥˊ", "ㄈㄥ", "ㄊㄧㄠˊ", "ㄩˇ", "ㄕㄨㄣˋ"] },
-        { word: "山青水秀人傑地靈", ruby: ["ㄕㄢ", "ㄑㄧㄥ", "ㄕㄨㄟˇ", "ㄒㄧㄡˋ", "ㄖㄣˊ", "ㄐㄧㄝˊ", "ㄉㄧˋ", "ㄌㄧㄥˊ"] },
-        { word: "歲月靜好現世安穩", ruby: ["ㄙㄨㄟˋ", "ㄩㄝˋ", "ㄐㄧㄥˋ", "ㄏㄠˇ", "ㄒㄧㄢˋ", "ㄕˋ", "ㄢ", "ㄨㄣˇ"] },
-        { word: "海角天涯心手相連", ruby: ["ㄏㄞˇ", "ㄐㄧㄠˇ", "ㄊㄧㄢ", "ㄧㄚˊ", "ㄒㄧㄣ", "ㄕㄡˇ", "ㄒㄧㄤ", "ㄌㄧㄢˊ"] },
-        { word: "錦繡山河萬象更新", ruby: ["ㄐㄧㄣˇ", "ㄒㄧㄡˋ", "ㄕㄢ", "ㄏㄜˊ", "ㄨㄢˋ", "ㄒㄧㄤˋ", "ㄍㄥ", "ㄒㄧㄣ"] }
+        { word: "台灣民主發展", ruby: ["ㄊㄞˊ", "ㄨㄢ", "ㄇㄧㄣˊ", "ㄓㄨˇ", "ㄈㄚ", "ㄓㄢˇ"] },
+        { word: "台灣多元文化", ruby: ["ㄊㄞˊ", "ㄨㄢ", "ㄉㄨㄛ", "ㄩㄢˊ", "ㄨㄣˊ", "ㄏㄨㄚˋ"] },
+        { word: "台灣自然生態", ruby: ["ㄊㄞˊ", "ㄨㄢ", "ㄗˋ", "ㄖㄢˊ", "ㄕㄥ", "ㄊㄞˋ"] },
+        { word: "台灣海洋文化", ruby: ["ㄊㄞˊ", "ㄨㄢ", "ㄏㄞˇ", "ㄧㄤˊ", "ㄨㄣˊ", "ㄏㄨㄚˋ"] },
+        { word: "台灣原住民族", ruby: ["ㄊㄞˊ", "ㄨㄢ", "ㄩㄢˊ", "ㄓㄨˋ", "ㄇㄧㄣˊ", "ㄗㄨˊ"] },
+        { word: "永續發展目標", ruby: ["ㄩㄥˇ", "ㄒㄩˋ", "ㄈㄚ", "ㄓㄢˇ", "ㄇㄨˋ", "ㄅㄧㄠ"] },
+        { word: "全球氣候變遷", ruby: ["ㄑㄩㄢˊ", "ㄑㄧㄡˊ", "ㄑㄧˋ", "ㄏㄡˋ", "ㄅㄧㄢˋ", "ㄑㄧㄢ"] },
+        { word: "全球環境保護", ruby: ["ㄑㄩㄢˊ", "ㄑㄧㄡˊ", "ㄏㄨㄢˊ", "ㄐㄧㄥˋ", "ㄅㄠˇ", "ㄏㄨˋ"] },
+        { word: "生物多樣性", ruby: ["ㄕㄥ", "ㄨˋ", "ㄉㄨㄛ", "ㄧㄤˋ", "ㄒㄧㄥˋ"] },
+        { word: "海洋生態系統", ruby: ["ㄏㄞˇ", "ㄧㄤˊ", "ㄕㄥ", "ㄊㄞˋ", "ㄒㄧˋ", "ㄊㄨㄥˇ"] },
+        { word: "世界文化遺產", ruby: ["ㄕˋ", "ㄐㄧㄝˋ", "ㄨㄣˊ", "ㄏㄨㄚˋ", "ㄧˊ", "ㄔㄢˇ"] },
+        { word: "人類共同文明", ruby: ["ㄖㄣˊ", "ㄌㄟˋ", "ㄍㄨㄥˋ", "ㄊㄨㄥˊ", "ㄨㄣˊ", "ㄇㄧㄥˊ"] },
+        { word: "國際文化交流", ruby: ["ㄍㄨㄛˊ", "ㄐㄧˋ", "ㄨㄣˊ", "ㄏㄨㄚˋ", "ㄐㄧㄠ", "ㄌㄧㄡˊ"] },
+        { word: "世界和平合作", ruby: ["ㄕˋ", "ㄐㄧㄝˋ", "ㄏㄜˊ", "ㄆㄧㄥˊ", "ㄏㄜˊ", "ㄗㄨㄛˋ"] },
+        { word: "跨國文化交流", ruby: ["ㄎㄨㄚˋ", "ㄍㄨㄛˊ", "ㄨㄣˊ", "ㄏㄨㄚˋ", "ㄐㄧㄠ", "ㄌㄧㄡˊ"] },
+        { word: "文藝復興時期", ruby: ["ㄨㄣˊ", "ㄧˋ", "ㄈㄨˋ", "ㄒㄧㄥ", "ㄕˊ", "ㄑㄧˊ"] },
+        { word: "工業革命時代", ruby: ["ㄍㄨㄥ", "ㄧㄝˋ", "ㄍㄜˊ", "ㄇㄧㄥˋ", "ㄕˊ", "ㄉㄞˋ"] },
+        { word: "人類登上月球", ruby: ["ㄖㄣˊ", "ㄌㄟˋ", "ㄉㄥ", "ㄕㄤˋ", "ㄩㄝˋ", "ㄑㄧㄡˊ"] },
+        { word: "國際太空探索", ruby: ["ㄍㄨㄛˊ", "ㄐㄧˋ", "ㄊㄞˋ", "ㄎㄨㄥ", "ㄊㄢˋ", "ㄙㄨㄛˇ"] },
+        { word: "人工智慧科技", ruby: ["ㄖㄣˊ", "ㄍㄨㄥ", "ㄓˋ", "ㄏㄨㄟˋ", "ㄎㄜ", "ㄐㄧˋ"] },
+        { word: "科技改變世界", ruby: ["ㄎㄜ", "ㄐㄧˋ", "ㄍㄞˇ", "ㄅㄧㄢˋ", "ㄕˋ", "ㄐㄧㄝˋ"] },
+        { word: "全球資訊網路", ruby: ["ㄑㄩㄢˊ", "ㄑㄧㄡˊ", "ㄗ", "ㄒㄩㄣˋ", "ㄨㄤˇ", "ㄌㄨˋ"] },
+        { word: "太陽系行星探索", ruby: ["ㄊㄞˋ", "ㄧㄤˊ", "ㄒㄧˋ", "ㄒㄧㄥˊ", "ㄒㄧㄥ", "ㄊㄢˋ", "ㄙㄨㄛˇ"] },
+        { word: "火星表面探測", ruby: ["ㄏㄨㄛˇ", "ㄒㄧㄥ", "ㄅㄧㄠˇ", "ㄇㄧㄢˋ", "ㄊㄢˋ", "ㄘㄜˋ"] },
+        { word: "地球環境永續", ruby: ["ㄉㄧˋ", "ㄑㄧㄡˊ", "ㄏㄨㄢˊ", "ㄐㄧㄥˋ", "ㄩㄥˇ", "ㄒㄩˋ"] },
+        { word: "全球能源轉型", ruby: ["ㄑㄩㄢˊ", "ㄑㄧㄡˊ", "ㄋㄥˊ", "ㄩㄢˊ", "ㄓㄨㄢˇ", "ㄒㄧㄥˊ"] },
+        { word: "科技與人類未來", ruby: ["ㄎㄜ", "ㄐㄧˋ", "ㄩˇ", "ㄖㄣˊ", "ㄌㄟˋ", "ㄨㄟˋ", "ㄌㄞˊ"] },
+        { word: "守護地球家園", ruby: ["ㄕㄡˇ", "ㄏㄨˋ", "ㄉㄧˋ", "ㄑㄧㄡˊ", "ㄐㄧㄚ", "ㄩㄢˊ"] }
       ]
     };
 
@@ -743,8 +815,26 @@
         pos: new THREE.Vector3(3.8, 1.35, 6.2),
         radiusX: 2.5, radiusZ: 2.1, speed: 0.85,
         camDist: 14, camAngle: 0.55, camLookAt: new THREE.Vector3(3.8, 1.5, 6.2)
+      },
+      "吳偉樺": {
+        pos: new THREE.Vector3(3.2, 1.35, 3.8),
+        radiusX: 0.8,
+        radiusZ: 0.6,
+        speed: 0.72,
+        camDist: 13,
+        camAngle: 0.1,
+        camLookAt: new THREE.Vector3(3.2, 1.45, 3.8)
       }
     };
+
+    // 確保幾何體相容性
+    if (!THREE.CapsuleGeometry) {
+      THREE.CapsuleGeometry = class extends THREE.CylinderGeometry {
+        constructor(radius = 1, length = 1, capSegments = 4, radialSegments = 8) {
+          super(radius, radius, length, radialSegments);
+        }
+      };
+    }
 
     function getDefaultLookAt() {
       const isDesktop = window.innerWidth >= 768;
@@ -1077,7 +1167,7 @@
         name: "古希臘神殿",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
-          g.scale.set(0.6, 0.6, 0.6); // 依需求縮小至約 60% 尺寸
+          g.scale.set(0.35, 0.35, 0.35); // 依需求再更進一步縮小至 35% 精緻微縮尺寸
           const marbleMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.55 });
           const shadeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.65 });
           const goldTrim = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.7, roughness: 0.3 });
@@ -1245,29 +1335,226 @@
         name: "巴黎鐵塔",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
-          const ironMat = new THREE.MeshStandardMaterial({ color: 0x78716c, metalness: 0.65, roughness: 0.45 });
-          const lightMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xfacc15, emissiveIntensity: 0.8 });
+          // 精確微調縮放至 0.41，使 3D 渲染實際高度剛好約為 4.5 單位 (11.08 * 0.41 ≈ 4.54)
+          g.scale.set(0.41, 0.41, 0.41);
 
-          [-0.7, 0.7].forEach(x => {
-            [-0.7, 0.7].forEach(z => {
-              const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, 1.6, 6), ironMat);
-              leg.position.set(x, 0.8, z); leg.rotation.x = z > 0 ? 0.25 : -0.25; leg.rotation.z = x > 0 ? -0.25 : 0.25;
-              g.add(leg);
-            });
+          // 嚴格對標照片中的巴黎鐵塔經典三段式鋼鐵暖古銅色 (Warm Bronze & Dark Steel)
+          const towerMat = new THREE.MeshStandardMaterial({
+            color: 0x5a4d41,
+            metalness: 0.52,
+            roughness: 0.45
           });
-          const arch1 = new THREE.Mesh(new THREE.TorusGeometry(0.65, 0.08, 6, 12, Math.PI), ironMat);
-          arch1.position.y = 0.7; g.add(arch1);
+          const darkIronMat = new THREE.MeshStandardMaterial({
+            color: 0x3d332b,
+            metalness: 0.65,
+            roughness: 0.5
+          });
+          const deckMat = new THREE.MeshStandardMaterial({
+            color: 0x2b241e,
+            metalness: 0.75,
+            roughness: 0.35
+          });
+          const domeCupolaMat = new THREE.MeshStandardMaterial({
+            color: 0xd6d3d1,
+            metalness: 0.45,
+            roughness: 0.3
+          });
+          const beaconLightMat = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            emissive: 0xfef08a,
+            emissiveIntensity: 1.6
+          });
 
-          const deck1 = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.18, 1.9), ironMat); deck1.position.y = 1.6;
-          const towerMid = new THREE.Mesh(new THREE.ConeGeometry(0.85, 1.8, 4), ironMat);
-          towerMid.rotation.y = Math.PI / 4; towerMid.position.y = 2.5;
-          const deck2 = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.14, 1.1), ironMat); deck2.position.y = 3.4;
-          const spire = new THREE.Mesh(new THREE.ConeGeometry(0.35, 2.2, 4), ironMat);
-          spire.rotation.y = Math.PI / 4; spire.position.y = 4.5;
-          const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.06, 0.8, 6), ironMat); antenna.position.y = 5.9;
-          const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), lightMat); beacon.position.y = 6.35;
+          // 向量輔助工具：將物件精準對齊兩點向量，絕不歪斜扭曲
+          const alignSegment = (mesh, p1, p2) => {
+            const dir = new THREE.Vector3().subVectors(p2, p1);
+            const len = dir.length();
+            mesh.position.copy(p1).addScaledVector(dir, 0.5);
+            mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+            return len;
+          };
 
-          g.add(deck1, towerMid, deck2, spire, antenna, beacon); return g;
+          // ==================== 1. 底層四隻筆直外八開展的鋼骨巨腿 ====================
+          const footRadius = 1.95;
+          const topL1Radius = 0.95;
+          const hL1 = 2.15; // 第一平台高度
+
+          const legAngles = [Math.PI * 0.25, Math.PI * 0.75, Math.PI * 1.25, Math.PI * 1.75];
+
+          legAngles.forEach(ang => {
+            const bx = Math.cos(ang) * footRadius;
+            const bz = Math.sin(ang) * footRadius;
+            const tx = Math.cos(ang) * topL1Radius;
+            const tz = Math.sin(ang) * topL1Radius;
+
+            // 地面平整基墩
+            const masonryPier = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.24, 0.72), darkIronMat);
+            masonryPier.position.set(bx, 0.12, bz);
+            masonryPier.rotation.y = -ang;
+            g.add(masonryPier);
+
+            // 主柱身骨架（以四角正方形柱體沿方向向量精準拉伸）
+            const pStart = new THREE.Vector3(bx, 0.24, bz);
+            const pEnd = new THREE.Vector3(tx, hL1, tz);
+            const legDist = pStart.distanceTo(pEnd);
+
+            const legMesh = new THREE.Mesh(new THREE.BoxGeometry(0.34, legDist, 0.34), towerMat);
+            alignSegment(legMesh, pStart, pEnd);
+            legMesh.castShadow = true;
+            g.add(legMesh);
+
+            // 柱身外側加固鋼板
+            const strutMesh = new THREE.Mesh(new THREE.BoxGeometry(0.38, legDist * 0.95, 0.12), darkIronMat);
+            alignSegment(strutMesh, pStart, pEnd);
+            g.add(strutMesh);
+          });
+
+          // 照片最顯眼的「四面半圓巨大懸吊拱門」（Grand Arches）
+          const archRadius = 1.22;
+          const archH = 1.15;
+          const archGeo = new THREE.TorusGeometry(archRadius, 0.075, 8, 32, Math.PI);
+
+          [-0.78, 0.78].forEach(pz => {
+            const frontArch = new THREE.Mesh(archGeo, towerMat);
+            frontArch.position.set(0, archH, pz);
+            const subArchFrieze = new THREE.Mesh(new THREE.TorusGeometry(archRadius * 1.08, 0.035, 6, 28, Math.PI), darkIronMat);
+            subArchFrieze.position.set(0, archH, pz);
+            g.add(frontArch, subArchFrieze);
+          });
+
+          [-0.78, 0.78].forEach(px => {
+            const sideArch = new THREE.Mesh(archGeo, towerMat);
+            sideArch.rotation.y = Math.PI / 2;
+            sideArch.position.set(px, archH, 0);
+            const subArchFrieze = new THREE.Mesh(new THREE.TorusGeometry(archRadius * 1.08, 0.035, 6, 28, Math.PI), darkIronMat);
+            subArchFrieze.rotation.y = Math.PI / 2;
+            subArchFrieze.position.set(px, archH, 0);
+            g.add(sideArch, subArchFrieze);
+          });
+
+          // ==================== 2. 第一觀景平台 (Premier Étage) ====================
+          const plat1Base = new THREE.Mesh(new THREE.BoxGeometry(2.35, 0.16, 2.35), deckMat);
+          plat1Base.position.y = hL1;
+          const plat1Frieze = new THREE.Mesh(new THREE.BoxGeometry(2.18, 0.32, 2.18), darkIronMat);
+          plat1Frieze.position.y = hL1 + 0.16;
+          const plat1Balustrade = new THREE.Mesh(new THREE.BoxGeometry(2.32, 0.08, 2.32), towerMat);
+          plat1Balustrade.position.y = hL1 + 0.36;
+          g.add(plat1Base, plat1Frieze, plat1Balustrade);
+
+          // ==================== 3. 一至二層梯形桁架段 ====================
+          const hL2 = 3.95;
+          const topL2Radius = 0.58;
+
+          legAngles.forEach(ang => {
+            const bx = Math.cos(ang) * (topL1Radius * 0.92);
+            const bz = Math.sin(ang) * (topL1Radius * 0.92);
+            const tx = Math.cos(ang) * topL2Radius;
+            const tz = Math.sin(ang) * topL2Radius;
+
+            const pStart = new THREE.Vector3(bx, hL1 + 0.36, bz);
+            const pEnd = new THREE.Vector3(tx, hL2, tz);
+            const segDist = pStart.distanceTo(pEnd);
+
+            const mLeg = new THREE.Mesh(new THREE.BoxGeometry(0.24, segDist, 0.24), towerMat);
+            alignSegment(mLeg, pStart, pEnd);
+            mLeg.castShadow = true;
+            g.add(mLeg);
+          });
+
+          // 中段四面 X 型格架拉條
+          for (let pz of [-0.62, 0.62]) {
+            const xBar1 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.04, 0.04), darkIronMat);
+            xBar1.rotation.z = 0.52; xBar1.position.set(0, 3.15, pz);
+            const xBar2 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.04, 0.04), darkIronMat);
+            xBar2.rotation.z = -0.52; xBar2.position.set(0, 3.15, pz);
+            const hBar = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.06, 0.06), towerMat);
+            hBar.position.set(0, 3.15, pz);
+            g.add(xBar1, xBar2, hBar);
+          }
+          for (let px of [-0.62, 0.62]) {
+            const xBar1 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 1.2), darkIronMat);
+            xBar1.rotation.x = 0.52; xBar1.position.set(px, 3.15, 0);
+            const xBar2 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 1.2), darkIronMat);
+            xBar2.rotation.x = -0.52; xBar2.position.set(px, 3.15, 0);
+            const hBar = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 1.25), towerMat);
+            hBar.position.set(px, 3.15, 0);
+            g.add(xBar1, xBar2, hBar);
+          }
+
+          // ==================== 4. 第二觀景平台 (Deuxième Étage) ====================
+          const plat2Base = new THREE.Mesh(new THREE.BoxGeometry(1.42, 0.14, 1.42), deckMat);
+          plat2Base.position.y = hL2;
+          const plat2Balustrade = new THREE.Mesh(new THREE.BoxGeometry(1.48, 0.08, 1.48), towerMat);
+          plat2Balustrade.position.y = hL2 + 0.12;
+          g.add(plat2Base, plat2Balustrade);
+
+          // ==================== 5. 照片靈魂：二層以上「超修長漸細衝刺塔尖」 ====================
+          const spireBaseY = hL2 + 0.16;
+          const spireHeight = 4.8;
+          const spireTopY = spireBaseY + spireHeight;
+
+          const cornerSpread = 0.44;
+          const cornerSpreadTop = 0.10;
+
+          legAngles.forEach(ang => {
+            const bx = Math.cos(ang) * cornerSpread;
+            const bz = Math.sin(ang) * cornerSpread;
+            const tx = Math.cos(ang) * cornerSpreadTop;
+            const tz = Math.sin(ang) * cornerSpreadTop;
+
+            const pStart = new THREE.Vector3(bx, spireBaseY, bz);
+            const pEnd = new THREE.Vector3(tx, spireTopY, tz);
+            const pDist = pStart.distanceTo(pEnd);
+
+            const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.09, pDist, 0.09), towerMat);
+            alignSegment(pillar, pStart, pEnd);
+            pillar.castShadow = true;
+            g.add(pillar);
+          });
+
+          // 塔身高頻 X 交叉鏤空橫樑環
+          const latticeRings = 9;
+          for (let r = 1; r <= latticeRings; r++) {
+            const p = r / latticeRings;
+            const ringY = spireBaseY + p * (spireHeight - 0.25);
+            const ringW = (cornerSpread * (1 - p) + cornerSpreadTop * p) * 2.1;
+
+            const ringMesh = new THREE.Mesh(new THREE.BoxGeometry(ringW, 0.045, ringW), darkIronMat);
+            ringMesh.position.y = ringY;
+            g.add(ringMesh);
+
+            if (r < latticeRings) {
+              const segMidY = ringY + (spireHeight / latticeRings) * 0.5;
+              const xSpan = ringW * 0.88;
+              const xMesh1 = new THREE.Mesh(new THREE.BoxGeometry(xSpan, 0.02, 0.02), towerMat);
+              xMesh1.rotation.z = 0.42; xMesh1.position.set(0, segMidY, ringW * 0.45);
+              const xMesh2 = new THREE.Mesh(new THREE.BoxGeometry(xSpan, 0.02, 0.02), towerMat);
+              xMesh2.rotation.z = -0.42; xMesh2.position.set(0, segMidY, ringW * 0.45);
+              g.add(xMesh1, xMesh2);
+            }
+          }
+
+          // ==================== 6. 第三層頂部觀景室、圓形穹頂與避雷天線 ====================
+          const summitL3Base = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.38, 0.26, 16), darkIronMat);
+          summitL3Base.position.y = spireTopY + 0.13;
+
+          const cupolaChamber = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.28, 0.28, 16), domeCupolaMat);
+          cupolaChamber.position.y = spireTopY + 0.38;
+
+          const cupolaDome = new THREE.Mesh(
+            new THREE.SphereGeometry(0.24, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2),
+            domeCupolaMat
+          );
+          cupolaDome.position.y = spireTopY + 0.52;
+
+          const spireAntenna = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.05, 1.45, 6), darkIronMat);
+          spireAntenna.position.y = spireTopY + 1.35;
+
+          const summitBeacon = new THREE.Mesh(new THREE.SphereGeometry(0.075, 8, 8), beaconLightMat);
+          summitBeacon.position.y = spireTopY + 2.1;
+
+          g.add(summitL3Base, cupolaChamber, cupolaDome, spireAntenna, summitBeacon);
+          return g;
         }
       },
       {
@@ -2691,7 +2978,7 @@
           walkingCelebrities.push({
             group: g, head: headGroup, armL, armR, legL, legR, tail,
             baseX: pos.x, baseZ: pos.z, baseY: pos.y,
-            radiusX: 2.5, radiusZ: 2.0, speed: 0.90, offset: Math.random() * Math.PI * 2
+            radiusX: 2.5, radiusZ: 2.1, speed: 0.85, offset: Math.random() * Math.PI * 2
           });
           return g;
         }
@@ -2700,96 +2987,357 @@
         name: "小熊維尼（漫步小島）",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
-          const furMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 });
-          const shirtMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.5 });
-          const darkMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 });
-          const muzzleMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.6 });
+          const yellowMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 });
+          const redShirtMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.5 });
+          const darkMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 });
 
-          const belly = new THREE.Mesh(new THREE.SphereGeometry(0.48, 14, 14), furMat);
-          belly.scale.set(1.05, 1.15, 1.05);
-          belly.position.y = 0.68;
+          // 圓滾滾暖黃身體與經典短版紅上衣
+          const body = new THREE.Mesh(new THREE.SphereGeometry(0.55, 14, 14), yellowMat);
+          body.scale.set(1.0, 1.1, 0.95);
+          body.position.y = 0.72;
 
-          const shirt = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.5, 0.42, 14), shirtMat);
-          shirt.position.y = 0.82;
-          const shirtCollar = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.06, 6, 14), shirtMat);
-          shirtCollar.rotation.x = Math.PI / 2;
-          shirtCollar.position.y = 1.02;
+          const redShirt = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.54, 0.42, 14), redShirtMat);
+          redShirt.position.set(0, 0.88, 0);
 
+          const belly = new THREE.Mesh(new THREE.SphereGeometry(0.48, 12, 12), yellowMat);
+          belly.scale.set(0.92, 0.9, 0.75);
+          belly.position.set(0, 0.62, 0.18);
+
+          // 頭部與可愛圓耳、五官
           const headGroup = new THREE.Group();
-          headGroup.position.set(0, 1.32, 0);
+          headGroup.position.set(0, 1.35, 0.04);
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.46, 14, 14), yellowMat);
 
-          const head = new THREE.Mesh(new THREE.SphereGeometry(0.44, 14, 14), furMat);
-          head.scale.set(1.05, 0.98, 1.02);
+          const earL = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), yellowMat);
+          earL.position.set(-0.35, 0.36, -0.05);
+          const earR = earL.clone(); earR.position.x = 0.35;
 
-          const earL = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), furMat);
-          earL.scale.set(0.6, 1.0, 1.0);
-          earL.position.set(-0.35, 0.35, -0.05);
-          const earR = earL.clone();
-          earR.position.x = 0.35;
-
-          const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 10), muzzleMat);
-          muzzle.scale.set(1.15, 0.85, 1.1);
-          muzzle.position.set(0, -0.08, 0.3);
+          const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.24, 10, 10), yellowMat);
+          muzzle.scale.set(1.0, 0.75, 1.15);
+          muzzle.position.set(0, -0.06, 0.28);
 
           const nose = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), darkMat);
-          nose.scale.set(1.1, 0.8, 0.9);
-          nose.position.set(0, 0.02, 0.48);
+          nose.position.set(0, 0.04, 0.52);
 
           const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.045, 6, 6), darkMat);
-          eyeL.position.set(-0.12, 0.1, 0.38);
-          const eyeR = eyeL.clone();
-          eyeR.position.x = 0.12;
+          eyeL.position.set(-0.13, 0.12, 0.38);
+          const eyeR = eyeL.clone(); eyeR.position.x = 0.13;
 
-          const browMat = new THREE.MeshStandardMaterial({ color: 0xb45309 });
-          const browL = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.025, 0.02), browMat);
-          browL.rotation.z = -0.15;
-          browL.position.set(-0.12, 0.18, 0.39);
-          const browR = browL.clone();
-          browR.rotation.z = 0.15;
-          browR.position.x = 0.12;
+          const browL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.02, 0.02), darkMat);
+          browL.rotation.z = -0.2; browL.position.set(-0.13, 0.20, 0.37);
+          const browR = browL.clone(); browR.rotation.z = 0.2; browR.position.x = 0.13;
 
           headGroup.add(head, earL, earR, muzzle, nose, eyeL, eyeR, browL, browR);
 
-          const armL = new THREE.Group();
-          armL.position.set(-0.46, 0.86, 0);
-          const sleeveL = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.15, 0.2, 8), shirtMat);
-          sleeveL.rotation.z = 0.4;
-          const pawL = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 8), furMat);
-          pawL.position.set(-0.12, -0.16, 0.08);
-          armL.add(sleeveL, pawL);
+          // 手臂（含紅色短袖袖口）
+          const armL = new THREE.Group(); armL.position.set(-0.48, 0.88, 0);
+          const sleeveL = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.16, 8), redShirtMat);
+          const armMeshL = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.1, 0.34, 8), yellowMat);
+          armMeshL.position.y = -0.18;
+          armL.add(sleeveL, armMeshL);
 
-          const armR = new THREE.Group();
-          armR.position.set(0.46, 0.86, 0);
-          const sleeveR = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.15, 0.2, 8), shirtMat);
-          sleeveR.rotation.z = -0.4;
-          const pawR = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 8), furMat);
-          pawR.position.set(0.12, -0.16, 0.08);
-          armR.add(sleeveR, pawR);
+          const armR = new THREE.Group(); armR.position.set(0.48, 0.88, 0);
+          const sleeveR = sleeveL.clone(); const armMeshR = armMeshL.clone();
+          armR.add(sleeveR, armMeshR);
 
-          const legL = new THREE.Group();
-          legL.position.set(-0.22, 0.28, 0);
-          const legMeshL = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.14, 0.26, 8), furMat);
-          const footL = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 8), furMat);
-          footL.scale.set(0.9, 0.65, 1.35);
-          footL.position.set(0, -0.12, 0.08);
-          legL.add(legMeshL, footL);
+          // 圓滾胖短腿
+          const legL = new THREE.Group(); legL.position.set(-0.22, 0.28, 0);
+          const footL = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.24, 0.36), yellowMat);
+          footL.position.set(0, -0.06, 0.06); legL.add(footL);
 
-          const legR = new THREE.Group();
-          legR.position.set(0.22, 0.28, 0);
-          const legMeshR = legMeshL.clone();
-          const footR = footL.clone();
-          legR.add(legMeshR, footR);
+          const legR = new THREE.Group(); legR.position.set(0.22, 0.28, 0);
+          const footR = footL.clone(); legR.add(footR);
 
-          const tail = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), furMat);
-          tail.position.set(0, 0.45, -0.46);
-
-          g.add(belly, shirt, shirtCollar, headGroup, armL, armR, legL, legR, tail);
+          g.add(body, redShirt, belly, headGroup, armL, armR, legL, legR);
 
           walkingCelebrities.push({
             group: g, head: headGroup, armL, armR, legL, legR,
             baseX: pos.x, baseZ: pos.z, baseY: pos.y,
             radiusX: 2.5, radiusZ: 2.1, speed: 0.85, offset: Math.random() * Math.PI * 2
           });
+          return g;
+        }
+      },
+      {
+        name: "吳偉樺（漫步小島）",
+        build: (pos) => {
+          const g = new THREE.Group();
+          g.position.copy(pos);
+
+          // 材質定義
+          const skinMat = new THREE.MeshStandardMaterial({ color: 0xf2c6a0, roughness: 0.7 });
+          const hairMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
+          const shirtMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.85 });
+          const pantsMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.8 });
+          const sockMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.6 });
+          const shoeMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.8 });
+          const shoeSoleMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+          const strapMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 });
+          const watchFaceMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.8, roughness: 0.3 });
+          // 背包顏色改為綠色
+          const bagMat = new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.8 });
+          const glassesFrameMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.35 });
+          const lensMat = new THREE.MeshStandardMaterial({
+            color: 0xbae6fd,
+            transparent: true,
+            opacity: 0.25,
+            roughness: 0.1
+          });
+          const beardMat = new THREE.MeshStandardMaterial({ color: 0x1c1917, roughness: 0.9 });
+
+          // 1. 頭部群組（支援 walkingCelebrities 擺動）
+          const headGroup = new THREE.Group();
+          headGroup.position.set(0, 1.62, 0);
+
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.48, 16, 14), skinMat);
+          headGroup.add(head);
+
+          // 髮型（保留原樣）
+          const hairGroup = new THREE.Group();
+          const topHairMain = new THREE.Mesh(new THREE.SphereGeometry(0.45, 14, 12), hairMat);
+          topHairMain.scale.set(0.96, 0.62, 1.05);
+          topHairMain.position.set(0, 0.33, -0.02);
+          topHairMain.rotation.x = -0.18;
+          hairGroup.add(topHairMain);
+
+          const frontHairLift = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 10), hairMat);
+          frontHairLift.scale.set(1.15, 0.58, 0.85);
+          frontHairLift.position.set(0, 0.36, 0.22);
+          frontHairLift.rotation.x = -0.32;
+          hairGroup.add(frontHairLift);
+
+          const sideHairL = new THREE.Mesh(new THREE.SphereGeometry(0.26, 10, 8), hairMat);
+          sideHairL.scale.set(0.38, 0.85, 0.95);
+          sideHairL.position.set(-0.38, 0.12, -0.02);
+          const sideHairR = sideHairL.clone();
+          sideHairR.position.x = 0.38;
+          hairGroup.add(sideHairL, sideHairR);
+
+          const backHair = new THREE.Mesh(new THREE.SphereGeometry(0.36, 12, 10), hairMat);
+          backHair.scale.set(0.95, 0.82, 0.55);
+          backHair.position.set(0, 0.10, -0.28);
+          hairGroup.add(backHair);
+          headGroup.add(hairGroup);
+
+          // 眼睛（保留原樣）
+          const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.048, 8, 8), hairMat);
+          eyeL.position.set(-0.16, 0.02, 0.42);
+          const eyeR = eyeL.clone();
+          eyeR.position.x = 0.16;
+          headGroup.add(eyeL, eyeR);
+
+          // 粗框眼鏡（保留原樣）
+          const rimL = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.032, 8, 20), glassesFrameMat);
+          rimL.position.set(-0.16, 0.02, 0.46);
+          const rimR = rimL.clone();
+          rimR.position.x = 0.16;
+
+          const lensL = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.105, 0.015, 14), lensMat);
+          lensL.rotation.x = Math.PI / 2;
+          lensL.position.set(-0.16, 0.02, 0.46);
+          const lensR = lensL.clone();
+          lensR.position.x = 0.16;
+
+          const bridge = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 0.12, 6), glassesFrameMat);
+          bridge.rotation.z = Math.PI / 2;
+          bridge.position.set(0, 0.03, 0.46);
+
+          const templeL = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.42, 4), glassesFrameMat);
+          templeL.rotation.x = Math.PI / 2;
+          templeL.position.set(-0.29, 0.03, 0.26);
+          const templeR = templeL.clone();
+          templeR.position.x = 0.29;
+
+          headGroup.add(rimL, rimR, lensL, lensR, bridge, templeL, templeR);
+
+          // 下巴鬍鬚（保留原樣）
+          const chinBeard = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), beardMat);
+          chinBeard.scale.set(1.4, 0.7, 0.9);
+          chinBeard.position.set(0, -0.37, 0.38);
+          const beardUnderLip = new THREE.Mesh(new THREE.SphereGeometry(0.055, 6, 6), beardMat);
+          beardUnderLip.position.set(0, -0.26, 0.45);
+          headGroup.add(chinBeard, beardUnderLip);
+
+          g.add(headGroup);
+
+          // 2. 黑色短袖 T-Shirt 與身軀
+          const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.34, 0.65, 12), shirtMat);
+          torso.position.y = 1.05;
+          const chestTop = new THREE.Mesh(
+            new THREE.SphereGeometry(0.36, 12, 10, 0, Math.PI * 2, 0, Math.PI / 2),
+            shirtMat
+          );
+          chestTop.position.y = 1.37;
+          g.add(torso, chestTop);
+
+          // 綠色背包與背帶
+          const backpack = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.50, 0.22), bagMat);
+          backpack.position.set(0, 1.08, -0.31);
+          const bagPocket = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.22, 0.08), bagMat);
+          bagPocket.position.set(0, 0.98, -0.44);
+          const strapL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.58, 0.03), bagMat);
+          strapL.position.set(-0.19, 1.08, 0.18);
+          const strapR = strapL.clone();
+          strapR.position.x = 0.19;
+          g.add(backpack, bagPocket, strapL, strapR);
+
+          // 3. 左手與右手群組（支援 walkingCelebrities 擺臂）
+          const armL = new THREE.Group();
+          armL.position.set(-0.46, 1.30, 0);
+          const sleeveL = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.14, 0.22, 8), shirtMat);
+          sleeveL.position.set(0, -0.06, 0);
+          const forearmL = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.08, 0.36, 8), skinMat);
+          forearmL.position.set(0, -0.28, 0);
+          const handL = new THREE.Mesh(new THREE.SphereGeometry(0.10, 8, 8), skinMat);
+          handL.position.set(0, -0.48, 0);
+          // 駝色手錶
+          const watchStrap = new THREE.Mesh(new THREE.CylinderGeometry(0.102, 0.102, 0.055, 10), strapMat);
+          watchStrap.position.set(0, -0.38, 0);
+          const watchFace = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.025, 8), watchFaceMat);
+          watchFace.rotation.x = Math.PI / 2;
+          watchFace.position.set(0, -0.38, 0.105);
+          armL.add(sleeveL, forearmL, handL, watchStrap, watchFace);
+
+          const armR = new THREE.Group();
+          armR.position.set(0.46, 1.30, 0);
+          const sleeveR = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.14, 0.22, 8), shirtMat);
+          sleeveR.position.set(0, -0.06, 0);
+          const forearmR = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.08, 0.36, 8), skinMat);
+          forearmR.position.set(0, -0.28, 0);
+          const handR = new THREE.Mesh(new THREE.SphereGeometry(0.10, 8, 8), skinMat);
+          handR.position.set(0, -0.48, 0);
+          armR.add(sleeveR, forearmR, handR);
+
+          g.add(armL, armR);
+
+          // 短褲腰部
+          const shortsWaist = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.36, 0.22, 12), pantsMat);
+          shortsWaist.position.y = 0.71;
+          g.add(shortsWaist);
+
+          // 4. 左腿與右腿群組（支援 walkingCelebrities 跨步，鞋底平踩地面不埋土）
+          const createLeg = (isLeft) => {
+            const leg = new THREE.Group();
+            const posX = isLeft ? -0.19 : 0.19;
+            leg.position.set(posX, 0.68, 0);
+
+            // 短褲管
+            const legShort = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.17, 0.22, 8), pantsMat);
+            legShort.position.set(0, -0.11, 0);
+
+            // 小腿皮膚
+            const calf = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.10, 0.14, 8), skinMat);
+            calf.position.set(0, -0.25, 0);
+
+            // 明顯白襪
+            const sock = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.105, 0.14, 8), sockMat);
+            sock.position.set(0, -0.37, 0);
+
+            // 黑色帆布鞋面
+            const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.14, 0.36), shoeMat);
+            shoe.position.set(0, -0.48, 0.05);
+
+            // 白色圓形橡膠鞋頭
+            const toe = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.115, 0.115, 0.12, 8, 1, false, 0, Math.PI),
+              shoeSoleMat
+            );
+            toe.rotation.x = Math.PI / 2;
+            toe.position.set(0, -0.50, 0.22);
+
+            // 白色厚橡膠平整鞋底（底緣位於整體 Y ≈ 0.06，完整清晰可見）
+            const sole = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.05, 0.40), shoeSoleMat);
+            sole.position.set(0, -0.57, 0.06);
+
+            leg.add(legShort, calf, sock, shoe, toe, sole);
+            return leg;
+          };
+
+          const legL = createLeg(true);
+          const legR = createLeg(false);
+          g.add(legL, legR);
+
+          // 5. 橘色小貓咪（跟隨子物件，站在右側稍後方）
+          const catGroup = new THREE.Group();
+          catGroup.position.set(0.75, 0.05, 0.35);
+
+          const catFurMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.65 });
+          const catBellyMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.65 });
+          const catPinkMat = new THREE.MeshStandardMaterial({ color: 0xfba5b3, roughness: 0.5 });
+          const catEyeMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+
+          // 圓滾貓身體與白肚皮
+          const catBody = new THREE.Mesh(new THREE.SphereGeometry(0.24, 10, 10), catFurMat);
+          catBody.scale.set(0.9, 0.85, 1.25);
+          catBody.position.set(0, 0.24, 0);
+
+          const catBelly = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), catBellyMat);
+          catBelly.scale.set(0.75, 0.75, 1.0);
+          catBelly.position.set(0, 0.20, 0.08);
+
+          // 四隻白襪小貓掌
+          const legOffsets = [
+            [-0.12, 0.14], [0.12, 0.14],
+            [-0.12, -0.14], [0.12, -0.14]
+          ];
+          legOffsets.forEach(([lx, lz]) => {
+            const legUpper = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.04, 0.14, 6), catFurMat);
+            legUpper.position.set(lx, 0.11, lz);
+            const paw = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), catBellyMat);
+            paw.position.set(lx, 0.04, lz + 0.02);
+            catGroup.add(legUpper, paw);
+          });
+
+          // 圓圓貓頭
+          const catHead = new THREE.Group();
+          catHead.position.set(0, 0.40, 0.24);
+
+          const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.19, 10, 10), catFurMat);
+          headMesh.scale.set(1.1, 0.95, 1.0);
+
+          const catEarL = new THREE.Mesh(new THREE.ConeGeometry(0.065, 0.14, 4), catPinkMat);
+          catEarL.rotation.z = -0.28;
+          catEarL.position.set(-0.11, 0.17, 0.04);
+          const catEarR = new THREE.Mesh(new THREE.ConeGeometry(0.065, 0.14, 4), catPinkMat);
+          catEarR.rotation.z = 0.28;
+          catEarR.position.set(0.11, 0.17, 0.04);
+
+          const cEyeL = new THREE.Mesh(new THREE.SphereGeometry(0.035, 6, 6), catEyeMat);
+          cEyeL.position.set(-0.07, 0.03, 0.17);
+          const cEyeR = cEyeL.clone();
+          cEyeR.position.x = 0.07;
+
+          const catNose = new THREE.Mesh(new THREE.ConeGeometry(0.025, 0.04, 3), catPinkMat);
+          catNose.rotation.x = Math.PI / 2;
+          catNose.position.set(0, -0.02, 0.19);
+
+          catHead.add(headMesh, catEarL, catEarR, cEyeL, cEyeR, catNose);
+
+          // 向上翹起的小尾巴
+          const catTail = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.024, 0.32, 6), catFurMat);
+          catTail.position.set(0, 0.35, -0.30);
+          catTail.rotation.x = -Math.PI / 3.2;
+
+          catGroup.add(catBody, catBelly, catHead, catTail);
+          g.add(catGroup);
+
+          // 6. 加入既有行走系統（中央安全平地微型漫步範圍）
+          walkingCelebrities.push({
+            group: g,
+            head: headGroup,
+            armL,
+            armR,
+            legL,
+            legR,
+            baseX: 3.2,
+            baseZ: 3.8,
+            baseY: pos.y,
+            radiusX: 0.8,
+            radiusZ: 0.6,
+            speed: 0.72,
+            offset: Math.random() * Math.PI * 2
+          });
+
           return g;
         }
       }
@@ -2921,34 +3469,127 @@
         } catch (e) {}
       }
 
-      // 專用樂器 4：輕巧短打擊節奏（音樂2 輕柔鼓點）
-      playPercussion(isKick = true) {
-        if (this.bgmMode === 0) return;
+      // 專用樂器 4-A：飽滿低音大鼓 (Kick)
+      playKick(gainVal = 0.075) {
+        if (this.bgmMode === 0 || this.muted) return;
         this.init();
         try {
           const now = this.ctx.currentTime;
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
-
-          if (isKick) {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(110, now);
-            osc.frequency.exponentialRampToValueAtTime(35, now + 0.1);
-            gain.gain.setValueAtTime(0.04, now);
-            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.1);
-          } else {
-            // Hi-hat 輕點
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(800, now);
-            osc.frequency.exponentialRampToValueAtTime(300, now + 0.04);
-            gain.gain.setValueAtTime(0.015, now);
-            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
-          }
-
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(145, now);
+          osc.frequency.exponentialRampToValueAtTime(42, now + 0.08);
+          gain.gain.setValueAtTime(gainVal, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
           osc.connect(gain);
           gain.connect(this.ctx.destination);
           osc.start(now);
-          osc.stop(now + (isKick ? 0.1 : 0.04));
+          osc.stop(now + 0.12);
+        } catch (e) {}
+      }
+
+      // 專用樂器 4-B：清脆動感軍鼓 (Snare / Rimshot)
+      playSnare(gainVal = 0.045) {
+        if (this.bgmMode === 0 || this.muted) return;
+        this.init();
+        try {
+          const now = this.ctx.currentTime;
+          // 音色主幹
+          const osc = this.ctx.createOscillator();
+          const oscGain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(210, now);
+          osc.frequency.exponentialRampToValueAtTime(75, now + 0.06);
+          oscGain.gain.setValueAtTime(gainVal * 0.7, now);
+          oscGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+          osc.connect(oscGain);
+          oscGain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.07);
+
+          // 噴發清脆白噪音
+          const sampleRate = this.ctx.sampleRate;
+          const bufferSize = Math.floor(sampleRate * 0.07);
+          const buffer = this.ctx.createBuffer(1, bufferSize, sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (sampleRate * 0.018));
+          }
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'highpass';
+          filter.frequency.setValueAtTime(1100, now);
+          const noiseGain = this.ctx.createGain();
+          noiseGain.gain.setValueAtTime(gainVal, now);
+          noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+          noise.connect(filter);
+          filter.connect(noiseGain);
+          noiseGain.connect(this.ctx.destination);
+          noise.start(now);
+        } catch (e) {}
+      }
+
+      // 專用樂器 4-C：細緻金屬踩鈸 (Hi-hat)
+      playHihat(isOpen = false, gainVal = 0.018) {
+        if (this.bgmMode === 0 || this.muted) return;
+        this.init();
+        try {
+          const now = this.ctx.currentTime;
+          const dur = isOpen ? 0.11 : 0.035;
+          const sampleRate = this.ctx.sampleRate;
+          const bufferSize = Math.floor(sampleRate * dur);
+          const buffer = this.ctx.createBuffer(1, bufferSize, sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1);
+          }
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(8500, now);
+          filter.Q.setValueAtTime(3.2, now);
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(isOpen ? gainVal * 1.2 : gainVal, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+          noise.start(now);
+        } catch (e) {}
+      }
+
+      // 專用樂器 4-D：彈跳切分低音貝斯 (Groovy Pluck Bass)
+      playGrooveBass(freq, duration = 0.28, gainVal = 0.062) {
+        if (this.bgmMode === 0 || this.muted) return;
+        this.init();
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const filter = this.ctx.createBiquadFilter();
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now);
+
+          // 動態低通濾波掃頻，打造經典彈撥「Dun-nn」渾厚低音
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(700, now);
+          filter.frequency.exponentialRampToValueAtTime(130, now + duration * 0.75);
+          filter.Q.setValueAtTime(3.5, now);
+
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.linearRampToValueAtTime(gainVal, now + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + duration);
         } catch (e) {}
       }
 
@@ -3052,27 +3693,67 @@
           }, 330);
 
         } else if (this.bgmMode === 2) {
-          // 🎵 音樂2：輕快冒險風（木琴/馬林巴、跳動鋼琴、行走低音、輕巧打擊節奏）
+          // 🎵 音樂2：經典放克島嶼律動（適中舒適步伐、切分重低音、大鼓/軍鼓/踩鈸完整鼓組、馬林巴主旋律）
+          const C3 = 130.81, D3 = 146.83, E3 = 164.81, F3 = 174.61, G3 = 196.00, A3 = 220.00, B3 = 246.94;
+          const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23, G4 = 392.00, A4 = 440.00, B4 = 493.88;
+          const C5 = 523.25, D5 = 587.33, E5 = 659.25, F5 = 698.46, G5 = 783.99, A5 = 880.00, B5 = 987.77;
+          const C6 = 1046.50, D6 = 1174.66, E6 = 1318.51;
+
+          // 32 步 4/4 拍律動循環，富有呼吸感與切分推動力
           const track2 = [
-            { lead: G5, bass: G3, kick: true }, { lead: B5 }, { lead: D6, hihat: true }, { lead: B5 },
-            { lead: E5, bass: C4, kick: true }, { lead: G5 }, { lead: C6, hihat: true }, { lead: G5 },
-            { lead: A5, bass: D4, kick: true }, { lead: C6 }, { lead: E6, hihat: true }, { lead: C6 },
-            { lead: D5, bass: G3, kick: true }, { lead: F5 }, { lead: A5, hihat: true }, { lead: B5 },
-            { lead: C6, bass: C4, kick: true }, { lead: E5 }, { lead: G5, hihat: true }, { lead: C6 },
-            { lead: B5, bass: B3, kick: true }, { lead: D5 }, { lead: G5, hihat: true }, { lead: B5 },
-            { lead: A5, bass: A3, kick: true }, { lead: C5 }, { lead: F5, hihat: true }, { lead: A5 },
-            { lead: G5, bass: G3, kick: true }, { lead: B4 }, { lead: D5, hihat: true }, { lead: F5 }
+            // Bar 1 (C 段落：根音出發 + 切分推動)
+            { lead: G5, bass: C3, kick: true, hihat: true },
+            { hihat: true },
+            { lead: E5, snare: true, hihat: true },
+            { bass: C4, hihat: true },
+            { lead: G5, bass: G3, kick: true, hihat: true },
+            { lead: C6, kick: true, openHat: true }, // 切分推動
+            { lead: E6, snare: true, hihat: true },
+            { bass: B3, hihat: true },
+
+            // Bar 2 (A 小調轉向：低音下行 + 歡樂小跳音)
+            { lead: A5, bass: A3, kick: true, hihat: true },
+            { hihat: true },
+            { lead: C6, snare: true, hihat: true },
+            { bass: E4, hihat: true },
+            { lead: E6, bass: A3, kick: true, hihat: true },
+            { lead: D6, kick: true, openHat: true },
+            { lead: C6, snare: true, hihat: true },
+            { bass: G3, hihat: true },
+
+            // Bar 3 (F 段落：暖意放克流動)
+            { lead: F5, bass: F3, kick: true, hihat: true },
+            { hihat: true },
+            { lead: A5, snare: true, hihat: true },
+            { bass: C4, hihat: true },
+            { lead: C6, bass: F3, kick: true, hihat: true },
+            { lead: D6, kick: true, openHat: true },
+            { lead: E6, snare: true, hihat: true },
+            { bass: F3, hihat: true },
+
+            // Bar 4 (G7 回轉：跳動階梯低音 + 鼓點收束)
+            { lead: D6, bass: G3, kick: true, hihat: true },
+            { hihat: true },
+            { lead: B5, snare: true, hihat: true },
+            { bass: D4, hihat: true },
+            { lead: G5, bass: G3, kick: true, hihat: true },
+            { lead: A5, kick: true, openHat: true },
+            { lead: B5, snare: true, hihat: true },
+            { bass: B3, hihat: true }
           ];
 
+          // 保持穩健從容的 235ms（約 127 BPM），絕不趕拍，聽感舒適有彈性
           this.bgmTimer = setInterval(() => {
             if (this.bgmMode !== 2) return;
             const item = track2[this.bgmStep % track2.length];
-            if (item.lead) this.playMarimba(item.lead, 0.2, 0.048);
-            if (item.bass) this.playSoftBass(item.bass, 0.28, 0.038);
-            if (item.kick) this.playPercussion(true);
-            if (item.hihat) this.playPercussion(false);
+            if (item.lead) this.playMarimba(item.lead, 0.22, 0.052);
+            if (item.bass) this.playGrooveBass(item.bass, 0.26, 0.065);
+            if (item.kick) this.playKick(0.075);
+            if (item.snare) this.playSnare(0.048);
+            if (item.openHat) this.playHihat(true, 0.024);
+            else if (item.hihat) this.playHihat(false, 0.016);
             this.bgmStep++;
-          }, 210);
+          }, 235);
 
         } else if (this.bgmMode === 3) {
           // 🎵 音樂3：魔法童話風（鋼片琴/鐘琴裝飾、夢幻和弦 Pad、神秘溫暖旋律）
@@ -3213,6 +3894,14 @@
     let migratoryFlockTargetYaw = Math.PI / 2; // 目標轉向角度
     const migratoryBirds = [];
 
+    // 🌧️ 獨立雨滴粒子系統變數（純視覺粒子，不改動天空、光照與霧氣）
+    let rainParticleSystem = null;
+    const RAIN_COUNT = 900;
+    let rainVelocities = null;
+    let isRaining = false;
+    let rainTimer = 18.0; // 縮短開局等待時間，更快迎來第一場小雨
+    let currentRainOpacity = 0.0; // 平滑淡入淡出透明度
+
     // 全域相機角度與滾輪縮放距離變數
     let sphericalAngle = 0;
     let currentCamDist = 52;
@@ -3282,7 +3971,6 @@
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         canvasWrapper.appendChild(renderer.domElement);
 
-        // 溫和平衡的光照，真實還原 #009944 深綠色
         ambientLight = new THREE.AmbientLight(0xffffff, 0.72);
         scene.add(ambientLight);
 
@@ -3296,10 +3984,10 @@
         createLayeredOceanAndSwells();
         createStarfield();
         createFloatingClouds();
+        createRainParticleSystem();
         createRichIslandTerrain();
         createInitialNature();
         createAquaticLife();
-        // 一開始不生成熱氣球，隨玩家答題才陸續自地面緩緩升空（雲多球少）
         setupCameraControls();
 
         window.addEventListener('resize', onWindowResize);
@@ -3423,6 +4111,80 @@
       });
       starsParticleSystem = new THREE.Points(starGeo, starMat);
       scene.add(starsParticleSystem);
+    }
+
+    // 🌧️ 建立獨立輕量雨滴粒子系統 (THREE.Points + BufferGeometry)
+    function createRainParticleSystem() {
+      const rainGeo = new THREE.BufferGeometry();
+      const positions = new Float32Array(RAIN_COUNT * 3);
+      rainVelocities = new Float32Array(RAIN_COUNT);
+
+      for (let i = 0; i < RAIN_COUNT; i++) {
+        // 分佈在小島與周遭海面範圍內 (X: -36 ~ 36, Z: -36 ~ 36)
+        positions[i * 3] = (Math.random() - 0.5) * 72;
+        // 初始高空高度 (Y: 1 ~ 38)
+        positions[i * 3 + 1] = 1.0 + Math.random() * 37;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 72;
+
+        // 每顆雨滴自然的下落速度差異 (14 ~ 22)
+        rainVelocities[i] = 14.0 + Math.random() * 8.0;
+      }
+
+      rainGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+      // 細小微亮、半透明淡水藍，預設透明度為 0（開局為晴朗好天氣）
+      const rainMat = new THREE.PointsMaterial({
+        color: 0x93c5fd,
+        size: 0.38,
+        transparent: true,
+        opacity: 0.0,
+        depthWrite: false
+      });
+
+      rainParticleSystem = new THREE.Points(rainGeo, rainMat);
+      scene.add(rainParticleSystem);
+    }
+
+    // 🌧️ 雨滴每幀下落、頂部循環與「偶爾才下」週期自然過渡更新
+    function updateRainParticles(dt) {
+      if (!rainParticleSystem || !rainVelocities) return;
+
+      // 天氣循環計時：提高下雨頻率
+      rainTimer -= dt;
+      if (rainTimer <= 0) {
+        isRaining = !isRaining;
+        // 下雨時持續 45 ~ 65 秒；放晴時間縮短為 25 ~ 40 秒，大幅增加降雨頻率
+        rainTimer = isRaining ? (45.0 + Math.random() * 20.0) : (25.0 + Math.random() * 15.0);
+      }
+
+      // 平滑淡入與淡出雨滴透明度
+      const targetOpacity = isRaining ? 0.45 : 0.0;
+      currentRainOpacity += (targetOpacity - currentRainOpacity) * 0.8 * dt;
+      rainParticleSystem.material.opacity = currentRainOpacity;
+
+      // 完全放晴且雨滴已完全隱形時，跳過粒子物理運算以保證最佳效能
+      if (currentRainOpacity <= 0.005) {
+        rainParticleSystem.visible = false;
+        return;
+      }
+      rainParticleSystem.visible = true;
+
+      const positions = rainParticleSystem.geometry.attributes.position.array;
+
+      for (let i = 0; i < RAIN_COUNT; i++) {
+        const yIndex = i * 3 + 1;
+        // 往下掉落
+        positions[yIndex] -= rainVelocities[i] * dt;
+
+        // 掉落至地面／水面以下時，平順重置回天空高處形成自然循環
+        if (positions[yIndex] < 0.2) {
+          positions[yIndex] = 34.0 + Math.random() * 4.0;
+          positions[i * 3] = (Math.random() - 0.5) * 72;
+          positions[i * 3 + 2] = (Math.random() - 0.5) * 72;
+        }
+      }
+
+      rainParticleSystem.geometry.attributes.position.needsUpdate = true;
     }
 
     function createFloatingClouds() {
@@ -4170,29 +4932,54 @@
 
       tailJoint.add(tailPeduncle, flukeLeft, flukeRight);
 
+      // ===== 精緻擬真水霧噴泉系統 =====
       const spoutGroup = new THREE.Group();
       spoutGroup.position.set(1.9, 1.35, 0);
 
-      const sprayMat = new THREE.MeshStandardMaterial({
+      // 1. 通透柔和水柱主幹（微微向後上方傾斜）
+      const jetMat = new THREE.MeshStandardMaterial({
         color: 0xbae6fd,
         transparent: true,
-        opacity: 0.82,
-        roughness: 0.2
+        opacity: 0.0,
+        roughness: 0.15,
+        depthWrite: false
       });
+      const jetColumn = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.08, 2.6, 12), jetMat);
+      jetColumn.position.set(-0.15, 1.3, 0);
+      jetColumn.rotation.z = 0.1; // 隨游動微向後傾
+      spoutGroup.add(jetColumn);
 
-      const plumeCoords = [
-        { x: 0, y: 0.5, z: 0, r: 0.35 },
-        { x: 0.15, y: 1.1, z: 0.1, r: 0.42 },
-        { x: -0.15, y: 1.05, z: -0.1, r: 0.38 },
-        { x: 0.3, y: 1.6, z: 0.2, r: 0.3 },
-        { x: -0.28, y: 1.55, z: -0.2, r: 0.32 }
-      ];
-
-      plumeCoords.forEach(p => {
-        const puff = new THREE.Mesh(new THREE.SphereGeometry(p.r, 8, 8), sprayMat);
-        puff.position.set(p.x, p.y, p.z);
-        spoutGroup.add(puff);
+      // 2. 26 顆飄散水霧與傘狀花冠微粒
+      const mistDrops = [];
+      const mistMat = new THREE.MeshStandardMaterial({
+        color: 0xf0f9ff,
+        transparent: true,
+        opacity: 0.0,
+        roughness: 0.3,
+        depthWrite: false
       });
+      const dropGeo = new THREE.SphereGeometry(0.18, 8, 8);
+
+      for (let i = 0; i < 26; i++) {
+        const drop = new THREE.Mesh(dropGeo, mistMat.clone());
+        const spreadAngle = (i / 26) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+        const spreadRad = 0.35 + Math.random() * 0.75;
+        const dropData = {
+          mesh: drop,
+          stagger: (i / 26) * 0.65, // 錯開噴射時間
+          maxH: 2.2 + Math.random() * 1.5,
+          targetX: -0.4 - Math.random() * 0.8 + Math.cos(spreadAngle) * spreadRad * 0.7,
+          targetZ: Math.sin(spreadAngle) * spreadRad,
+          scaleBase: 0.7 + Math.random() * 0.9
+        };
+        spoutGroup.add(drop);
+        mistDrops.push(dropData);
+      }
+
+      spoutGroup.userData.jet = jetColumn;
+      spoutGroup.userData.jetMat = jetMat;
+      spoutGroup.userData.drops = mistDrops;
+      spoutGroup.visible = false;
 
       whaleGroup.add(
         mainTorso, 
@@ -5057,6 +5844,7 @@
     }
 
     const DIFF_CONFIG = {
+      superEasy: { name: '超簡單', colorClass: 'text-sky-400', activeBg: 'bg-sky-500/25', border: 'border-sky-500', text: 'text-sky-300' },
       easy: { name: '簡易', colorClass: 'text-emerald-400', activeBg: 'bg-emerald-500/25', border: 'border-emerald-500', text: 'text-emerald-300' },
       medium: { name: '普通', colorClass: 'text-amber-400', activeBg: 'bg-amber-500/25', border: 'border-amber-500', text: 'text-amber-300' },
       hard: { name: '困難', colorClass: 'text-rose-400', activeBg: 'bg-rose-500/25', border: 'border-rose-500', text: 'text-rose-300' }
@@ -5098,8 +5886,8 @@
     });
 
     function displayCurrentWord() {
-      // 若當前有待挑戰的人物試煉題，優先出題該試煉
-      if (pendingTrialMilestone && MILESTONE_SPECIAL_TRIALS[pendingTrialMilestone]) {
+      // 若當前難度為「超簡單」，絕對不啟用任何特殊試煉題（全部為多字），強制為 null
+      if (currentDifficulty !== 'superEasy' && pendingTrialMilestone && MILESTONE_SPECIAL_TRIALS[pendingTrialMilestone]) {
         activeTrial = MILESTONE_SPECIAL_TRIALS[pendingTrialMilestone];
       } else {
         activeTrial = null;
@@ -5107,7 +5895,7 @@
 
       const item = activeTrial 
         ? activeTrial 
-        : (currentWordList.length > 0 ? currentWordList[currentWordIndex % currentWordList.length] : WORD_DB.easy[0]);
+        : (currentWordList.length > 0 ? currentWordList[currentWordIndex % currentWordList.length] : (WORD_DB[currentDifficulty] ? WORD_DB[currentDifficulty][0] : WORD_DB.superEasy[0]));
 
       charCardsContainer.innerHTML = '';
 
@@ -5203,16 +5991,18 @@
       }
 
       let posX, posZ, posY;
+      let angle = 0;
 
       // 若是第 50 座地標（鵝鑾鼻燈塔），特意固定座落於小島正中央！
       if (monument.name.includes("燈塔") || specialMonumentsSpawned === 50) {
         posX = 0;
         posZ = 0;
         posY = 1.35;
+        angle = 0;
       } else if (monument.name.includes("大商船")) {
         // 特殊水上大型艦船：固定泊錨在外海深水區
         const goldenAngle = 2.39996;
-        const angle = (specialMonumentsSpawned * goldenAngle) + (Math.random() * 0.4 - 0.2);
+        angle = (specialMonumentsSpawned * goldenAngle) + (Math.random() * 0.4 - 0.2);
         const oceanRad = 31.0 + (Math.random() * 5.0);
         posX = Math.cos(angle) * oceanRad;
         posZ = Math.sin(angle) * oceanRad;
@@ -5220,7 +6010,7 @@
       } else {
         // 其他 1~49 個地標：保留島中央半徑 3.8 緩衝區，散佈在半徑 4.5 到 16.0 之間
         const goldenAngle = 2.39996;
-        const angle = (specialMonumentsSpawned * goldenAngle) + (Math.random() * 0.4 - 0.2);
+        angle = (specialMonumentsSpawned * goldenAngle) + (Math.random() * 0.4 - 0.2);
         const rRatio = 0.08 + (Math.random() * 0.88);
         const rad = 4.5 + Math.sqrt(rRatio) * 11.5;
 
@@ -5293,11 +6083,11 @@
       }
     }
 
-    // 一鍵全體大集合作弊碼 (marshmallow)
+    // 一鍵全體人物大集合秘技 (marshmallow / matshmallow)
     function triggerAllMilestonesCheat() {
       sound.init();
 
-      // 1. 若彩虹尚未架起，立即在天際升起【夢幻大彩虹】
+      // 1. 若彩虹尚未架起，在天際升起【夢幻大彩虹】
       if (!rainbowUnlocked) {
         rainbowUnlocked = true;
         createGrandRainbow();
@@ -5308,53 +6098,49 @@
         spawnOceanWhale();
       }
 
-      // 3. 額外生成彩虹帆船增添熱鬧外海景致
-      const rainbowBoat = createSailboatModel(0x0f172a, true);
-      rainbowBoat.position.set(31, 0.12, 10);
-      scene.add(rainbowBoat);
-      cruisingSailboats.push({
-        group: rainbowBoat,
-        radius: 32.5,
-        speed: 0.0028,
-        angle: 0.3,
-        bobSpeed: 1.4,
-        bobAmp: 0.05
-      });
-      spawnedIslandObjects.push(rainbowBoat);
-
-      // 4. 精確召喚 10 位傳奇明星與地標
-      const targetIndices = [4, 9, 14, 19, 24, 29, 34, 39, 44, 49];
-
-      targetIndices.forEach((idx, step) => {
-        if (idx < SPECIAL_MONUMENTS.length) {
-          const monument = SPECIAL_MONUMENTS[idx];
-          let pos;
-          let spotKey = Object.keys(CHARACTER_SPOTS).find(k => monument.name.includes(k) || k.includes(monument.name));
-          if (spotKey) {
-            pos = CHARACTER_SPOTS[spotKey].pos.clone();
-          } else {
-            const viewAngle = -0.85 + (step / (targetIndices.length - 1)) * 1.7;
-            const rad = 6.0 + (step % 2) * 2.6;
-            pos = new THREE.Vector3(Math.sin(viewAngle) * rad, 1.35, Math.cos(viewAngle) * rad);
+      // 3. 遍歷 HIDDEN_CHARACTERS，精準召喚全部 10 位登場人物（絕不召喚任何地標建築）
+      HIDDEN_CHARACTERS.forEach(charDef => {
+        // 先移除場上同名角色的舊物件，避免重複堆疊
+        for (let i = spawnedIslandObjects.length - 1; i >= 0; i--) {
+          const obj = spawnedIslandObjects[i];
+          if (obj.userData && obj.userData.characterName === charDef.name) {
+            scene.remove(obj);
+            spawnedIslandObjects.splice(i, 1);
+            const wcIdx = walkingCelebrities.findIndex(c => c.group === obj);
+            if (wcIdx !== -1) walkingCelebrities.splice(wcIdx, 1);
+            const fcIdx = flyingCreatures.findIndex(c => c.group === obj);
+            if (fcIdx !== -1) flyingCreatures.splice(fcIdx, 1);
           }
-
-          const monumentObj = monument.build(pos);
-          monumentObj.userData = { targetScale: 1.0 };
-          monumentObj.scale.set(1.0, 1.0, 1.0);
-          monumentObj.rotation.y = Math.random() * Math.PI * 2;
-
-          scene.add(monumentObj);
-          spawnedIslandObjects.push(monumentObj);
         }
+
+        let spotKey = Object.keys(CHARACTER_SPOTS).find(k => charDef.name.includes(k) || k.includes(charDef.name));
+        const spot = spotKey ? CHARACTER_SPOTS[spotKey] : null;
+        const isFlyer = charDef.name.includes("翼手龍");
+        const pos = spot ? spot.pos.clone() : (isFlyer ? new THREE.Vector3(0, 15, 0) : new THREE.Vector3(0, 1.35, 3.8));
+
+        const charObj = charDef.build(pos);
+        const scaleVal = charDef.name.includes("小恐龍") ? 1.05 : (charDef.name.includes("巴斯光年") ? 1.4 : 1.35);
+        charObj.userData = { targetScale: scaleVal, characterName: charDef.name };
+        charObj.scale.set(scaleVal, scaleVal, scaleVal);
+
+        scene.add(charObj);
+        spawnedIslandObjects.push(charObj);
       });
+
+      // 4. 開啟永恆綠洲效果
+      isEternalVitality = true;
+      vitality = 100;
+      if (vitalityBar) {
+        vitalityBar.style.width = '100%';
+        vitalityBar.className = 'h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-cyan-400 rounded-full transition-all duration-300 shadow-[0_0_16px_rgba(250,204,21,0.8)]';
+      }
+      if (vitalityPercent) {
+        vitalityPercent.textContent = '✨ 永恆綠洲';
+        vitalityPercent.className = 'text-amber-300 font-black';
+      }
 
       // 更新進度顯示與慶祝橫幅
-      specialMonumentsSpawned = 50;
-      checkEternalVitality();
-      if (milestoneCounter) {
-        milestoneCounter.textContent = `50 / 50`;
-      }
-      upgradeBanner.textContent = "作弊碼生效：全數傳奇明星已回到島嶼專屬領地、大彩虹與深海藍鯨現身！";
+      upgradeBanner.textContent = "全明星大集合！全部 10 位人物與偉樺老師已全員登場漫步！✨";
       upgradeBanner.className = "text-xs sm:text-sm font-black px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-pink-400 to-emerald-300 text-slate-950 shadow-2xl tracking-wider transition-all duration-300";
       upgradeBanner.classList.remove('hidden');
       setTimeout(() => upgradeBanner.classList.add('hidden'), 4500);
@@ -5531,8 +6317,8 @@
         // 每 5 題落成特殊紀念地標
         if (correctCount % 5 === 0) {
           spawnSpecialMonument();
-          // 若落成的紀念地標剛好達到 10, 15, 20, 25, 30, 35, 40, 45, 50，立即標記下一題為隱藏人物試煉題
-          if (MILESTONE_SPECIAL_TRIALS[specialMonumentsSpawned]) {
+          // 若落成的紀念地標達到試煉門檻，但當前是「超簡單」模式時，絕對不設定試煉題
+          if (currentDifficulty !== 'superEasy' && MILESTONE_SPECIAL_TRIALS[specialMonumentsSpawned]) {
             pendingTrialMilestone = specialMonumentsSpawned;
           }
         } else {
@@ -5542,13 +6328,13 @@
         }
       }
 
-      score += (currentDifficulty === 'hard' ? 300 : (currentDifficulty === 'medium' ? 250 : 200));
+      score += (currentDifficulty === 'hard' ? 300 : (currentDifficulty === 'medium' ? 250 : (currentDifficulty === 'easy' ? 200 : 150)));
       scoreEl.textContent = score;
 
       advanceWord();
     }
 
-    function checkTypingMatch() {
+    function checkTypingMatch(isExplicitSubmit = false) {
       if (gameState !== 'RUNNING') return;
       const target = activeTrial 
         ? activeTrial.word 
@@ -5556,144 +6342,161 @@
       const val = typeInput.value.trim();
       const code = val.toLowerCase();
 
-      // 秘技一覽面板開啟/關閉切換指令：嚴格限定 00000（單個 0 絕不開啟）
-      if (code === '00000') {
-        toggleCheatSheet(true);
-        typeInput.value = '';
-        return;
-      }
+      // ⭐ 所有秘技與召喚指令：嚴格限制只有在按下 Enter 或點擊「送出」時才執行判定
+      if (isExplicitSubmit) {
+        if (val === "吳偉樺") {
+          summonSpecificCharacter("吳偉樺", 1.35);
 
-      // 地標圖鑑開啟指令：12345
-      if (val === '12345') {
-        if (landmarkInspectorModal) {
-          landmarkInspectorModal.classList.remove('hidden');
-          if (inspectorBtn) inspectorBtn.classList.remove('hidden');
-          upgradeBanner.textContent = "已開啟【地標圖鑑模式】！輸入 54321 可關閉。";
-          upgradeBanner.className = "text-xs font-black px-4 py-2 rounded-xl bg-amber-400 text-slate-950 shadow-2xl tracking-wider transition-all duration-300";
+          if (upgradeBanner) {
+            upgradeBanner.textContent = "偉樺老師登場";
+            upgradeBanner.classList.remove("hidden");
+
+            setTimeout(() => {
+              upgradeBanner.classList.add("hidden");
+            }, 3000);
+          }
+
+          typeInput.value = "";
+          return;
+        }
+
+        // 秘技一覽面板開啟指令：00000
+        if (code === '00000') {
+          toggleCheatSheet(true);
+          typeInput.value = '';
+          return;
+        }
+
+        // 地標圖鑑開啟指令：12345
+        if (val === '12345') {
+          if (landmarkInspectorModal) {
+            landmarkInspectorModal.classList.remove('hidden');
+            if (inspectorBtn) inspectorBtn.classList.remove('hidden');
+            upgradeBanner.textContent = "已開啟【地標圖鑑模式】！輸入 54321 可關閉。";
+            upgradeBanner.className = "text-xs font-black px-4 py-2 rounded-xl bg-amber-400 text-slate-950 shadow-2xl tracking-wider transition-all duration-300";
+            upgradeBanner.classList.remove('hidden');
+            setTimeout(() => upgradeBanner.classList.add('hidden'), 3000);
+          }
+          typeInput.value = '';
+          typeInput.focus();
+          return;
+        }
+
+        // 地標圖鑑關閉指令：54321
+        if (val === '54321') {
+          if (landmarkInspectorModal) {
+            landmarkInspectorModal.classList.add('hidden');
+            upgradeBanner.textContent = "已關閉【地標圖鑑模式】。";
+            upgradeBanner.className = "text-xs font-black px-4 py-2 rounded-xl bg-slate-700 text-white shadow-2xl tracking-wider transition-all duration-300";
+            upgradeBanner.classList.remove('hidden');
+            setTimeout(() => upgradeBanner.classList.add('hidden'), 2500);
+          }
+          typeInput.value = '';
+          typeInput.focus();
+          return;
+        }
+
+        // 清除指令：c (或相容 clear、清除)
+        if (code === 'c' || code === 'clear' || val === '清除') {
+          clearAllIslandCreations();
+          return;
+        }
+
+        // 9 大明星專屬召喚碼判定（不分大小寫）
+        if (code === 'a') {
+          summonSpecificCharacter("多啦A夢", 1.35);
+          return;
+        }
+        if (code === 'j') {
+          summonSpecificCharacter("蠟筆小新", 1.35);
+          return;
+        }
+        if (code === 'g') {
+          summonSpecificCharacter("櫻桃小丸子", 1.35);
+          return;
+        }
+        if (code === 'm') {
+          summonSpecificCharacter("米老鼠", 1.35);
+          return;
+        }
+        if (code === 'd') {
+          summonSpecificCharacter("小恐龍", 1.05);
+          return;
+        }
+        if (code === 'buzz' || val === '巴斯光年') {
+          summonSpecificCharacter("巴斯光年", 1.4);
+          return;
+        }
+        if (code === 'f' || code === 'flyd') {
+          summonSpecificCharacter("翼手龍", 1.35);
+          return;
+        }
+        if (code === 's') {
+          summonSpecificCharacter("史奴比", 1.35);
+          return;
+        }
+        if (code === 'p' || code === 'pooh' || code === 'bear' || code === 'w' || val === '小熊維尼') {
+          summonSpecificCharacter("小熊維尼", 1.35);
+          return;
+        }
+
+        // 綠洲模式秘技：輸入 life 進入生命全滿且不扣血
+        if (code === 'life') {
+          sound.init();
+          isEternalVitality = true;
+          vitality = 100;
+          if (vitalityBar) {
+            vitalityBar.style.width = '100%';
+            vitalityBar.className = 'h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-cyan-400 rounded-full transition-all duration-300 shadow-[0_0_16px_rgba(250,204,21,0.8)]';
+          }
+          if (vitalityPercent) {
+            vitalityPercent.textContent = '✨ 永恆綠洲';
+            vitalityPercent.className = 'text-amber-300 font-black';
+          }
+          upgradeBanner.textContent = "秘技生效：【永恆綠洲模式】已啟動，生命值全滿且不再扣除！";
+          upgradeBanner.className = "text-xs sm:text-sm font-black px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-300 text-slate-950 shadow-2xl tracking-wider transition-all duration-300";
           upgradeBanner.classList.remove('hidden');
-          setTimeout(() => upgradeBanner.classList.add('hidden'), 3000);
+          setTimeout(() => upgradeBanner.classList.add('hidden'), 3500);
+          sound.upgradeFanfare();
+          typeInput.value = '';
+          return;
         }
-        typeInput.value = '';
-        typeInput.focus();
-        return;
-      }
 
-      // 地標圖鑑關閉指令：54321
-      if (val === '54321') {
-        if (landmarkInspectorModal) {
-          landmarkInspectorModal.classList.add('hidden');
-          upgradeBanner.textContent = "已關閉【地標圖鑑模式】。";
-          upgradeBanner.className = "text-xs font-black px-4 py-2 rounded-xl bg-slate-700 text-white shadow-2xl tracking-wider transition-all duration-300";
-          upgradeBanner.classList.remove('hidden');
-          setTimeout(() => upgradeBanner.classList.add('hidden'), 2500);
+        // 作弊碼檢測：專屬保密指令 marshmallow（召喚全體人物，不召喚地標）
+        if (code === 'marshmallow' || code === 'matshmallow') {
+          triggerAllMilestonesCheat();
+          return;
         }
-        typeInput.value = '';
-        typeInput.focus();
-        return;
-      }
 
-      // 清除指令：c (或相容 clear、清除)
-      if (code === 'c' || code === 'clear' || val === '清除') {
-        clearAllIslandCreations();
-        return;
-      }
-
-      // 9 大明星專屬召喚碼判定（不分大小寫）
-      if (code === 'a') {
-        summonSpecificCharacter("多啦A夢", 1.35);
-        return;
-      }
-      if (code === 'j') {
-        summonSpecificCharacter("蠟筆小新", 1.35);
-        return;
-      }
-      if (code === 'g') {
-        summonSpecificCharacter("櫻桃小丸子", 1.35);
-        return;
-      }
-      if (code === 'm') {
-        summonSpecificCharacter("米老鼠", 1.35);
-        return;
-      }
-      if (code === 'd') {
-        summonSpecificCharacter("小恐龍", 1.05);
-        return;
-      }
-      if (code === 'buzz' || val === '巴斯光年') {
-        summonSpecificCharacter("巴斯光年", 1.4);
-        return;
-      }
-      if (code === 'f' || code === 'flyd') {
-        summonSpecificCharacter("翼手龍", 1.35);
-        return;
-      }
-      if (code === 's') {
-        summonSpecificCharacter("史奴比", 1.35);
-        return;
-      }
-      if (code === 'p' || code === 'pooh' || code === 'bear' || code === 'w' || val === '小熊維尼') {
-        summonSpecificCharacter("小熊維尼", 1.35);
-        return;
-      }
-
-      // 綠洲模式秘技：輸入 life 進入生命全滿且不扣血
-      if (code === 'life') {
-        sound.init();
-        isEternalVitality = true;
-        vitality = 100;
-        if (vitalityBar) {
-          vitalityBar.style.width = '100%';
-          vitalityBar.className = 'h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-cyan-400 rounded-full transition-all duration-300 shadow-[0_0_16px_rgba(250,204,21,0.8)]';
+        // 一鍵排排站展示指令：showall
+        if (code === 'showall') {
+          spawnAllLandmarksInGrid();
+          typeInput.value = '';
+          return;
         }
-        if (vitalityPercent) {
-          vitalityPercent.textContent = '✨ 永恆綠洲';
-          vitalityPercent.className = 'text-amber-300 font-black';
-        }
-        upgradeBanner.textContent = "秘技生效：【永恆綠洲模式】已啟動，生命值全滿且不再扣除！";
-        upgradeBanner.className = "text-xs sm:text-sm font-black px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-300 text-slate-950 shadow-2xl tracking-wider transition-all duration-300";
-        upgradeBanner.classList.remove('hidden');
-        setTimeout(() => upgradeBanner.classList.add('hidden'), 3500);
-        sound.upgradeFanfare();
-        typeInput.value = '';
-        return;
       }
 
-      // 作弊碼檢測：專屬保密指令 marshmallow（召喚全體里程碑）
-      if (code === 'marshmallow') {
-        triggerAllMilestonesCheat();
-        return;
-      }
-
-      // 一鍵排排站展示指令：showall
-      if (code === 'showall') {
-        spawnAllLandmarksInGrid();
-        typeInput.value = '';
-        return;
-      }
-
+      // 遊戲常規目標中文詞彙判定（輸入即時符合或按下 Enter 皆算答對）
       if (val === target) {
         onWordCorrect();
       }
     }
 
     typeInput.addEventListener('compositionend', () => {
-      setTimeout(checkTypingMatch, 10);
+      setTimeout(() => checkTypingMatch(false), 10);
     });
 
     typeInput.addEventListener('input', () => {
-      checkTypingMatch();
+      checkTypingMatch(false);
     });
 
     typeInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        checkTypingMatch();
+        checkTypingMatch(true);
       }
     });
 
-    // 獨立連續 5 個 0 判定計數器
-    let consecutiveZeroCount = 0;
-
-    // 全域鍵盤事件監聽：獨立判定 00000 與按 C / ESC 關閉
+    // 全域鍵盤事件監聽：面板開啟時按 C / ESC 關閉，螢幕保護按 ESC 退出
     window.addEventListener('keydown', (e) => {
       const modal = document.getElementById('cheatSheetModal');
       const isModalOpen = modal && !modal.classList.contains('hidden') && modal.style.display !== 'none';
@@ -5702,28 +6505,12 @@
       if (isModalOpen && (e.key === 'c' || e.key === 'C' || e.key === 'Escape' || e.key === 'Esc')) {
         e.preventDefault();
         toggleCheatSheet(false);
-        consecutiveZeroCount = 0;
         return;
       }
 
       if (e.key === 'Escape' && isScreensaverActive) {
         toggleScreensaver(false);
         return;
-      }
-
-      // 獨立嚴格判定連續 5 個 0 (00000)
-      if (e.key === '0') {
-        consecutiveZeroCount++;
-        if (consecutiveZeroCount === 5) {
-          toggleCheatSheet(true);
-          consecutiveZeroCount = 0;
-          if (typeInput && document.activeElement === typeInput) {
-            typeInput.value = '';
-          }
-        }
-      } else {
-        // 一旦中間輸入了任何非 0 按鍵，計數立刻重置
-        consecutiveZeroCount = 0;
       }
     });
 
@@ -5772,6 +6559,9 @@
       if (startOverlay) startOverlay.classList.add('hidden');
       if (gameOverOverlay) gameOverOverlay.classList.add('hidden');
 
+      // 重新開拓時徹底清空上一局所有物件，確保從乾淨初始島嶼開始
+      clearAllIslandCreations();
+
       score = 0;
       vitality = 100;
       correctCount = 0;
@@ -5780,16 +6570,6 @@
       isEternalVitality = false;
       activeTrial = null;
       pendingTrialMilestone = null;
-
-      // 清除空中動態熱氣球與候鳥，確保一開始天空純淨
-      hotAirBalloons.forEach(b => scene.remove(b.group));
-      hotAirBalloons.length = 0;
-      if (migratoryFlockGroup) {
-        scene.remove(migratoryFlockGroup);
-        migratoryFlockGroup = null;
-        migratoryBirds.length = 0;
-      }
-      migratoryFlockUnlocked = false;
 
       if (scoreEl) scoreEl.textContent = '0';
       if (milestoneCounter) milestoneCounter.textContent = '0 / 50';
@@ -5822,12 +6602,16 @@
 
     function endGame() {
       gameState = 'GAMEOVER';
-      if (gameOverOverlay) gameOverOverlay.classList.remove('hidden');
 
       const finalCorrectCount = document.getElementById('finalCorrectCount');
       const finalScore = document.getElementById('finalScore');
       if (finalCorrectCount) finalCorrectCount.textContent = `${correctCount} 題`;
       if (finalScore) finalScore.textContent = score;
+
+      // 當島嶼活力耗盡時，立即清空島上所有開拓物件，小島恢復初始平原樣貌
+      clearAllIslandCreations();
+
+      if (gameOverOverlay) gameOverOverlay.classList.remove('hidden');
 
       sound.stopBGM();
       sound.stopNightAmbient();
@@ -5982,6 +6766,10 @@
     startBtn.addEventListener('click', startGame);
     restartBtn.addEventListener('click', startGame);
 
+    if (submitBtn) {
+      submitBtn.addEventListener('click', () => checkTypingMatch(true));
+    }
+
     muteBtn.addEventListener('click', () => {
       const isMuted = sound.toggleMute();
       muteBtn.textContent = isMuted ? '音效 OFF' : '音效 ON';
@@ -6017,8 +6805,8 @@
       lastTime = currentTime;
 
       updateDayNightCycle(dt);
+      updateRainParticles(dt);
 
-      // 螢幕保護模式下自動慢速影院級環島巡弋
       if (isScreensaverActive) {
         sphericalAngle += 0.0018;
       }
@@ -6029,7 +6817,6 @@
         c.group.position.z = Math.sin(c.angle) * c.dist;
       });
 
-      // 熱氣球空中悠閒漂浮與環島巡弋
       hotAirBalloons.forEach((b, idx) => {
         b.angle += b.speed;
         const bx = Math.cos(b.angle) * b.radius;
@@ -6039,21 +6826,17 @@
         b.group.rotation.y = -b.angle - Math.PI / 2;
       });
 
-      // 鵝鑾鼻燈塔夜間旋轉與光芒掃射動畫 (無燈塔時不執行)
       spawnedIslandObjects.forEach(obj => {
         if (obj && obj.userData && obj.userData.lighthouseData) {
           const lh = obj.userData.lighthouseData;
-          // 從晚霞 (2)、夜晚 (3) 一路亮到清晨 (0)，僅在中午 (1) 關閉休息
           const isLighthouseActive = (timePhase === 2 || timePhase === 3 || timePhase === 0);
 
           if (isLighthouseActive) {
-            // 燈頭 360° 優雅慢速旋轉 (約 35 秒轉一圈，寧靜詩意)
             lh.rotator.rotation.y += dt * 0.18;
             if (lh.rotator.rotation.y > Math.PI * 2) {
               lh.rotator.rotation.y -= Math.PI * 2;
             }
 
-            // 依時段微調強度：深夜 (3) 最為飽滿璀璨，晚霞 (2) 與清晨 (0) 維持柔和晨昏光暈
             const targetBeamOpacity = (timePhase === 3) ? 0.52 : 0.38;
             const targetSpotIntensity = (timePhase === 3) ? 0.92 : 0.65;
             const targetPointLight = (timePhase === 3) ? 0.55 : 0.40;
@@ -6064,7 +6847,6 @@
             if (lh.pointLight) lh.pointLight.intensity += (targetPointLight - lh.pointLight.intensity) * 0.05;
             if (lh.bulbGlowMat) lh.bulbGlowMat.opacity = (timePhase === 3) ? 0.45 : 0.32;
           } else {
-            // 中午時段：光束平滑淡出並隱藏，回歸常態
             if (lh.beamMat && lh.beamMat.opacity > 0.01) {
               lh.beamMat.opacity += (0.0 - lh.beamMat.opacity) * 0.08;
               if (lh.spot) lh.spot.intensity += (0.0 - lh.spot.intensity) * 0.08;
@@ -6081,7 +6863,6 @@
         }
       });
 
-      // 帆船外海悠閒巡航與波浪搖曳
       cruisingSailboats.forEach((boat, idx) => {
         boat.angle += boat.speed;
         const sx = Math.cos(boat.angle) * boat.radius;
@@ -6089,14 +6870,11 @@
         const wave = Math.sin(currentTime * 0.0018 * boat.bobSpeed + idx) * boat.bobAmp;
 
         boat.group.position.set(sx, 0.12 + wave, sz);
-        // 船頭順著航行切線方向前進
         boat.group.rotation.y = -boat.angle - Math.PI / 2;
-        // 航行隨浪微微側傾 (Heeling & Pitching)
         boat.group.rotation.z = Math.sin(currentTime * 0.0016 * boat.bobSpeed + idx) * 0.05;
         boat.group.rotation.x = Math.cos(currentTime * 0.0014 * boat.bobSpeed + idx) * 0.03;
       });
 
-      // 翼手龍空中盤旋巡弋與振翅動畫
       flyingCreatures.forEach((fc, idx) => {
         fc.angle += fc.speed;
         const fx = Math.cos(fc.angle) * fc.radius;
@@ -6111,34 +6889,27 @@
         if (fc.wingR) fc.wingR.rotation.z = -flap;
       });
 
-      // 雁行遷徙白候鳥群在天際水平直線往返飛行 (左 ⇄ 右)
       if (migratoryFlockGroup) {
-        const flySpeed = 5.8; // 水平前進速度
+        const flySpeed = 5.8;
         migratoryFlockGroup.position.x += migratoryFlockDir * flySpeed * dt;
 
-        // 到達右側邊界 (X = 52) 時轉向往左；到達左側邊界 (X = -52) 時轉向往右
         if (migratoryFlockGroup.position.x >= 52 && migratoryFlockDir > 0) {
           migratoryFlockDir = -1;
-          migratoryFlockTargetYaw = -Math.PI / 2; // 朝向左方
+          migratoryFlockTargetYaw = -Math.PI / 2;
         } else if (migratoryFlockGroup.position.x <= -52 && migratoryFlockDir < 0) {
           migratoryFlockDir = 1;
-          migratoryFlockTargetYaw = Math.PI / 2; // 朝向右方
+          migratoryFlockTargetYaw = Math.PI / 2;
         }
 
-        // 平順轉向插值，避免突然翻轉
         let diffYaw = migratoryFlockTargetYaw - migratoryFlockGroup.rotation.y;
         while (diffYaw < -Math.PI) diffYaw += Math.PI * 2;
         while (diffYaw > Math.PI) diffYaw -= Math.PI * 2;
         migratoryFlockGroup.rotation.y += diffYaw * 2.8 * dt;
-
-        // 轉向時帶有細微氣流側傾角，增添自然感
         migratoryFlockGroup.rotation.z = -diffYaw * 0.35;
 
-        // 高度維持在天空高處 (22.0)，並帶有極微幅的上下波浪起伏 (±0.35)
         const waveH = Math.sin(currentTime * 0.0012) * 0.35;
         migratoryFlockGroup.position.y = 22.0 + waveH;
 
-        // 每隻候鳥的自然振翅動作
         migratoryBirds.forEach(b => {
           const flap = Math.sin(currentTime * 0.0045 + b.phase) * 0.42;
           b.wingL.rotation.z = flap;
@@ -6148,7 +6919,6 @@
 
       const t = currentTime * 0.002;
 
-      // 1. 海洋生物與湖泊天鵝游動
       aquaticCreatures.forEach(aq => {
         if (aq.type === 'swan') {
           aq.angle += aq.speed * dt * 0.4;
@@ -6174,20 +6944,56 @@
             aq.flipperL.rotation.z = finFlap;
             aq.flipperR.rotation.z = -finFlap;
           }
-          if (aq.spout) {
-            const spoutCycle = Math.sin(currentTime * 0.0016);
-            if (spoutCycle > 0.4) {
-              const grow = (spoutCycle - 0.4) / 0.6;
+          if (aq.spout && aq.spout.userData && aq.spout.userData.drops) {
+            // 放慢噴水週期：約 11.2 秒長循環 (0.00056)，其中約 3.8 秒為悠緩換氣噴水，其餘為深海平靜巡游
+            const cycleTime = (currentTime * 0.00056) % (Math.PI * 2);
+            const spoutDuration = 2.1; // 噴水活躍區段 (約 3.8 秒)
+
+            if (cycleTime < spoutDuration) {
               aq.spout.visible = true;
-              aq.spout.scale.set(grow * 1.1, grow * 1.5, grow * 1.1);
+              const p = cycleTime / spoutDuration; // 噴水進度 0.0 ~ 1.0
+
+              // 水柱主幹：平滑湧出、懸空、柔順回落
+              const jetPower = Math.sin(p * Math.PI);
+              const jet = aq.spout.userData.jet;
+              const jetMat = aq.spout.userData.jetMat;
+              jet.scale.set(0.6 + jetPower * 0.6, Math.max(0.1, jetPower * 1.15), 0.6 + jetPower * 0.6);
+              jet.position.y = 0.2 + (jetPower * 1.3);
+              jetMat.opacity = jetPower * 0.68;
+
+              // 傘狀水花粒子：由噴氣孔湧出，緩慢拋物線上浮、如水霧花冠向外撐開、漸淡落下
+              aq.spout.userData.drops.forEach(d => {
+                // 每顆微粒依 stagger 延遲噴出
+                const dp = Math.max(0, Math.min(1, (p - d.stagger) / (1.0 - d.stagger)));
+                if (dp <= 0) {
+                  d.mesh.visible = false;
+                  d.mesh.material.opacity = 0;
+                } else {
+                  d.mesh.visible = true;
+                  // 拋物線上升下降 (重力感)
+                  const curveY = Math.sin(dp * Math.PI * 0.85);
+                  d.mesh.position.y = curveY * d.maxH;
+                  // 向後向外擴散
+                  d.mesh.position.x = d.targetX * dp;
+                  d.mesh.position.z = d.targetZ * dp;
+                  // 隨高度膨脹水霧直徑，末段淡出消散
+                  const s = d.scaleBase * (0.5 + dp * 1.3);
+                  d.mesh.scale.set(s, s, s);
+                  const fade = Math.sin(dp * Math.PI);
+                  d.mesh.material.opacity = fade * 0.55;
+                }
+              });
             } else {
               aq.spout.visible = false;
+              aq.spout.userData.drops.forEach(d => {
+                d.mesh.visible = false;
+                d.mesh.material.opacity = 0;
+              });
             }
           }
         }
       });
 
-      // 2. 動物運動（嚴格面向前方前進，昂首奔跑，絕不倒退）
       animalCreatures.forEach(a => {
         const animTime = t * a.speed + a.offset;
 
@@ -6199,14 +7005,9 @@
           a.group.rotation.y = -animTime - Math.PI / 2;
           a.group.position.y = 1.35 + Math.abs(Math.sin(animTime * 6.0)) * 0.05;
 
-          if (a.head) {
-            a.head.rotation.y = Math.sin(animTime * 2.5) * 0.25;
-          }
-          if (a.tail) {
-            a.tail.rotation.z = Math.sin(animTime * 5.0) * 0.35;
-          }
+          if (a.head) a.head.rotation.y = Math.sin(animTime * 2.5) * 0.25;
+          if (a.tail) a.tail.rotation.z = Math.sin(animTime * 5.0) * 0.35;
         } else if (a.type === 'dog') {
-          // 狗狗歡樂前行與高頻快速搖尾巴
           const walkX = Math.cos(animTime) * a.radius;
           const walkZ = Math.sin(animTime) * a.radius;
           a.group.position.x = a.baseX + walkX;
@@ -6219,7 +7020,7 @@
             a.head.rotation.x = Math.sin(animTime * 4.0) * 0.08;
           }
           if (a.tail) {
-            a.tail.rotation.y = Math.sin(currentTime * 0.015) * 0.65; // 歡快快速搖尾巴
+            a.tail.rotation.y = Math.sin(currentTime * 0.015) * 0.65;
           }
         } else if (a.type === 'rabbit') {
           const hop = Math.abs(Math.sin(animTime * 3.5));
@@ -6227,9 +7028,7 @@
           a.group.position.x = a.baseX + Math.cos(animTime) * a.radius;
           a.group.position.z = a.baseZ + Math.sin(animTime) * a.radius;
           a.group.rotation.y = -animTime - Math.PI / 2;
-          if (a.head) {
-            a.head.rotation.x = 0.15 - hop * 0.25;
-          }
+          if (a.head) a.head.rotation.x = 0.15 - hop * 0.25;
         } else {
           const walkX = Math.cos(animTime) * a.radius;
           const walkZ = Math.sin(animTime) * a.radius;
@@ -6246,38 +7045,32 @@
         }
       });
 
-      // 3. 花草樹木微風搖曳
       animatedFlowers.forEach(f => {
         if (f.mesh) {
           f.mesh.rotation.z = Math.sin(t * f.speed + f.offset) * f.amp;
         }
       });
 
-      // 4. 百葉窗扇開關
       animatedWindows.forEach(w => {
         const swing = (Math.sin(t * w.speed + w.offset) + 1) * 0.5 * 1.2;
         if (w.left) w.left.rotation.y = swing;
         if (w.right) w.right.rotation.y = -swing;
       });
 
-      // 5. 村民手臂擺動
       movingPeople.forEach(p => {
         const walkCycle = Math.sin(t * 3.5 + p.offset);
         if (p.arm) p.arm.rotation.z = -0.4 + walkCycle * 0.45;
         p.group.position.x = p.baseX + Math.sin(t * 1.2 + p.offset) * p.walkRange;
       });
 
-      // 5.5 卡通巨星（多啦A夢、小新、小丸子、米老鼠等）在各自專屬領地漫步，步伐順向朝前
       walkingCelebrities.forEach(c => {
         const animTime = t * c.speed + c.offset;
         const rx = c.radiusX || 2.2;
         const rz = c.radiusZ || 2.0;
 
-        // 各自以領地為中心進行寬闊的自然橢圓巡邏漫步
         c.group.position.x = c.baseX + Math.sin(animTime) * rx;
         c.group.position.z = c.baseZ + Math.cos(animTime) * rz;
 
-        // 面向行進切線方向前進，昂首邁步，不再呆板轉小圈
         const dx = Math.cos(animTime) * rx;
         const dz = -Math.sin(animTime) * rz;
         c.group.rotation.y = Math.atan2(dx, dz);
@@ -6293,7 +7086,6 @@
         if (c.tail) c.tail.rotation.y = Math.sin(animTime * 5.0) * 0.35;
       });
 
-      // 6. 多重立體湧浪圈平滑向外擴散
       concentricSwellRings.forEach(ring => {
         ring.progress = (ring.progress + dt * ring.speed) % 1.0;
         const currentRadius = ring.minRadius + (ring.maxRadius - ring.minRadius) * ring.progress;
@@ -6303,14 +7095,11 @@
         ring.mesh.position.y = 0.16 + Math.sin(ring.progress * Math.PI * 2) * 0.03;
       });
 
-      // 對焦目標平滑緩動插值（特寫特定人物領地 vs 回歸島嶼全景）
       currentCamLookAt.lerp(targetCamLookAt, 0.08);
 
-      // 相機平滑緩動插值（旋轉與縮放即時計算）
       currentCamDist += (targetCamDist - currentCamDist) * 0.12;
       applyCameraPosition(sphericalAngle, currentCamDist);
 
-      // 7. 渲染 3D 場景
       if (renderer && scene && camera) {
         renderer.render(scene, camera);
       }
