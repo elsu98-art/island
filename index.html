@@ -550,7 +550,6 @@
         { word: "淡水", ruby: ["ㄉㄢˋ", "ㄕㄨㄟˇ"] },
         { word: "鹿港", ruby: ["ㄌㄨˋ", "ㄍㄤˇ"] },
         { word: "安平", ruby: ["ㄢ", "ㄆㄧㄥˊ"] },
-        { word: "澎湖", ruby: ["ㄆㄥ", "ㄏㄨˊ"] },
         { word: "金門", ruby: ["ㄐㄧㄣ", "ㄇㄣˊ"] },
         { word: "馬祖", ruby: ["ㄇㄚˇ", "ㄗㄨˇ"] },
         { word: "綠島", ruby: ["ㄌㄩˋ", "ㄉㄠˇ"] },
@@ -601,7 +600,6 @@
         { word: "安平古堡", ruby: ["ㄢ", "ㄆㄧㄥˊ", "ㄍㄨˇ", "ㄅㄠˇ"] },
         { word: "鵝鑾鼻", ruby: ["ㄜˊ", "ㄌㄨㄢˊ", "ㄅㄧˊ"] },
         { word: "三仙台", ruby: ["ㄙㄢ", "ㄒㄧㄢ", "ㄊㄞˊ"] },
-        { word: "雙心石滬", ruby: ["ㄕㄨㄤ", "ㄒㄧㄣ", "ㄕˊ", "ㄏㄨˋ"] },
         { word: "合歡山", ruby: ["ㄏㄜˊ", "ㄏㄨㄢ", "ㄕㄢ"] },
         { word: "太平山", ruby: ["ㄊㄞˋ", "ㄆㄧㄥˊ", "ㄕㄢ"] },
         { word: "吉野櫻", ruby: ["ㄐㄧˊ", "ㄧㄝˇ", "ㄧㄥ"] },
@@ -633,7 +631,6 @@
         { word: "深坑豆腐", ruby: ["ㄕㄣ", "ㄎㄥ", "ㄉㄡˋ", "ㄈㄨˇ"] },
         { word: "金門貢糖", ruby: ["ㄐㄧㄣ", "ㄇㄣˊ", "ㄍㄨㄥˋ", "ㄊㄤˊ"] },
         { word: "宜蘭牛舌餅", ruby: ["ㄧˊ", "ㄌㄢˊ", "ㄋㄧㄡˊ", "ㄕㄜˊ", "ㄅㄧㄥˇ"] },
-        { word: "澎湖黑糖糕", ruby: ["ㄆㄥ", "ㄏㄨˊ", "ㄏㄟ", "ㄊㄤˊ", "ㄍㄠ"] },
         { word: "春暖花開", ruby: ["ㄔㄨㄣ", "ㄋㄨㄢˇ", "ㄏㄨㄚ", "ㄎㄞ"] },
         { word: "風和日麗", ruby: ["ㄈㄥ", "ㄏㄜˊ", "ㄖˋ", "ㄌㄧˋ"] },
         { word: "鳥語花香", ruby: ["ㄋㄧㄠˇ", "ㄩˇ", "ㄏㄨㄚ", "ㄒㄧㄤ"] },
@@ -661,7 +658,6 @@
         { word: "淡水紅毛城", ruby: ["ㄉㄢˋ", "ㄕㄨㄟˇ", "ㄏㄨㄥˊ", "ㄇㄠˊ", "ㄔㄥˊ"] },
         { word: "恆春古城門", ruby: ["ㄏㄥˊ", "ㄔㄨㄣ", "ㄍㄨˇ", "ㄔㄥˊ", "ㄇㄣˊ"] },
         { word: "大溪老街景", ruby: ["ㄉㄚˋ", "ㄒㄧ", "ㄌㄠˇ", "ㄐㄧㄝ", "ㄐㄧㄥˇ"] },
-        { word: "澎湖玄武岩", ruby: ["ㄆㄥˊ", "ㄏㄨˊ", "ㄒㄩㄢˊ", "ㄨˇ", "ㄧㄢˊ"] },
         { word: "金門風獅爺", ruby: ["ㄐㄧㄣ", "ㄇㄣˊ", "ㄈㄥ", "ㄕ", "ㄧㄝˊ"] },
         { word: "綠島朝日溫泉", ruby: ["ㄌㄩˋ", "ㄉㄠˇ", "ㄓㄠ", "ㄖˋ", "ㄨㄣ", "ㄑㄩㄢˊ"] },
         { word: "七星潭礫灘", ruby: ["ㄑㄧ", "ㄒㄧㄥ", "ㄊㄢˊ", "ㄌㄧˋ", "ㄊㄢ"] },
@@ -726,7 +722,7 @@
       "小恐龍": {
         pos: new THREE.Vector3(-1.8, 1.35, -3.8),
         radiusX: 2.2, radiusZ: 1.8, speed: 0.95,
-        camDist: 11, camAngle: -2.7, camLookAt: new THREE.Vector3(-1.8, 1.2, -3.8)
+        camDist: 12, camAngle: -2.7, camLookAt: new THREE.Vector3(-1.8, 1.25, -3.8)
       },
       "巴斯光年": {
         pos: new THREE.Vector3(6.5, 1.35, -2.8),
@@ -891,19 +887,14 @@
               driftZ: (Math.random() - 0.5) * 0.03
             };
 
-            // 利用 Three.js 內建 onBeforeRender 自動執行動畫，零全域污染
             puff.onBeforeRender = () => {
               puff.userData.progress = (puff.userData.progress + 0.009) % 1.0;
               const p = puff.userData.progress;
-              // 慢慢上升
               puff.position.y = p * 1.4;
-              // 隨微風輕微往船後方飄散
               puff.position.x = p * puff.userData.driftX * 8;
               puff.position.z = p * puff.userData.driftZ * 4;
-              // 上升時逐漸擴大
               const s = 0.8 + p * 1.9;
               puff.scale.set(s, s * 0.9, s);
-              // 半透明淡入並緩緩淡出
               puff.material.opacity = Math.sin(p * Math.PI) * 0.45;
             };
 
@@ -923,22 +914,18 @@
           const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
           const blueMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.4 });
 
-          // 雙層奢華圓形台基
           const base1 = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.65, 0.25, 24), goldMat);
           base1.position.y = 0.125;
           const base2 = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.3, 0.18, 24), pinkMat);
           base2.position.y = 0.34;
-          // 外圍裝飾小護欄
           const fence = new THREE.Mesh(new THREE.TorusGeometry(2.32, 0.04, 6, 24), goldMat);
           fence.rotation.x = Math.PI / 2; fence.position.y = 0.48;
 
-          // 中央金雕菱面反射鏡柱
           const centerPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.55, 2.2, 12), goldMat);
           centerPillar.position.y = 1.45;
           const mirrorRing = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.08, 6, 16), new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9 }));
           mirrorRing.rotation.x = Math.PI / 2; mirrorRing.position.y = 1.45;
 
-          // 荷葉邊馬戲團波浪遮陽蓬
           const canopy = new THREE.Mesh(new THREE.ConeGeometry(2.65, 1.25, 24), pinkMat);
           canopy.position.y = 3.0;
           const canopyRing = new THREE.Mesh(new THREE.TorusGeometry(2.65, 0.1, 8, 24), goldMat);
@@ -946,7 +933,6 @@
           const topFinial = new THREE.Mesh(new THREE.SphereGeometry(0.24, 8, 8), goldMat);
           topFinial.position.y = 3.75;
 
-          // 6 根螺旋金柱與高低起伏的彩鞍駿馬
           for (let i = 0; i < 6; i++) {
             const ang = (i / 6) * Math.PI * 2;
             const px = Math.cos(ang) * 1.75;
@@ -978,19 +964,17 @@
         name: "古典凱旋門",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
+          g.scale.set(0.42, 0.42, 0.42); // 再縮小至約 42% 尺寸，更加精巧秀氣
           const stoneMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.75 });
           const darkStoneMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.85 });
           const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.7, roughness: 0.3 });
 
-          // 三層雕花石階底座
           const plinth1 = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.25, 2.4), darkStoneMat); plinth1.position.y = 0.125;
           const plinth2 = new THREE.Mesh(new THREE.BoxGeometry(4.1, 0.2, 2.2), stoneMat); plinth2.position.y = 0.35;
 
-          // 左右雙墩（帶立體羅馬柱飾與浮雕飾板）
           const p1 = new THREE.Mesh(new THREE.BoxGeometry(1.15, 3.0, 1.8), stoneMat); p1.position.set(-1.3, 1.95, 0);
           const p2 = new THREE.Mesh(new THREE.BoxGeometry(1.15, 3.0, 1.8), stoneMat); p2.position.set(1.3, 1.95, 0);
           
-          // 前後羅馬壁柱飾
           for (let z of [-0.95, 0.95]) {
             for (let x of [-1.75, -0.85, 0.85, 1.75]) {
               const col = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.11, 2.9, 8), darkStoneMat);
@@ -998,16 +982,13 @@
             }
           }
 
-          // 中央半圓拱券
           const archVault = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.35, 8, 16, Math.PI), stoneMat);
           archVault.position.set(0, 2.5, 0);
 
-          // 簷口飾帶與頂層閣樓 (Attic)
           const cornice = new THREE.Mesh(new THREE.BoxGeometry(4.3, 0.35, 2.2), darkStoneMat); cornice.position.y = 3.6;
           const attic = new THREE.Mesh(new THREE.BoxGeometry(3.8, 1.1, 1.8), stoneMat); attic.position.y = 4.3;
           const atticCornice = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.2, 2.0), darkStoneMat); atticCornice.position.y = 4.95;
 
-          // 頂端金色勝利榮譽雕飾板
           const victoryPlate = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 0.08), goldMat);
           victoryPlate.position.set(0, 4.3, 0.95);
           const victoryPlateBack = victoryPlate.clone(); victoryPlateBack.position.z = -0.95;
@@ -1025,13 +1006,11 @@
           const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8 });
           const podColors = [0xef4444, 0xf97316, 0xfacc15, 0x10b981, 0x06b6d4, 0x3b82f6, 0x8b5cf6, 0xec4899];
 
-          // 登梯月台與售票基座
           const platform = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.35, 2.6), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
           platform.position.y = 0.175;
           const stairs = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.15, 0.6), new THREE.MeshStandardMaterial({ color: 0x475569 }));
           stairs.position.set(0, 0.075, 1.45);
 
-          // A 字雙傾角大支架
           const centerHubY = 3.6;
           [-0.6, 0.6].forEach(z => {
             const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 3.8, 6), frameMat);
@@ -1043,12 +1022,10 @@
             g.add(legL, legR, tieBar);
           });
 
-          // 中心轉軸輪轂
           const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 1.5, 16), goldMat);
           hub.rotation.x = Math.PI / 2; hub.position.set(0, centerHubY, 0);
           g.add(hub);
 
-          // 同心雙環鋼圈與 12 根放射狀輪輻
           const wheelGroup = new THREE.Group();
           wheelGroup.position.set(0, centerHubY, 0);
 
@@ -1065,7 +1042,6 @@
             const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, rOuter * 2, 6), frameMat);
             spoke.rotation.z = ang; wheelGroup.add(spoke);
 
-            // 8 個彩色獨立懸掛景觀座艙 (Gondolas)
             const podX = Math.cos(ang) * rOuter;
             const podY = Math.sin(ang) * rOuter;
             const podMat = new THREE.MeshStandardMaterial({ color: podColors[i], metalness: 0.4, roughness: 0.3 });
@@ -1101,17 +1077,102 @@
         name: "古希臘神殿",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
-          const mat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.6 });
-          const base = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.3, 2.2), mat); base.position.y = 0.15;
-          for (let x of [-1.3, -0.65, 0, 0.65, 1.3]) {
-            for (let z of [-0.8, 0.8]) {
-              const col = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 1.8, 8), mat);
-              col.position.set(x, 1.05, z); g.add(col);
-            }
-          }
-          const roof = new THREE.Mesh(new THREE.ConeGeometry(2.2, 0.8, 4), mat);
-          roof.rotation.y = Math.PI / 4; roof.position.y = 2.3;
-          g.add(base, roof); return g;
+          g.scale.set(0.6, 0.6, 0.6); // 依需求縮小至約 60% 尺寸
+          const marbleMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.55 });
+          const shadeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.65 });
+          const goldTrim = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.7, roughness: 0.3 });
+          const cellaMat = new THREE.MeshStandardMaterial({ color: 0xcfd8dc, roughness: 0.7 });
+
+          // 三層經典階梯基座 (Crepidoma: Stereobate + Stylobate)
+          const step1 = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.16, 3.2), shadeMat); step1.position.y = 0.08;
+          const step2 = new THREE.Mesh(new THREE.BoxGeometry(4.3, 0.16, 2.9), marbleMat); step2.position.y = 0.24;
+          const step3 = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.16, 2.6), marbleMat); step3.position.y = 0.40;
+          g.add(step1, step2, step3);
+
+          // 內殿核心壁體 (Cella)
+          const cella = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.8, 1.4), cellaMat);
+          cella.position.set(0, 1.38, 0);
+          const cellaDoor = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.2, 0.08), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+          cellaDoor.position.set(1.31, 1.08, 0);
+          g.add(cella, cellaDoor);
+
+          // 環列多立克柱 (Peristyle Colonnade: 6x4 柱廊，每根立柱含柱礎與柱頭)
+          const colsX = [-1.75, -1.05, -0.35, 0.35, 1.05, 1.75];
+          const colsZ = [-1.08, 1.08];
+
+          colsX.forEach(x => {
+            colsZ.forEach(z => {
+              const colGroup = new THREE.Group();
+              colGroup.position.set(x, 0.48, z);
+              // 柱礎
+              const base = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.15, 0.08, 8), shadeMat);
+              base.position.y = 0.04;
+              // 漸縮柱身
+              const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 1.65, 8), marbleMat);
+              shaft.position.y = 0.9;
+              // 柱頭 (Echinus & Abacus)
+              const capital = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.24), shadeMat);
+              capital.position.y = 1.76;
+              colGroup.add(base, shaft, capital);
+              g.add(colGroup);
+            });
+          });
+
+          // 兩側山牆外柱補充
+          [-0.36, 0.36].forEach(z => {
+            [-1.75, 1.75].forEach(x => {
+              const sideCol = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 1.65, 8), marbleMat);
+              sideCol.position.set(x, 1.38, z);
+              const capital = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.24), shadeMat);
+              capital.position.set(x, 2.24, z);
+              g.add(sideCol, capital);
+            });
+          });
+
+          // 額枋與簷壁三道飾帶 (Architrave & Frieze with Triglyphs)
+          const architrave = new THREE.Mesh(new THREE.BoxGeometry(4.05, 0.22, 2.65), marbleMat);
+          architrave.position.y = 2.39;
+          const frieze = new THREE.Mesh(new THREE.BoxGeometry(4.15, 0.22, 2.75), shadeMat);
+          frieze.position.y = 2.61;
+          const cornice = new THREE.Mesh(new THREE.BoxGeometry(4.35, 0.12, 2.95), marbleMat);
+          cornice.position.y = 2.78;
+          g.add(architrave, frieze, cornice);
+
+          // 雙坡人字形屋頂與經典山牆飾帶 (Pediment & Tympanum)
+          const roofGeo = new THREE.CylinderGeometry(1.65, 1.65, 4.35, 3, 1, false, 0, Math.PI);
+          roofGeo.rotateZ(Math.PI / 2);
+          roofGeo.rotateY(Math.PI / 2);
+          roofGeo.scale(1.0, 0.45, 1.0);
+          const roof = new THREE.Mesh(roofGeo, marbleMat);
+          roof.position.set(0, 3.12, 0);
+
+          // 前後三角山牆金飾浮雕板 (Pediment Relief)
+          const pedShape = new THREE.Shape();
+          pedShape.moveTo(-1.42, 0);
+          pedShape.lineTo(1.42, 0);
+          pedShape.lineTo(0, 0.72);
+          pedShape.closePath();
+
+          [-2.18, 2.18].forEach(pz => {
+            const pedMesh = new THREE.Mesh(new THREE.ShapeGeometry(pedShape), shadeMat);
+            pedMesh.position.set(0, 2.84, pz);
+            if (pz < 0) pedMesh.rotation.y = Math.PI;
+
+            const medallion = new THREE.Mesh(new THREE.CircleGeometry(0.18, 8), goldTrim);
+            medallion.position.set(0, 3.06, pz + (pz > 0 ? 0.01 : -0.01));
+            if (pz < 0) medallion.rotation.y = Math.PI;
+            g.add(pedMesh, medallion);
+          });
+
+          // 頂端山尖衛飾 (Acroterion)
+          [-2.18, 0, 2.18].forEach(az => {
+            const acro = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.25, 4), goldTrim);
+            acro.position.set(0, 3.65, az);
+            g.add(acro);
+          });
+
+          g.add(roof);
+          return g;
         }
       },
       {
@@ -1136,25 +1197,22 @@
         name: "比薩斜塔",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
+          g.scale.set(0.42, 0.42, 0.42); // 再縮小至約 42% 尺寸，更加精緻小巧
           const marbleMat = new THREE.MeshStandardMaterial({ color: 0xfef9c3, roughness: 0.6 });
           const archMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5 });
           const darkMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
 
-          // 地面八角基座
           const base = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.7, 0.4, 16), marbleMat);
           base.position.y = 0.2;
           g.add(base);
 
-          // 整座傾斜塔身組件
           const towerGroup = new THREE.Group();
           towerGroup.position.set(0, 0.4, 0);
-          towerGroup.rotation.z = -0.165; // 優雅擬真傾角
+          towerGroup.rotation.z = -0.165;
 
-          // 底層實心拱門迴廊
           const t1 = new THREE.Mesh(new THREE.CylinderGeometry(1.22, 1.25, 0.85, 20), marbleMat);
           t1.position.y = 0.425; towerGroup.add(t1);
 
-          // 2 ~ 6 層外凸大理石拱圈外廊（每層精雕 14 根微型外環圓柱）
           for (let i = 0; i < 5; i++) {
             const cy = 1.05 + i * 0.68;
             const core = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, 0.68, 16), marbleMat);
@@ -1171,7 +1229,6 @@
             }
           }
 
-          // 頂層縮口鐘樓與青銅大鐘
           const bellFloor = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 1.0, 0.75, 16), marbleMat);
           bellFloor.position.y = 4.8;
           const bell = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.26, 0.35, 8), darkMat);
@@ -1191,7 +1248,6 @@
           const ironMat = new THREE.MeshStandardMaterial({ color: 0x78716c, metalness: 0.65, roughness: 0.45 });
           const lightMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xfacc15, emissiveIntensity: 0.8 });
 
-          // 第一層：四個傾斜外拱基座與中央大拱券
           [-0.7, 0.7].forEach(x => {
             [-0.7, 0.7].forEach(z => {
               const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, 1.6, 6), ironMat);
@@ -1202,14 +1258,10 @@
           const arch1 = new THREE.Mesh(new THREE.TorusGeometry(0.65, 0.08, 6, 12, Math.PI), ironMat);
           arch1.position.y = 0.7; g.add(arch1);
 
-          // 第一觀景平台
           const deck1 = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.18, 1.9), ironMat); deck1.position.y = 1.6;
-          // 第二層向上收攏鐵塔
           const towerMid = new THREE.Mesh(new THREE.ConeGeometry(0.85, 1.8, 4), ironMat);
           towerMid.rotation.y = Math.PI / 4; towerMid.position.y = 2.5;
-          // 第二觀景平台
           const deck2 = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.14, 1.1), ironMat); deck2.position.y = 3.4;
-          // 第三層長尖塔與天線避雷針
           const spire = new THREE.Mesh(new THREE.ConeGeometry(0.35, 2.2, 4), ironMat);
           spire.rotation.y = Math.PI / 4; spire.position.y = 4.5;
           const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.06, 0.8, 6), ironMat); antenna.position.y = 5.9;
@@ -1241,7 +1293,6 @@
           const velvetMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.6 });
           const woodMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 });
 
-          // 優雅月牙翹頭船身
           const hull = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.35, 0.95), blackHullMat);
           hull.position.y = 0.22;
           const bowUpturn = new THREE.Mesh(new THREE.ConeGeometry(0.48, 0.9, 4), blackHullMat);
@@ -1249,23 +1300,19 @@
           const sternUpturn = new THREE.Mesh(new THREE.ConeGeometry(0.48, 0.8, 4), blackHullMat);
           sternUpturn.rotation.z = -Math.PI / 2.4; sternUpturn.position.set(-2.15, 0.42, 0);
 
-          // 船頭標誌性金屬六齒月牙舵 (Ferro)
           const ferro = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.65, 0.35), silverMetalMat);
           ferro.position.set(2.55, 0.75, 0);
 
-          // 酒紅絲絨靠背扶手軟椅
           const seatBase = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.2, 0.65), velvetMat);
           seatBase.position.set(0.1, 0.38, 0);
           const seatBack = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.42, 0.65), velvetMat);
           seatBack.position.set(-0.35, 0.58, 0);
 
-          // 單側木質槳架 (Forcola) 與修長船槳
           const oarlock = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.35, 0.1), woodMat);
           oarlock.position.set(-1.2, 0.5, 0.48);
           const oar = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 3.2, 6), woodMat);
           oar.rotation.x = 0.55; oar.rotation.y = 0.25; oar.position.set(-0.8, 0.6, 0.6);
 
-          // 威尼斯紅白相間繫船木樁 (Palina)
           const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 1.8, 8), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
           pole.position.set(1.4, 0.8, 0.75);
           const stripe = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.03, 6, 12), silverMetalMat);
@@ -1307,23 +1354,18 @@
           const woodMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.7 });
           const whiteSailMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
 
-          // 八角磚石階梯基座
           const base = new THREE.Mesh(new THREE.CylinderGeometry(1.45, 1.7, 0.5, 8), brickMat);
           base.position.y = 0.25;
-          // 主塔身（上窄下寬）
           const body = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 1.35, 2.4, 8), new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.6 }));
           body.position.y = 1.6;
-          // 中段環形觀景走廊與木護欄
           const balcony = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.1, 8), woodMat);
           balcony.position.y = 1.7;
           const railing = new THREE.Mesh(new THREE.TorusGeometry(1.38, 0.04, 6, 16), woodMat);
           railing.rotation.x = Math.PI / 2; railing.position.y = 1.9;
 
-          // 頂部可轉向圓頂閣樓
           const cap = new THREE.Mesh(new THREE.ConeGeometry(1.05, 0.85, 8), woodMat);
           cap.position.y = 3.15;
 
-          // 風車十字傳動軸與四面鏤空木格白帆
           const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.45, 8), woodMat);
           axle.rotation.x = Math.PI / 2; axle.position.set(0, 2.8, 1.0);
 
@@ -1350,7 +1392,6 @@
           const pyrMat = new THREE.MeshStandardMaterial({ color: 0xd4a373, roughness: 0.9 });
           const capMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8, roughness: 0.2 });
 
-          // 多層漸縮金字塔階梯基座
           for (let i = 0; i < 4; i++) {
             const w = 3.6 - i * 0.75;
             const step = new THREE.Mesh(new THREE.BoxGeometry(w, 0.45, w), pyrMat);
@@ -1376,69 +1417,6 @@
         }
       },
       {
-        name: "多啦A夢（漫步小島）",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const blueMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
-          const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
-          const redMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.4 });
-          const bellMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.7, roughness: 0.3 });
-
-          const body = new THREE.Mesh(new THREE.SphereGeometry(0.55, 14, 14), blueMat);
-          body.position.y = 0.75;
-          const belly = new THREE.Mesh(new THREE.SphereGeometry(0.46, 12, 12), whiteMat);
-          belly.position.set(0, 0.73, 0.18);
-          belly.scale.set(0.9, 0.9, 0.55);
-          const pocket = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.05, 12, 1, false, 0, Math.PI), whiteMat);
-          pocket.rotation.x = Math.PI / 2; pocket.rotation.z = Math.PI; pocket.position.set(0, 0.65, 0.42);
-
-          const headGroup = new THREE.Group();
-          headGroup.position.set(0, 1.45, 0);
-          const head = new THREE.Mesh(new THREE.SphereGeometry(0.62, 16, 16), blueMat);
-          const face = new THREE.Mesh(new THREE.SphereGeometry(0.52, 14, 14), whiteMat);
-          face.position.set(0, -0.06, 0.22); face.scale.set(0.95, 0.88, 0.6);
-
-          const eyeMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-          const pupilMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
-          const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), eyeMat);
-          eyeL.scale.set(0.85, 1.25, 0.6); eyeL.position.set(-0.1, 0.15, 0.52);
-          const pupilL = new THREE.Mesh(new THREE.SphereGeometry(0.045, 6, 6), pupilMat);
-          pupilL.position.set(-0.08, 0.15, 0.58);
-          const eyeR = eyeL.clone(); eyeR.position.x = 0.1;
-          const pupilR = pupilL.clone(); pupilR.position.x = 0.08;
-
-          const nose = new THREE.Mesh(new THREE.SphereGeometry(0.085, 8, 8), redMat);
-          nose.position.set(0, 0.04, 0.61);
-
-          const collar = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.06, 6, 16), redMat);
-          collar.rotation.x = Math.PI / 2; collar.position.y = -0.42;
-          const bell = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), bellMat);
-          bell.position.set(0, -0.45, 0.44);
-
-          headGroup.add(head, face, eyeL, pupilL, eyeR, pupilR, nose, collar, bell);
-
-          const armL = new THREE.Group(); armL.position.set(-0.52, 0.82, 0);
-          const handL = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), whiteMat);
-          handL.position.y = -0.22; armL.add(handL);
-          const armR = new THREE.Group(); armR.position.set(0.52, 0.82, 0);
-          const handR = handL.clone(); armR.add(handR);
-
-          const legL = new THREE.Group(); legL.position.set(-0.25, 0.32, 0);
-          const footL = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.2, 0.42), whiteMat);
-          footL.position.set(0, -0.1, 0.06); legL.add(footL);
-          const legR = new THREE.Group(); legR.position.set(0.25, 0.32, 0);
-          const footR = footL.clone(); legR.add(footR);
-
-          g.add(body, belly, pocket, headGroup, armL, armR, legL, legR);
-          walkingCelebrities.push({
-            group: g, head: headGroup, armL, armR, legL, legR,
-            baseX: pos.x, baseZ: pos.z, baseY: pos.y,
-            radiusX: 2.6, radiusZ: 2.0, speed: 0.85, offset: Math.random() * Math.PI * 2
-          });
-          return g;
-        }
-      },
-      {
         name: "朱紅千本鳥居",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
@@ -1447,73 +1425,6 @@
           const p2 = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 2.2, 6), m); p2.position.set(0.9, 1.1, 0);
           const top = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.16, 0.22), m); top.position.set(0, 2.1, 0);
           g.add(p1, p2, top); return g;
-        }
-      },
-      {
-        name: "台北一零一摩天大樓",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const glassMat = new THREE.MeshStandardMaterial({
-            color: 0x7dd3fc,
-            metalness: 0.25,
-            roughness: 0.2,
-            transparent: true,
-            opacity: 0.92,
-            emissive: 0x38bdf8,
-            emissiveIntensity: 0.3
-          });
-          const frameMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, metalness: 0.5, roughness: 0.3 });
-          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.25 });
-          const beaconMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x38bdf8, emissiveIntensity: 1.2 });
-
-          // 1. 裙樓大型購物商場與階梯底座
-          const podiumBase = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.5, 3.6), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-          podiumBase.position.y = 0.25;
-          const podiumMall = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.9, 2.8), frameMat);
-          podiumMall.position.y = 0.95;
-
-          // 2. 核心過渡台基 (Tower Base)
-          const lowerCore = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.0, 2.0), glassMat);
-          lowerCore.position.y = 1.85;
-
-          // 3. 標誌性 8 節倒梯形「竹節／如意」節節高升塔身 (Inverted Trapezoid Pagoda Modules)
-          const moduleGroup = new THREE.Group();
-          for (let i = 0; i < 8; i++) {
-            const h = 0.72;
-            const baseY = 2.35 + i * h;
-            // 倒梯形向上傾斜外擴模組 (上寬 1.45, 下寬 1.15)
-            const modGeo = new THREE.CylinderGeometry(0.85, 0.68, h, 4);
-            modGeo.rotateY(Math.PI / 4);
-            const moduleMesh = new THREE.Mesh(modGeo, glassMat);
-            moduleMesh.position.y = baseY + h / 2;
-            moduleGroup.add(moduleMesh);
-
-            // 每節外牆裝飾金黃「吉祥如意紋」徽章 (Ruyi Cloud Medallion)
-            [-0.75, 0.75].forEach(dx => {
-              const ruyi = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.05, 8), goldMat);
-              ruyi.rotation.z = Math.PI / 2; ruyi.position.set(dx, baseY + h / 2, 0);
-              moduleGroup.add(ruyi);
-            });
-            // 節段金色收邊橫樑
-            const ringBeam = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.06, 1.5), goldMat);
-            ringBeam.position.y = baseY + h;
-            moduleGroup.add(ringBeam);
-          }
-
-          // 4. 頂層 360° 室內外全景觀景台 (Observation Decks)
-          const topDeck = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.65, 1.2), frameMat);
-          topDeck.position.y = 8.4;
-          const topDome = new THREE.Mesh(new THREE.ConeGeometry(0.7, 0.8, 4), frameMat);
-          topDome.rotation.y = Math.PI / 4; topDome.position.y = 9.1;
-
-          // 5. 聳入雲霄避雷通訊尖塔與頂部信標 (Tower Spire & Beacon)
-          const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.12, 1.8, 6), goldMat);
-          spire.position.y = 10.3;
-          const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), beaconMat);
-          beacon.position.y = 11.2;
-
-          g.add(podiumBase, podiumMall, lowerCore, moduleGroup, topDeck, topDome, spire, beacon);
-          return g;
         }
       },
       {
@@ -1557,17 +1468,14 @@
           const darkArchMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 });
           const sandMat = new THREE.MeshStandardMaterial({ color: 0xd4a373, roughness: 0.95 });
 
-          // 橢圓形外台階基座
           const base = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.7, 0.3, 24), stoneMat);
           base.scale.set(1.15, 1.0, 0.9); base.position.y = 0.15;
 
-          // 內部角鬥場黃沙舞台與殘存地宮迷宮隔牆
           const arena = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.2, 20), sandMat);
           arena.scale.set(1.15, 1.0, 0.9); arena.position.y = 0.32;
           const mazeWall = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.25, 0.12), stoneMat);
           mazeWall.position.set(0, 0.45, 0);
 
-          // 三層羅馬圓拱外牆迴廊（高低起伏，重現古羅馬斷垣殘壁歷史滄桑感）
           const tiers = 3;
           for (let t = 0; t < tiers; t++) {
             const h = 0.65;
@@ -1575,7 +1483,6 @@
             const r = 2.45 - t * 0.1;
             const count = 16;
             for (let i = 0; i < count; i++) {
-              // 刻意留空部分缺口，營造真實競技場外牆破壁剪影
               if (t === 2 && (i > 10 || i === 0)) continue;
               const ang = (i / count) * Math.PI * 2;
               const px = Math.cos(ang) * (r * 1.15);
@@ -1589,7 +1496,6 @@
               archTop.position.set(px, cy + h / 2, pz);
               g.add(archPillar, archTop);
             }
-            // 樓層外環橫樑環
             const rim = new THREE.Mesh(new THREE.TorusGeometry(r * 1.02, 0.08, 6, 24), stoneMat);
             rim.scale.set(1.15, 0.9, 1.0); rim.rotation.x = Math.PI / 2; rim.position.y = cy + h / 2;
             g.add(rim);
@@ -1603,17 +1509,14 @@
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
           const basaltMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 });
-          const scoriaMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.95 }); // 復活節島傳統紅色普卡奧火山石
+          const scoriaMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.95 });
 
-          // 石雕祭台 (Ahu)
           const ahu = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.45, 1.8), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.95 }));
           ahu.position.y = 0.225;
 
-          // 摩艾壯碩胸軀軀幹
           const torso = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, 0.95), basaltMat);
           torso.position.y = 1.15;
 
-          // 經典摩艾面部：凸起嚴肅眉棱、長直鼻樑、深陷眼窩與長耳垂
           const head = new THREE.Mesh(new THREE.BoxGeometry(1.05, 1.8, 1.1), basaltMat);
           head.position.set(0, 2.35, 0.05);
 
@@ -1626,17 +1529,74 @@
           const chin = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.45, 0.4), basaltMat);
           chin.position.set(0, 1.65, 0.58);
 
-          // 兩側長長微垂耳垂
           [-0.56, 0.56].forEach(ex => {
             const ear = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.95, 0.25), basaltMat);
             ear.position.set(ex, 2.25, 0); g.add(ear);
           });
 
-          // 頭頂傳統紅色火山石髮髻圓帽 (Pukao)
           const pukao = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.75, 0.65, 10), scoriaMat);
           pukao.position.set(0, 3.45, 0.05);
 
           g.add(ahu, torso, head, brow, nose, chin, pukao); return g;
+        }
+      },
+      {
+        name: "台北一零一摩天大樓",
+        build: (pos) => {
+          const g = new THREE.Group(); g.position.copy(pos);
+          const glassMat = new THREE.MeshStandardMaterial({
+            color: 0x7dd3fc,
+            metalness: 0.25,
+            roughness: 0.2,
+            transparent: true,
+            opacity: 0.92,
+            emissive: 0x38bdf8,
+            emissiveIntensity: 0.3
+          });
+          const frameMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, metalness: 0.5, roughness: 0.3 });
+          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.25 });
+          const beaconMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x38bdf8, emissiveIntensity: 1.2 });
+
+          const podiumBase = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.5, 3.6), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
+          podiumBase.position.y = 0.25;
+          const podiumMall = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.9, 2.8), frameMat);
+          podiumMall.position.y = 0.95;
+
+          const lowerCore = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.0, 2.0), glassMat);
+          lowerCore.position.y = 1.85;
+
+          const moduleGroup = new THREE.Group();
+          for (let i = 0; i < 8; i++) {
+            const h = 0.72;
+            const baseY = 2.35 + i * h;
+            const modGeo = new THREE.CylinderGeometry(0.85, 0.68, h, 4);
+            modGeo.rotateY(Math.PI / 4);
+            const moduleMesh = new THREE.Mesh(modGeo, glassMat);
+            moduleMesh.position.y = baseY + h / 2;
+            moduleGroup.add(moduleMesh);
+
+            [-0.75, 0.75].forEach(dx => {
+              const ruyi = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.05, 8), goldMat);
+              ruyi.rotation.z = Math.PI / 2; ruyi.position.set(dx, baseY + h / 2, 0);
+              moduleGroup.add(ruyi);
+            });
+            const ringBeam = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.06, 1.5), goldMat);
+            ringBeam.position.y = baseY + h;
+            moduleGroup.add(ringBeam);
+          }
+
+          const topDeck = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.65, 1.2), frameMat);
+          topDeck.position.y = 8.4;
+          const topDome = new THREE.Mesh(new THREE.ConeGeometry(0.7, 0.8, 4), frameMat);
+          topDome.rotation.y = Math.PI / 4; topDome.position.y = 9.1;
+
+          const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.12, 1.8, 6), goldMat);
+          spire.position.y = 10.3;
+          const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), beaconMat);
+          beacon.position.y = 11.2;
+
+          g.add(podiumBase, podiumMall, lowerCore, moduleGroup, topDeck, topDome, spire, beacon);
+          return g;
         }
       },
       {
@@ -1662,71 +1622,6 @@
         }
       },
       {
-        name: "蠟筆小新（漫步小島）",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const skinMat = new THREE.MeshStandardMaterial({ color: 0xfed7aa, roughness: 0.6 });
-          const hairMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
-          const redShirtMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.5 });
-          const yellowShortsMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.5 });
-          const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc });
-
-          const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.38, 0.55, 10), redShirtMat);
-          torso.position.y = 0.72;
-          const shorts = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.32, 10), yellowShortsMat);
-          shorts.position.y = 0.42;
-
-          const headGroup = new THREE.Group();
-          headGroup.position.set(0, 1.25, 0);
-          const head = new THREE.Mesh(new THREE.SphereGeometry(0.48, 12, 12), skinMat);
-          head.scale.set(1.2, 0.95, 1.05);
-
-          const hair = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 10, 0, Math.PI * 2, 0, Math.PI / 1.8), hairMat);
-          hair.rotation.x = -0.35; hair.position.set(0, 0.08, -0.05);
-
-          const browMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 });
-          const browL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.065, 0.06), browMat);
-          browL.rotation.z = -0.22; browL.position.set(-0.16, 0.16, 0.46);
-          const browR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.065, 0.06), browMat);
-          browR.rotation.z = 0.22; browR.position.set(0.16, 0.16, 0.46);
-
-          const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), hairMat);
-          eyeL.position.set(-0.15, 0.02, 0.48);
-          const eyeR = eyeL.clone(); eyeR.position.x = 0.15;
-
-          const blushMat = new THREE.MeshStandardMaterial({ color: 0xfb7185 });
-          const blushL = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), blushMat);
-          blushL.scale.set(1.2, 0.6, 0.4); blushL.position.set(-0.35, -0.08, 0.35);
-          const blushR = blushL.clone(); blushR.position.x = 0.35;
-
-          headGroup.add(head, hair, browL, browR, eyeL, eyeR, blushL, blushR);
-
-          const armL = new THREE.Group(); armL.position.set(-0.42, 0.8, 0);
-          const sleeveL = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.2, 6), redShirtMat);
-          const handL = new THREE.Mesh(new THREE.SphereGeometry(0.1, 6, 6), skinMat);
-          handL.position.y = -0.18; armL.add(sleeveL, handL);
-          const armR = new THREE.Group(); armR.position.set(0.42, 0.8, 0);
-          const sleeveR = sleeveL.clone(); const handR = handL.clone();
-          armR.add(sleeveR, handR);
-
-          const legL = new THREE.Group(); legL.position.set(-0.18, 0.26, 0);
-          const sockL = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.22, 6), whiteMat);
-          const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.14, 0.28), yellowShortsMat);
-          shoeL.position.set(0, -0.12, 0.05); legL.add(sockL, shoeL);
-          const legR = new THREE.Group(); legR.position.set(0.18, 0.26, 0);
-          const sockR = sockL.clone(); const shoeR = shoeL.clone();
-          legR.add(sockR, shoeR);
-
-          g.add(torso, shorts, headGroup, armL, armR, legL, legR);
-          walkingCelebrities.push({
-            group: g, head: headGroup, armL, armR, legL, legR,
-            baseX: pos.x, baseZ: pos.z, baseY: pos.y,
-            radiusX: 2.5, radiusZ: 1.9, speed: 0.95, offset: Math.random() * Math.PI * 2
-          });
-          return g;
-        }
-      },
-      {
         name: "沙漠綠洲清泉亭",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
@@ -1749,91 +1644,6 @@
           const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 0.4, 12), new THREE.MeshStandardMaterial({ color: 0x475569 }));
           stand.position.y = 0.2;
           g.add(sphere, stand); return g;
-        }
-      },
-      {
-        name: "小恐龍（漫步小島）",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const greenMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.5 });
-          const lightGreenMat = new THREE.MeshStandardMaterial({ color: 0x86efac, roughness: 0.5 });
-          const yellowMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.4 });
-          const darkMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 });
-          const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc });
-
-          // 迷你圓滾滾小恐龍身體
-          const body = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 12), greenMat);
-          body.scale.set(0.95, 1.15, 0.9);
-          body.position.y = 0.44;
-
-          // 淺綠色肚皮
-          const belly = new THREE.Mesh(new THREE.SphereGeometry(0.27, 10, 10), lightGreenMat);
-          belly.scale.set(0.8, 0.95, 0.5);
-          belly.position.set(0, 0.42, 0.16);
-
-          // 恐龍頭部
-          const headGroup = new THREE.Group();
-          headGroup.position.set(0, 0.8, 0.06);
-          const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 12), greenMat);
-          head.scale.set(0.95, 0.9, 1.12);
-
-          // 圓滾滾大眼與黑眼珠
-          const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 8), whiteMat);
-          eyeL.position.set(-0.15, 0.1, 0.2);
-          const pupilL = new THREE.Mesh(new THREE.SphereGeometry(0.035, 6, 6), darkMat);
-          pupilL.position.set(-0.155, 0.1, 0.25);
-          const eyeR = eyeL.clone(); eyeR.position.x = 0.15;
-          const pupilR = pupilL.clone(); pupilR.position.x = 0.155;
-
-          // 口鼻前突部
-          const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.17, 10, 10), greenMat);
-          muzzle.scale.set(1.0, 0.65, 1.1);
-          muzzle.position.set(0, -0.05, 0.21);
-
-          // 背部與尾巴黃色小刺背鰭
-          for (let i = 0; i < 4; i++) {
-            const spike = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.11, 4), yellowMat);
-            spike.rotation.x = -Math.PI / 4;
-            spike.position.set(0, 0.15 - i * 0.11, -0.26);
-            headGroup.add(spike);
-          }
-          headGroup.add(head, eyeL, pupilL, eyeR, pupilR, muzzle);
-
-          // 恐龍背鰭與翹翹尾巴
-          const tail = new THREE.Group();
-          tail.position.set(0, 0.32, -0.25);
-          const tailMesh = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.42, 8), greenMat);
-          tailMesh.rotation.x = -Math.PI / 2.8;
-          tailMesh.position.set(0, 0.09, -0.14);
-          for (let j = 0; j < 3; j++) {
-            const tailSpike = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.09, 4), yellowMat);
-            tailSpike.rotation.x = -Math.PI / 3;
-            tailSpike.position.set(0, 0.17 - j * 0.06, -0.09 - j * 0.07);
-            tail.add(tailSpike);
-          }
-          tail.add(tailMesh);
-
-          // 小恐龍短短可愛手手
-          const armL = new THREE.Group(); armL.position.set(-0.24, 0.5, 0.12);
-          const armMeshL = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.16, 6), greenMat);
-          armMeshL.rotation.x = Math.PI / 3; armL.add(armMeshL);
-          const armR = new THREE.Group(); armR.position.set(0.24, 0.5, 0.12);
-          const armMeshR = armMeshL.clone(); armR.add(armMeshR);
-
-          // 恐龍粗壯小腳
-          const legL = new THREE.Group(); legL.position.set(-0.16, 0.18, 0);
-          const footL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.14, 0.24), greenMat);
-          footL.position.set(0, -0.05, 0.04); legL.add(footL);
-          const legR = new THREE.Group(); legR.position.set(0.16, 0.18, 0);
-          const footR = footL.clone(); legR.add(footR);
-
-          g.add(body, belly, headGroup, tail, armL, armR, legL, legR);
-          walkingCelebrities.push({
-            group: g, head: headGroup, armL, armR, legL, legR, tail,
-            baseX: pos.x, baseZ: pos.z, baseY: pos.y,
-            radiusX: 2.2, radiusZ: 1.8, speed: 0.95, offset: Math.random() * Math.PI * 2
-          });
-          return g;
         }
       },
       {
@@ -1892,7 +1702,6 @@
           const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8, roughness: 0.25 });
           const greenMat = new THREE.MeshStandardMaterial({ color: 0x16a34a });
 
-          // 立體六瓣南瓜果身
           const pumpkinGroup = new THREE.Group();
           pumpkinGroup.position.y = 1.15;
           for (let i = 0; i < 6; i++) {
@@ -1901,14 +1710,12 @@
             lobe.rotation.y = (i / 6) * Math.PI;
             pumpkinGroup.add(lobe);
           }
-          // 頂端蔓藤冠頂
           const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.4, 6), greenMat);
           stem.position.y = 0.95;
           const crown = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.06, 6, 12), goldMat);
           crown.rotation.x = Math.PI / 2; crown.position.y = 0.98;
           pumpkinGroup.add(stem, crown);
 
-          // 金色鏤空雕花古典大輪軸
           for (let dx of [-0.95, 0.95]) {
             for (let dz of [-0.75, 0.75]) {
               const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.05, 6, 16), goldMat);
@@ -1941,79 +1748,6 @@
           const cap = new THREE.Mesh(new THREE.ConeGeometry(1.4, 1.2, 10), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
           cap.position.y = 1.8;
           g.add(stem, cap); return g;
-        }
-      },
-      {
-        name: "櫻桃小丸子（漫步小島）",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const skinMat = new THREE.MeshStandardMaterial({ color: 0xffedd5, roughness: 0.6 });
-          const hairMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
-          const whiteShirtMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.6 });
-          const redSkirtMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.5 });
-          const blackShoeMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
-          const yellowHatMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.5 });
-
-          const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.32, 0.48, 8), whiteShirtMat);
-          torso.position.y = 0.72;
-          const skirt = new THREE.Mesh(new THREE.ConeGeometry(0.48, 0.36, 12), redSkirtMat);
-          skirt.position.y = 0.44;
-          const strapL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.42, 0.03), redSkirtMat);
-          strapL.position.set(-0.14, 0.72, 0.16);
-          const strapR = strapL.clone(); strapR.position.x = 0.14;
-
-          const headGroup = new THREE.Group();
-          headGroup.position.set(0, 1.22, 0);
-          const head = new THREE.Mesh(new THREE.SphereGeometry(0.44, 12, 12), skinMat);
-          const hairBack = new THREE.Mesh(new THREE.SphereGeometry(0.47, 10, 10, 0, Math.PI * 2, 0, Math.PI / 1.7), hairMat);
-          hairBack.rotation.x = -0.25; hairBack.position.set(0, 0.05, -0.06);
-
-          const hatDome = new THREE.Mesh(new THREE.SphereGeometry(0.47, 12, 10, 0, Math.PI * 2, 0, Math.PI / 2), yellowHatMat);
-          hatDome.position.set(0, 0.18, -0.02);
-          const hatBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.64, 0.64, 0.04, 16), yellowHatMat);
-          hatBrim.position.set(0, 0.18, -0.02);
-          hatBrim.rotation.x = -0.08;
-          headGroup.add(hatDome, hatBrim);
-
-          for (let b = -3; b <= 3; b++) {
-            const tooth = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.16, 3), hairMat);
-            tooth.rotation.z = Math.PI; tooth.position.set(b * 0.09, 0.18, 0.42);
-            headGroup.add(tooth);
-          }
-
-          const blushL = new THREE.Mesh(new THREE.CircleGeometry(0.08, 8), new THREE.MeshStandardMaterial({ color: 0xfb7185, side: THREE.DoubleSide }));
-          blushL.position.set(-0.25, -0.08, 0.4); blushL.rotation.y = -0.4;
-          const blushR = blushL.clone(); blushR.position.x = 0.25; blushR.rotation.y = 0.4;
-
-          const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.045, 6, 6), hairMat);
-          eyeL.position.set(-0.12, 0.03, 0.42);
-          const eyeR = eyeL.clone(); eyeR.position.x = 0.12;
-
-          headGroup.add(head, hairBack, blushL, blushR, eyeL, eyeR);
-
-          const armL = new THREE.Group(); armL.position.set(-0.36, 0.78, 0);
-          const sleeveL = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.1, 0.16, 6), whiteShirtMat);
-          const handL = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), skinMat);
-          handL.position.y = -0.16; armL.add(sleeveL, handL);
-          const armR = new THREE.Group(); armR.position.set(0.36, 0.78, 0);
-          const sleeveR = sleeveL.clone(); const handR = handL.clone();
-          armR.add(sleeveR, handR);
-
-          const legL = new THREE.Group(); legL.position.set(-0.14, 0.25, 0);
-          const legMeshL = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.24, 6), whiteShirtMat);
-          const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.12, 0.24), blackShoeMat);
-          shoeL.position.set(0, -0.12, 0.04); legL.add(legMeshL, shoeL);
-          const legR = new THREE.Group(); legR.position.set(0.14, 0.25, 0);
-          const legMeshR = legMeshL.clone(); const shoeR = shoeL.clone();
-          legR.add(legMeshR, shoeR);
-
-          g.add(torso, skirt, strapL, strapR, headGroup, armL, armR, legL, legR);
-          walkingCelebrities.push({
-            group: g, head: headGroup, armL, armR, legL, legR,
-            baseX: pos.x, baseZ: pos.z, baseY: pos.y,
-            radiusX: 2.6, radiusZ: 1.8, speed: 0.88, offset: Math.random() * Math.PI * 2
-          });
-          return g;
         }
       },
       {
@@ -2115,6 +1849,480 @@
         }
       },
       {
+        name: "夢幻粉紅火烈鳥雕像",
+        build: (pos) => {
+          const g = new THREE.Group(); g.position.copy(pos);
+          const pinkMat = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.4 });
+          const deepPinkMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, roughness: 0.4 });
+          const beakTipMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+
+          const pool = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.3, 0.18, 16), new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.15 }));
+          pool.position.y = 0.09;
+          const rim = new THREE.Mesh(new THREE.TorusGeometry(1.25, 0.06, 6, 16), new THREE.MeshStandardMaterial({ color: 0x64748b }));
+          rim.rotation.x = Math.PI / 2; rim.position.y = 0.14;
+
+          const legStanding = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 1.4, 6), deepPinkMat);
+          legStanding.position.set(-0.1, 0.78, 0);
+          const legFoldedUpper = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.65, 6), deepPinkMat);
+          legFoldedUpper.rotation.z = -0.7; legFoldedUpper.position.set(0.12, 1.1, 0);
+          const legFoldedLower = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.65, 6), deepPinkMat);
+          legFoldedLower.position.set(0.35, 0.75, 0);
+
+          const body = new THREE.Mesh(new THREE.SphereGeometry(0.55, 12, 10), pinkMat);
+          body.scale.set(1.3, 0.85, 0.75); body.position.set(0, 1.55, 0);
+          const wingL = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.4, 0.12), deepPinkMat);
+          wingL.rotation.z = 0.2; wingL.position.set(-0.05, 1.6, 0.36);
+          const wingR = wingL.clone(); wingR.position.z = -0.36;
+
+          const neck1 = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.85, 8), pinkMat);
+          neck1.rotation.z = -0.45; neck1.position.set(0.55, 1.9, 0);
+          const neck2 = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.7, 8), pinkMat);
+          neck2.rotation.z = 0.65; neck2.position.set(0.72, 2.5, 0);
+
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), pinkMat);
+          head.position.set(0.52, 2.82, 0);
+          const beakBase = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.35, 6), pinkMat);
+          beakBase.rotation.z = -Math.PI / 1.7; beakBase.position.set(0.35, 2.72, 0);
+          const beakTip = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.22, 6), beakTipMat);
+          beakTip.rotation.z = -Math.PI / 1.5; beakTip.position.set(0.22, 2.6, 0);
+
+          g.add(pool, rim, legStanding, legFoldedUpper, legFoldedLower, body, wingL, wingR, neck1, neck2, head, beakBase, beakTip);
+          return g;
+        }
+      },
+      {
+        name: "蒸汽龐克機械時鐘塔",
+        build: (pos) => {
+          const g = new THREE.Group(); g.position.copy(pos);
+          const copperMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, metalness: 0.75, roughness: 0.35 });
+          const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.9, roughness: 0.2 });
+          const dialMat = new THREE.MeshStandardMaterial({ color: 0xfef9c3, roughness: 0.4 });
+          const pipeMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8 });
+
+          const tower = new THREE.Mesh(new THREE.BoxGeometry(1.5, 3.4, 1.5), copperMat);
+          tower.position.y = 1.7;
+
+          const gear1 = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.1, 8, 14), brassMat);
+          gear1.position.set(0, 2.6, 0.78);
+          const gear2 = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.08, 8, 12), brassMat);
+          gear2.position.set(0.42, 2.1, 0.78);
+          const gear3 = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.07, 8, 10), pipeMat);
+          gear3.position.set(-0.4, 2.05, 0.78);
+
+          [-0.78, 0.78].forEach(x => {
+            const dial = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.06, 16), dialMat);
+            dial.rotation.z = Math.PI / 2; dial.position.set(x, 2.6, 0);
+            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.28, 0.02), pipeMat);
+            hand.position.set(x * 1.02, 2.68, 0);
+            g.add(dial, hand);
+          });
+
+          const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 3.2, 8), pipeMat);
+          pipe.position.set(0.85, 2.0, 0.65);
+
+          const roof = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.1, 4), copperMat);
+          roof.rotation.y = Math.PI / 4; roof.position.y = 3.95;
+          const vane = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.7, 4), brassMat);
+          vane.position.y = 4.8;
+
+          g.add(tower, gear1, gear2, gear3, pipe, roof, vane);
+          return g;
+        }
+      },
+      {
+        name: "海濱透明水族觀景廊",
+        build: (pos) => {
+          const g = new THREE.Group(); g.position.copy(pos);
+          const steelMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8, roughness: 0.3 });
+          const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.65 });
+          const woodMat = new THREE.MeshStandardMaterial({ color: 0x854d0e, roughness: 0.8 });
+
+          const pierPlank = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.2, 1.4), woodMat);
+          pierPlank.position.y = 0.25;
+
+          const tunnel = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 3.4, 16, 1, true, 0, Math.PI), glassMat);
+          tunnel.rotation.z = Math.PI / 2; tunnel.position.y = 0.35;
+
+          [-1.5, -0.75, 0, 0.75, 1.5].forEach(x => {
+            const rib = new THREE.Mesh(new THREE.TorusGeometry(0.92, 0.05, 6, 16, Math.PI), steelMat);
+            rib.position.set(x, 0.35, 0); g.add(rib);
+          });
+
+          const fish = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.35, 4), new THREE.MeshStandardMaterial({ color: 0xf97316 }));
+          fish.rotation.z = Math.PI / 2; fish.position.set(0.3, 0.8, 0);
+
+          g.add(pierPlank, tunnel, fish); return g;
+        }
+      },
+      {
+        name: "鵝鑾鼻燈塔",
+        build: (pos) => {
+          const g = new THREE.Group(); g.position.copy(pos);
+          const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
+          const baseMat = new THREE.MeshStandardMaterial({ color: 0x78716c, roughness: 0.85 });
+          const darkMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
+          const roofMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
+          const glassMat = new THREE.MeshStandardMaterial({ color: 0xe0f2fe, roughness: 0.1, transparent: true, opacity: 0.75 });
+
+          const mound = new THREE.Mesh(new THREE.CylinderGeometry(1.85, 2.15, 0.3, 18), baseMat);
+          mound.position.y = 0.15;
+          const entrance = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.7, 0.4), whiteMat);
+          entrance.position.set(0, 0.38, 0.95);
+          const entranceDoor = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.48, 0.05), darkMat);
+          entranceDoor.position.set(0, 0.28, 1.16);
+          const entranceRoof = new THREE.Mesh(new THREE.ConeGeometry(0.42, 0.25, 4), whiteMat);
+          entranceRoof.rotation.y = Math.PI / 4;
+          entranceRoof.position.set(0, 0.82, 0.95);
+
+          const towerBody = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 1.05, 3.6, 20), whiteMat);
+          towerBody.position.y = 1.95;
+          towerBody.castShadow = true;
+
+          const winGeo = new THREE.BoxGeometry(0.14, 0.2, 0.04);
+          const w1 = new THREE.Mesh(winGeo, darkMat); w1.position.set(-0.24, 3.0, 0.74);
+          const w2 = new THREE.Mesh(winGeo, darkMat); w2.position.set(0.24, 3.0, 0.74);
+          const w3 = new THREE.Mesh(winGeo, darkMat); w3.position.set(-0.25, 2.1, 0.84);
+          const w4 = new THREE.Mesh(winGeo, darkMat); w4.position.set(0.34, 2.1, 0.82);
+          const w5 = new THREE.Mesh(winGeo, darkMat); w5.position.set(0.26, 1.25, 0.96);
+
+          const balconyFlare = new THREE.Mesh(new THREE.CylinderGeometry(1.18, 0.72, 0.38, 16), whiteMat);
+          balconyFlare.position.y = 3.9;
+          const balconyDeck = new THREE.Mesh(new THREE.CylinderGeometry(1.22, 1.22, 0.16, 16), whiteMat);
+          balconyDeck.position.y = 4.14;
+          const balustrade = new THREE.Mesh(new THREE.TorusGeometry(1.18, 0.035, 6, 20), darkMat);
+          balustrade.rotation.x = Math.PI / 2;
+          balustrade.position.y = 4.38;
+
+          const lanternWall = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.72, 0.7, 16), glassMat);
+          lanternWall.position.y = 4.58;
+          const roof = new THREE.Mesh(new THREE.ConeGeometry(0.82, 0.55, 16), roofMat);
+          roof.position.y = 5.18;
+          const finial = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), darkMat);
+          finial.position.y = 5.52;
+
+          const rotatingLanternGroup = new THREE.Group();
+          rotatingLanternGroup.position.set(0, 4.58, 0);
+
+          const coreBulb = new THREE.Mesh(
+            new THREE.SphereGeometry(0.28, 16, 16),
+            new THREE.MeshBasicMaterial({ color: 0xffffff })
+          );
+          const bulbGlow = new THREE.Mesh(
+            new THREE.SphereGeometry(0.38, 16, 16),
+            new THREE.MeshBasicMaterial({
+              color: 0xfde047,
+              transparent: true,
+              opacity: 0.45,
+              blending: THREE.AdditiveBlending
+            })
+          );
+          rotatingLanternGroup.add(coreBulb, bulbGlow);
+
+          const lanternPointLight = new THREE.PointLight(0xfef3c7, 0.55, 9, 2.0);
+          rotatingLanternGroup.add(lanternPointLight);
+
+          const beamCanvas = document.createElement('canvas');
+          beamCanvas.width = 128;
+          beamCanvas.height = 256;
+          const bCtx = beamCanvas.getContext('2d');
+          const bData = bCtx.createImageData(128, 256);
+          for (let py = 0; py < 256; py++) {
+            const ny = py / 256;
+            const lengthFade = Math.sin(Math.pow(1 - ny, 0.75) * Math.PI * 0.5) * (1 - ny * 0.85);
+            for (let px = 0; px < 128; px++) {
+              const nx = (px - 64) / 64;
+              const crossFade = Math.max(0, Math.cos(Math.abs(nx) * Math.PI * 0.5));
+              const alpha = Math.pow(crossFade, 2.4) * lengthFade;
+              const idx = (py * 128 + px) * 4;
+              bData.data[idx] = 254;
+              bData.data[idx + 1] = 244;
+              bData.data[idx + 2] = 199;
+              bData.data[idx + 3] = Math.floor(Math.min(1, Math.max(0, alpha)) * 255);
+            }
+          }
+          bCtx.putImageData(bData, 0, 0);
+          const hazyBeamTex = new THREE.CanvasTexture(beamCanvas);
+
+          const beamGroup = new THREE.Group();
+          const beamMat = new THREE.MeshBasicMaterial({
+            map: hazyBeamTex,
+            color: 0xfef3c7,
+            transparent: true,
+            opacity: 0.0,
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+          });
+
+          const beamLen = 32;
+          const nearW = 0.5;
+          const farW = 6.8;
+          const planeGeo = new THREE.PlaneGeometry(1, beamLen, 1, 8);
+          planeGeo.translate(0, beamLen / 2, 0);
+          const posAttr = planeGeo.attributes.position;
+          for (let i = 0; i < posAttr.count; i++) {
+            const y = posAttr.getY(i);
+            const progress = y / beamLen;
+            const w = nearW + (farW - nearW) * progress;
+            posAttr.setX(i, posAttr.getX(i) * w);
+          }
+          planeGeo.computeVertexNormals();
+          planeGeo.rotateX(Math.PI / 2);
+
+          [0, Math.PI / 3, (Math.PI * 2) / 3].forEach(rotAngle => {
+            const pMesh = new THREE.Mesh(planeGeo, beamMat);
+            pMesh.rotation.z = rotAngle;
+            beamGroup.add(pMesh);
+          });
+          beamGroup.position.set(0, 0, 0.2);
+          beamGroup.rotation.x = 0.05;
+          beamGroup.visible = false;
+          rotatingLanternGroup.add(beamGroup);
+
+          const spotLight = new THREE.SpotLight(0xfff7ed, 0.0, 52, Math.PI / 6, 1.0, 2.0);
+          spotLight.position.set(0, 0, 0.2);
+          const spotTarget = new THREE.Object3D();
+          spotTarget.position.set(0, -2.5, 24);
+          spotLight.target = spotTarget;
+          rotatingLanternGroup.add(spotLight, spotTarget);
+
+          const umbrellaGroup = new THREE.Group();
+          umbrellaGroup.position.set(1.35, 0.28, 1.05);
+          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 1.1, 6), darkMat);
+          pole.position.y = 0.55;
+          const canopy = new THREE.Mesh(new THREE.ConeGeometry(0.68, 0.45, 8), new THREE.MeshStandardMaterial({
+            color: 0x38bdf8,
+            roughness: 0.4
+          }));
+          canopy.position.y = 1.1;
+          umbrellaGroup.add(pole, canopy);
+
+          g.add(
+            mound, entrance, entranceDoor, entranceRoof,
+            towerBody, w1, w2, w3, w4, w5,
+            balconyFlare, balconyDeck, balustrade,
+            lanternWall, roof, finial,
+            rotatingLanternGroup, umbrellaGroup
+          );
+
+          g.userData.lighthouseData = {
+            rotator: rotatingLanternGroup,
+            beamMesh: beamGroup,
+            bulbGlowMat: bulbGlow.material,
+            spot: spotLight,
+            beamMat: beamMat,
+            pointLight: lanternPointLight
+          };
+
+          return g;
+        }
+      }
+    ];
+
+    // 9 大傳奇隱藏人物專屬殿堂（與 50 個地標分離，專用於里程碑試煉題獎勵與秘技召喚）
+    const HIDDEN_CHARACTERS = [
+      {
+        name: "多啦A夢（漫步小島）",
+        build: (pos) => {
+          const g = new THREE.Group(); g.position.copy(pos);
+          const blueMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
+          const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+          const redMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.4 });
+          const bellMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.7, roughness: 0.3 });
+
+          const body = new THREE.Mesh(new THREE.SphereGeometry(0.55, 14, 14), blueMat);
+          body.position.y = 0.75;
+          const belly = new THREE.Mesh(new THREE.SphereGeometry(0.46, 12, 12), whiteMat);
+          belly.position.set(0, 0.73, 0.18);
+          belly.scale.set(0.9, 0.9, 0.55);
+          const pocket = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.05, 12, 1, false, 0, Math.PI), whiteMat);
+          pocket.rotation.x = Math.PI / 2; pocket.rotation.z = Math.PI; pocket.position.set(0, 0.65, 0.42);
+
+          const headGroup = new THREE.Group();
+          headGroup.position.set(0, 1.45, 0);
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.62, 16, 16), blueMat);
+          const face = new THREE.Mesh(new THREE.SphereGeometry(0.52, 14, 14), whiteMat);
+          face.position.set(0, -0.06, 0.22); face.scale.set(0.95, 0.88, 0.6);
+
+          const eyeMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+          const pupilMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+          const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), eyeMat);
+          eyeL.scale.set(0.85, 1.25, 0.6); eyeL.position.set(-0.1, 0.15, 0.52);
+          const pupilL = new THREE.Mesh(new THREE.SphereGeometry(0.045, 6, 6), pupilMat);
+          pupilL.position.set(-0.08, 0.15, 0.58);
+          const eyeR = eyeL.clone(); eyeR.position.x = 0.1;
+          const pupilR = pupilL.clone(); pupilR.position.x = 0.08;
+
+          const nose = new THREE.Mesh(new THREE.SphereGeometry(0.085, 8, 8), redMat);
+          nose.position.set(0, 0.04, 0.61);
+
+          const collar = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.06, 6, 16), redMat);
+          collar.rotation.x = Math.PI / 2; collar.position.y = -0.42;
+          const bell = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), bellMat);
+          bell.position.set(0, -0.45, 0.44);
+
+          headGroup.add(head, face, eyeL, pupilL, eyeR, pupilR, nose, collar, bell);
+
+          const armL = new THREE.Group(); armL.position.set(-0.52, 0.82, 0);
+          const handL = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), whiteMat);
+          handL.position.y = -0.22; armL.add(handL);
+          const armR = new THREE.Group(); armR.position.set(0.52, 0.82, 0);
+          const handR = handL.clone(); armR.add(handR);
+
+          const legL = new THREE.Group(); legL.position.set(-0.25, 0.32, 0);
+          const footL = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.2, 0.42), whiteMat);
+          footL.position.set(0, -0.1, 0.06); legL.add(footL);
+          const legR = new THREE.Group(); legR.position.set(0.25, 0.32, 0);
+          const footR = footL.clone(); legR.add(footR);
+
+          g.add(body, belly, pocket, headGroup, armL, armR, legL, legR);
+          walkingCelebrities.push({
+            group: g, head: headGroup, armL, armR, legL, legR,
+            baseX: pos.x, baseZ: pos.z, baseY: pos.y,
+            radiusX: 2.6, radiusZ: 2.0, speed: 0.85, offset: Math.random() * Math.PI * 2
+          });
+          return g;
+        }
+      },
+      {
+        name: "蠟筆小新（漫步小島）",
+        build: (pos) => {
+          const g = new THREE.Group(); g.position.copy(pos);
+          const skinMat = new THREE.MeshStandardMaterial({ color: 0xfed7aa, roughness: 0.6 });
+          const hairMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
+          const redShirtMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.5 });
+          const yellowShortsMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.5 });
+          const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc });
+
+          const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.38, 0.55, 10), redShirtMat);
+          torso.position.y = 0.72;
+          const shorts = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.32, 10), yellowShortsMat);
+          shorts.position.y = 0.42;
+
+          const headGroup = new THREE.Group();
+          headGroup.position.set(0, 1.25, 0);
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.48, 12, 12), skinMat);
+          head.scale.set(1.2, 0.95, 1.05);
+
+          const hair = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 10, 0, Math.PI * 2, 0, Math.PI / 1.8), hairMat);
+          hair.rotation.x = -0.35; hair.position.set(0, 0.08, -0.05);
+
+          const browMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 });
+          const browL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.065, 0.06), browMat);
+          browL.rotation.z = -0.22; browL.position.set(-0.16, 0.16, 0.46);
+          const browR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.065, 0.06), browMat);
+          browR.rotation.z = 0.22; browR.position.set(0.16, 0.16, 0.46);
+
+          const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), hairMat);
+          eyeL.position.set(-0.15, 0.02, 0.48);
+          const eyeR = eyeL.clone(); eyeR.position.x = 0.15;
+
+          const blushMat = new THREE.MeshStandardMaterial({ color: 0xfb7185 });
+          const blushL = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), blushMat);
+          blushL.scale.set(1.2, 0.6, 0.4); blushL.position.set(-0.35, -0.08, 0.35);
+          const blushR = blushL.clone(); blushR.position.x = 0.35;
+
+          headGroup.add(head, hair, browL, browR, eyeL, eyeR, blushL, blushR);
+
+          const armL = new THREE.Group(); armL.position.set(-0.42, 0.8, 0);
+          const sleeveL = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.2, 6), redShirtMat);
+          const handL = new THREE.Mesh(new THREE.SphereGeometry(0.1, 6, 6), skinMat);
+          handL.position.y = -0.18; armL.add(sleeveL, handL);
+          const armR = new THREE.Group(); armR.position.set(0.42, 0.8, 0);
+          const sleeveR = sleeveL.clone(); const handR = handL.clone();
+          armR.add(sleeveR, handR);
+
+          const legL = new THREE.Group(); legL.position.set(-0.18, 0.26, 0);
+          const sockL = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.22, 6), whiteMat);
+          const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.14, 0.28), yellowShortsMat);
+          shoeL.position.set(0, -0.12, 0.05); legL.add(sockL, shoeL);
+          const legR = new THREE.Group(); legR.position.set(0.18, 0.26, 0);
+          const sockR = sockL.clone(); const shoeR = shoeL.clone();
+          legR.add(sockR, shoeR);
+
+          g.add(torso, shorts, headGroup, armL, armR, legL, legR);
+          walkingCelebrities.push({
+            group: g, head: headGroup, armL, armR, legL, legR,
+            baseX: pos.x, baseZ: pos.z, baseY: pos.y,
+            radiusX: 2.5, radiusZ: 1.9, speed: 0.95, offset: Math.random() * Math.PI * 2
+          });
+          return g;
+        }
+      },
+      {
+        name: "櫻桃小丸子（漫步小島）",
+        build: (pos) => {
+          const g = new THREE.Group(); g.position.copy(pos);
+          const skinMat = new THREE.MeshStandardMaterial({ color: 0xffedd5, roughness: 0.6 });
+          const hairMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
+          const whiteShirtMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.6 });
+          const redSkirtMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.5 });
+          const blackShoeMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
+          const yellowHatMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.5 });
+
+          const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.32, 0.48, 8), whiteShirtMat);
+          torso.position.y = 0.72;
+          const skirt = new THREE.Mesh(new THREE.ConeGeometry(0.48, 0.36, 12), redSkirtMat);
+          skirt.position.y = 0.44;
+          const strapL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.42, 0.03), redSkirtMat);
+          strapL.position.set(-0.14, 0.72, 0.16);
+          const strapR = strapL.clone(); strapR.position.x = 0.14;
+
+          const headGroup = new THREE.Group();
+          headGroup.position.set(0, 1.22, 0);
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.44, 12, 12), skinMat);
+          const hairBack = new THREE.Mesh(new THREE.SphereGeometry(0.47, 10, 10, 0, Math.PI * 2, 0, Math.PI / 1.7), hairMat);
+          hairBack.rotation.x = -0.25; hairBack.position.set(0, 0.05, -0.06);
+
+          const hatDome = new THREE.Mesh(new THREE.SphereGeometry(0.47, 12, 10, 0, Math.PI * 2, 0, Math.PI / 2), yellowHatMat);
+          hatDome.position.set(0, 0.18, -0.02);
+          const hatBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.64, 0.64, 0.04, 16), yellowHatMat);
+          hatBrim.position.set(0, 0.18, -0.02);
+          hatBrim.rotation.x = -0.08;
+          headGroup.add(hatDome, hatBrim);
+
+          for (let b = -3; b <= 3; b++) {
+            const tooth = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.16, 3), hairMat);
+            tooth.rotation.z = Math.PI; tooth.position.set(b * 0.09, 0.18, 0.42);
+            headGroup.add(tooth);
+          }
+
+          const blushL = new THREE.Mesh(new THREE.CircleGeometry(0.08, 8), new THREE.MeshStandardMaterial({ color: 0xfb7185, side: THREE.DoubleSide }));
+          blushL.position.set(-0.25, -0.08, 0.4); blushL.rotation.y = -0.4;
+          const blushR = blushL.clone(); blushR.position.x = 0.25; blushR.rotation.y = 0.4;
+
+          const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.045, 6, 6), hairMat);
+          eyeL.position.set(-0.12, 0.03, 0.42);
+          const eyeR = eyeL.clone(); eyeR.position.x = 0.12;
+
+          headGroup.add(head, hairBack, blushL, blushR, eyeL, eyeR);
+
+          const armL = new THREE.Group(); armL.position.set(-0.36, 0.78, 0);
+          const sleeveL = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.1, 0.16, 6), whiteShirtMat);
+          const handL = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), skinMat);
+          handL.position.y = -0.16; armL.add(sleeveL, handL);
+          const armR = new THREE.Group(); armR.position.set(0.36, 0.78, 0);
+          const sleeveR = sleeveL.clone(); const handR = handL.clone();
+          armR.add(sleeveR, handR);
+
+          const legL = new THREE.Group(); legL.position.set(-0.14, 0.25, 0);
+          const legMeshL = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.24, 6), whiteShirtMat);
+          const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.12, 0.24), blackShoeMat);
+          shoeL.position.set(0, -0.12, 0.04); legL.add(legMeshL, shoeL);
+          const legR = new THREE.Group(); legR.position.set(0.14, 0.25, 0);
+          const legMeshR = legMeshL.clone(); const shoeR = shoeL.clone();
+          legR.add(legMeshR, shoeR);
+
+          g.add(torso, skirt, strapL, strapR, headGroup, armL, armR, legL, legR);
+          walkingCelebrities.push({
+            group: g, head: headGroup, armL, armR, legL, legR,
+            baseX: pos.x, baseZ: pos.z, baseY: pos.y,
+            radiusX: 2.6, radiusZ: 1.8, speed: 0.88, offset: Math.random() * Math.PI * 2
+          });
+          return g;
+        }
+      },
+      {
         name: "米老鼠（漫步小島）",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
@@ -2179,161 +2387,79 @@
         }
       },
       {
-        name: "夢幻粉紅火烈鳥雕像",
+        name: "小恐龍（漫步小島）",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
-          const pinkMat = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.4 });
-          const deepPinkMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, roughness: 0.4 });
-          const beakTipMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+          const greenMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.5 });
+          const lightGreenMat = new THREE.MeshStandardMaterial({ color: 0x86efac, roughness: 0.5 });
+          const yellowMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.4 });
+          const darkMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 });
+          const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc });
 
-          // 涉水卵石池基座
-          const pool = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.3, 0.18, 16), new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.15 }));
-          pool.position.y = 0.09;
-          const rim = new THREE.Mesh(new THREE.TorusGeometry(1.25, 0.06, 6, 16), new THREE.MeshStandardMaterial({ color: 0x64748b }));
-          rim.rotation.x = Math.PI / 2; rim.position.y = 0.14;
+          const body = new THREE.Mesh(new THREE.SphereGeometry(0.38, 12, 12), greenMat);
+          body.scale.set(0.95, 1.15, 0.9);
+          body.position.y = 0.52;
 
-          // 亭亭玉立的修長雙腿（經典涉水單腿微屈姿態）
-          const legStanding = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 1.4, 6), deepPinkMat);
-          legStanding.position.set(-0.1, 0.78, 0);
-          const legFoldedUpper = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.65, 6), deepPinkMat);
-          legFoldedUpper.rotation.z = -0.7; legFoldedUpper.position.set(0.12, 1.1, 0);
-          const legFoldedLower = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.65, 6), deepPinkMat);
-          legFoldedLower.position.set(0.35, 0.75, 0);
+          const belly = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 10), lightGreenMat);
+          belly.scale.set(0.8, 0.95, 0.5);
+          belly.position.set(0, 0.5, 0.19);
 
-          // 圓潤羽毛身軀與層次羽翼
-          const body = new THREE.Mesh(new THREE.SphereGeometry(0.55, 12, 10), pinkMat);
-          body.scale.set(1.3, 0.85, 0.75); body.position.set(0, 1.55, 0);
-          const wingL = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.4, 0.12), deepPinkMat);
-          wingL.rotation.z = 0.2; wingL.position.set(-0.05, 1.6, 0.36);
-          const wingR = wingL.clone(); wingR.position.z = -0.36;
+          const headGroup = new THREE.Group();
+          headGroup.position.set(0, 0.94, 0.07);
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.33, 12, 12), greenMat);
+          head.scale.set(0.95, 0.9, 1.12);
 
-          // S 型長頸與黑尖彎嘴喙
-          const neck1 = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.85, 8), pinkMat);
-          neck1.rotation.z = -0.45; neck1.position.set(0.55, 1.9, 0);
-          const neck2 = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.7, 8), pinkMat);
-          neck2.rotation.z = 0.65; neck2.position.set(0.72, 2.5, 0);
+          const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.082, 8, 8), whiteMat);
+          eyeL.position.set(-0.18, 0.12, 0.24);
+          const pupilL = new THREE.Mesh(new THREE.SphereGeometry(0.042, 6, 6), darkMat);
+          pupilL.position.set(-0.185, 0.12, 0.3);
+          const eyeR = eyeL.clone(); eyeR.position.x = 0.18;
+          const pupilR = pupilL.clone(); pupilR.position.x = 0.185;
 
-          const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), pinkMat);
-          head.position.set(0.52, 2.82, 0);
-          const beakBase = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.35, 6), pinkMat);
-          beakBase.rotation.z = -Math.PI / 1.7; beakBase.position.set(0.35, 2.72, 0);
-          const beakTip = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.22, 6), beakTipMat);
-          beakTip.rotation.z = -Math.PI / 1.5; beakTip.position.set(0.22, 2.6, 0);
+          const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 10), greenMat);
+          muzzle.scale.set(1.0, 0.65, 1.1);
+          muzzle.position.set(0, -0.06, 0.25);
 
-          g.add(pool, rim, legStanding, legFoldedUpper, legFoldedLower, body, wingL, wingR, neck1, neck2, head, beakBase, beakTip);
+          for (let i = 0; i < 4; i++) {
+            const spike = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.13, 4), yellowMat);
+            spike.rotation.x = -Math.PI / 4;
+            spike.position.set(0, 0.18 - i * 0.13, -0.31);
+            headGroup.add(spike);
+          }
+          headGroup.add(head, eyeL, pupilL, eyeR, pupilR, muzzle);
+
+          const tail = new THREE.Group();
+          tail.position.set(0, 0.38, -0.3);
+          const tailMesh = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.48, 8), greenMat);
+          tailMesh.rotation.x = -Math.PI / 2.8;
+          tailMesh.position.set(0, 0.11, -0.16);
+          for (let j = 0; j < 3; j++) {
+            const tailSpike = new THREE.Mesh(new THREE.ConeGeometry(0.048, 0.11, 4), yellowMat);
+            tailSpike.rotation.x = -Math.PI / 3;
+            tailSpike.position.set(0, 0.2 - j * 0.07, -0.11 - j * 0.08);
+            tail.add(tailSpike);
+          }
+          tail.add(tailMesh);
+
+          const armL = new THREE.Group(); armL.position.set(-0.28, 0.58, 0.14);
+          const armMeshL = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.19, 6), greenMat);
+          armMeshL.rotation.x = Math.PI / 3; armL.add(armMeshL);
+          const armR = new THREE.Group(); armR.position.set(0.28, 0.58, 0.14);
+          const armMeshR = armMeshL.clone(); armR.add(armMeshR);
+
+          const legL = new THREE.Group(); legL.position.set(-0.19, 0.21, 0);
+          const footL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.16, 0.28), greenMat);
+          footL.position.set(0, -0.06, 0.05); legL.add(footL);
+          const legR = new THREE.Group(); legR.position.set(0.19, 0.21, 0);
+          const footR = footL.clone(); legR.add(footR);
+
+          g.add(body, belly, headGroup, tail, armL, armR, legL, legR);
+          walkingCelebrities.push({
+            group: g, head: headGroup, armL, armR, legL, legR, tail,
+            baseX: pos.x, baseZ: pos.z, baseY: pos.y,
+            radiusX: 2.2, radiusZ: 1.8, speed: 0.95, offset: Math.random() * Math.PI * 2
+          });
           return g;
-        }
-      },
-      {
-        name: "蒸汽龐克機械時鐘塔",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const copperMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, metalness: 0.75, roughness: 0.35 });
-          const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.9, roughness: 0.2 });
-          const dialMat = new THREE.MeshStandardMaterial({ color: 0xfef9c3, roughness: 0.4 });
-          const pipeMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8 });
-
-          // 鉚釘螺栓方形磚石主塔
-          const tower = new THREE.Mesh(new THREE.BoxGeometry(1.5, 3.4, 1.5), copperMat);
-          tower.position.y = 1.7;
-
-          // 外露機械連動大小齒輪組
-          const gear1 = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.1, 8, 14), brassMat);
-          gear1.position.set(0, 2.6, 0.78);
-          const gear2 = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.08, 8, 12), brassMat);
-          gear2.position.set(0.42, 2.1, 0.78);
-          const gear3 = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.07, 8, 10), pipeMat);
-          gear3.position.set(-0.4, 2.05, 0.78);
-
-          // 四面古典羅馬刻度鐘面與金色指針
-          [-0.78, 0.78].forEach(x => {
-            const dial = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.06, 16), dialMat);
-            dial.rotation.z = Math.PI / 2; dial.position.set(x, 2.6, 0);
-            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.28, 0.02), pipeMat);
-            hand.position.set(x * 1.02, 2.68, 0);
-            g.add(dial, hand);
-          });
-
-          // 蒸汽散熱銅管排風煙囪
-          const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 3.2, 8), pipeMat);
-          pipe.position.set(0.85, 2.0, 0.65);
-
-          // 頂部斜屋頂與機械風向標
-          const roof = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.1, 4), copperMat);
-          roof.rotation.y = Math.PI / 4; roof.position.y = 3.95;
-          const vane = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.7, 4), brassMat);
-          vane.position.y = 4.8;
-
-          g.add(tower, gear1, gear2, gear3, pipe, roof, vane);
-          return g;
-        }
-      },
-      {
-        name: "海濱透明水族觀景廊",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const steelMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8, roughness: 0.3 });
-          const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.65 });
-          const woodMat = new THREE.MeshStandardMaterial({ color: 0x854d0e, roughness: 0.8 });
-
-          // 水下沉箱固定基座與木質走道棧板
-          const pierPlank = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.2, 1.4), woodMat);
-          pierPlank.position.y = 0.25;
-
-          // 拱形透明壓克力深海水族隧道
-          const tunnel = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 3.4, 16, 1, true, 0, Math.PI), glassMat);
-          tunnel.rotation.z = Math.PI / 2; tunnel.position.y = 0.35;
-
-          // 強化鋼骨拱圈支撐框架
-          [-1.5, -0.75, 0, 0.75, 1.5].forEach(x => {
-            const rib = new THREE.Mesh(new THREE.TorusGeometry(0.92, 0.05, 6, 16, Math.PI), steelMat);
-            rib.position.set(x, 0.35, 0); g.add(rib);
-          });
-
-          // 隧道內側護欄與浮游熱帶小魚
-          const fish = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.35, 4), new THREE.MeshStandardMaterial({ color: 0xf97316 }));
-          fish.rotation.z = Math.PI / 2; fish.position.set(0.3, 0.8, 0);
-
-          g.add(pierPlank, tunnel, fish); return g;
-        }
-      },
-      {
-        name: "浪漫水上漂浮涼亭",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const deckMat = new THREE.MeshStandardMaterial({ color: 0xa16207, roughness: 0.85 });
-          const thatchMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.9 });
-          const barrelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.5 });
-          const curtainMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, transparent: true, opacity: 0.8 });
-
-          // 浮桶排架 (Pontoon Barrels)
-          [-0.8, 0.8].forEach(x => {
-            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2.6, 10), barrelMat);
-            barrel.rotation.x = Math.PI / 2; barrel.position.set(x, 0.18, 0);
-            g.add(barrel);
-          });
-
-          // 水上雪松原木休閒甲板
-          const deck = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.18, 2.6), deckMat);
-          deck.position.y = 0.4;
-          // 四角原木立柱與飄逸白色紗幔
-          [-0.9, 0.9].forEach(px => {
-            [-0.9, 0.9].forEach(pz => {
-              const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.8, 6), deckMat);
-              pillar.position.set(px, 1.25, pz); g.add(pillar);
-            });
-          });
-          const curtain = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 1.4), curtainMat);
-          curtain.position.set(-0.85, 1.1, 0);
-
-          // 熱帶編織茅草尖屋頂
-          const roof = new THREE.Mesh(new THREE.ConeGeometry(2.1, 1.1, 4), thatchMat);
-          roof.rotation.y = Math.PI / 4; roof.position.y = 2.65;
-          // 延伸至海面下的潛水木梯
-          const ladder = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.65, 0.06), deckMat);
-          ladder.rotation.x = 0.35; ladder.position.set(0, 0.15, 1.35);
-
-          g.add(deck, curtain, roof, ladder); return g;
         }
       },
       {
@@ -2404,70 +2530,6 @@
         }
       },
       {
-        name: "神秘古代太陽石碑",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const obelisk = new THREE.Mesh(new THREE.ConeGeometry(0.6, 3.2, 4), new THREE.MeshStandardMaterial({ color: 0xd4a373, roughness: 0.7 })); obelisk.position.y = 1.6;
-          g.add(obelisk); return g;
-        }
-      },
-      {
-        name: "皇家玫瑰迷宮花園",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const base = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.2, 2.8), new THREE.MeshStandardMaterial({ color: 0x15803d })); base.position.y = 0.1;
-          const rose = new THREE.Mesh(new THREE.SphereGeometry(0.4, 8, 8), new THREE.MeshStandardMaterial({ color: 0xef4444 })); rose.position.y = 0.5;
-          g.add(base, rose); return g;
-        }
-      },
-      {
-        name: "夢幻水晶獨角獸雕像",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const crystalMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.15, metalness: 0.3, transparent: true, opacity: 0.92 });
-          const goldHornMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.9, roughness: 0.15 });
-
-          // 雙階大理石雕刻銘文基座
-          const pedestal1 = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.35, 1.4), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 }));
-          pedestal1.position.y = 0.175;
-          const pedestal2 = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.25, 1.1), new THREE.MeshStandardMaterial({ color: 0x475569 }));
-          pedestal2.position.y = 0.45;
-
-          // 昂首躍起 (Rearing Up) 的雄健駿馬身段
-          const body = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.48, 1.3, 10), crystalMat);
-          body.rotation.z = -0.7; body.position.set(-0.15, 1.25, 0);
-
-          // 飛揚前蹄
-          const legFL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.06, 0.8, 6), crystalMat);
-          legFL.rotation.z = -1.2; legFL.position.set(0.65, 1.55, 0.22);
-          const legFR = legFL.clone(); legFR.rotation.z = -0.9; legFR.position.set(0.55, 1.7, -0.22);
-
-          // 矯健後肢踏立基座
-          const legBL = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.08, 0.9, 6), crystalMat);
-          legBL.position.set(-0.6, 0.8, 0.25);
-          const legBR = legBL.clone(); legBR.position.z = -0.25;
-
-          // 昂然長頸與馬首
-          const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.36, 0.9, 8), crystalMat);
-          neck.rotation.z = 0.55; neck.position.set(0.38, 1.95, 0);
-          const head = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.32, 0.28), crystalMat);
-          head.rotation.z = 0.25; head.position.set(0.65, 2.35, 0);
-
-          // 螺旋金色璀璨獨角 (Alicorn)
-          const horn = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.85, 8), goldHornMat);
-          horn.rotation.z = -0.7; horn.position.set(0.98, 2.75, 0);
-
-          // 飄逸靈動馬鬃與星光馬尾
-          const mane = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.8, 0.08), goldHornMat);
-          mane.rotation.z = 0.55; mane.position.set(0.25, 2.1, 0);
-          const tail = new THREE.Mesh(new THREE.ConeGeometry(0.22, 1.1, 6), crystalMat);
-          tail.rotation.z = 0.8; tail.position.set(-0.95, 1.0, 0);
-
-          g.add(pedestal1, pedestal2, body, legFL, legFR, legBL, legBR, neck, head, horn, mane, tail);
-          return g;
-        }
-      },
-      {
         name: "翼手龍（空中翱翔振翅）",
         build: (pos) => {
           const g = new THREE.Group();
@@ -2510,610 +2572,224 @@
         }
       },
       {
-        name: "夢幻深海珊瑚樹林",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const coralMat1 = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.7 });
-          const coralMat2 = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.65 });
-          const seaGreenMat = new THREE.MeshStandardMaterial({ color: 0x14b8a6, roughness: 0.6 });
-
-          // 礁石海底底座
-          const reefBase = new THREE.Mesh(new THREE.DodecahedronGeometry(1.6, 1), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.95 }));
-          reefBase.scale.set(1.4, 0.45, 1.2); reefBase.position.y = 0.2;
-
-          // 枝狀鹿角珊瑚群
-          for (let i = 0; i < 7; i++) {
-            const ang = (i / 7) * Math.PI * 2;
-            const branch = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.18, 1.8, 6), coralMat1);
-            branch.position.set(Math.cos(ang) * 0.7, 1.0, Math.sin(ang) * 0.7);
-            branch.rotation.z = Math.cos(ang) * 0.35;
-            branch.rotation.x = Math.sin(ang) * 0.35;
-
-            // 分叉小枝幹
-            const sub = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.65, 5), coralMat2);
-            sub.position.set(0, 0.65, 0.2); sub.rotation.x = 0.6;
-            branch.add(sub);
-            g.add(branch);
-          }
-
-          // 團狀扇形海葵與發光海珠
-          const anemone = new THREE.Mesh(new THREE.SphereGeometry(0.45, 8, 8), seaGreenMat);
-          anemone.position.set(0, 0.5, 0);
-          const pearl = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x38bdf8, emissiveIntensity: 0.9 }));
-          pearl.position.set(0, 0.85, 0);
-
-          g.add(reefBase, anemone, pearl); return g;
-        }
-      },
-      {
-        name: "浪漫星願天使許願池",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const marbleMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.45 });
-          const waterMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.2 });
-          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85 });
-
-          // 八角巴洛克雙層噴泉水池
-          const basinOuter = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.4, 0.45, 8), marbleMat);
-          basinOuter.position.y = 0.225;
-          const water = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.0, 0.35, 8), waterMat);
-          water.position.y = 0.25;
-
-          // 池中幸運閃亮金幣
-          for (let i = 0; i < 6; i++) {
-            const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.03, 8), goldMat);
-            coin.position.set((Math.random() - 0.5) * 1.5, 0.38, (Math.random() - 0.5) * 1.5);
-            g.add(coin);
-          }
-
-          // 中心羅馬雕花支柱與中層水缽
-          const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.6, 1.2, 8), marbleMat);
-          pedestal.position.y = 0.9;
-          const midBasin = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 0.8, 0.3, 12), marbleMat);
-          midBasin.position.y = 1.55;
-
-          // 純白雙翼祈願天使雕像
-          const angelBody = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.95, 8), marbleMat);
-          angelBody.position.y = 2.15;
-          const angelHead = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 8), marbleMat);
-          angelHead.position.y = 2.75;
-          const halo = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.03, 6, 16), goldMat);
-          halo.rotation.x = Math.PI / 2; halo.position.y = 2.92;
-
-          // 伸展的天使羽翼
-          const wingL = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.3, 0.06), marbleMat);
-          wingL.rotation.z = 0.6; wingL.position.set(-0.35, 2.4, -0.05);
-          const wingR = wingL.clone(); wingR.rotation.z = -0.6; wingR.position.x = 0.35;
-
-          g.add(basinOuter, water, pedestal, midBasin, angelBody, angelHead, halo, wingL, wingR);
-          return g;
-        }
-      },
-      {
-        name: "迷你火星探測車",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const chassisMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.6, roughness: 0.4 });
-          const goldFoilMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.85, roughness: 0.3 });
-          const tireMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
-          const lensMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.9 });
-
-          // 車身金色隔熱膜底盤與設備甲板
-          const body = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.55, 1.1), goldFoilMat);
-          body.position.y = 0.68;
-          const deck = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.12, 0.95), chassisMat);
-          deck.position.y = 0.98;
-
-          // 搖臂轉向懸吊系統與 6 顆凹槽輪胎 (Rocker-Bogie 6 Wheels)
-          [-0.7, 0, 0.7].forEach(x => {
-            [-0.7, 0.7].forEach(z => {
-              const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.18, 12), tireMat);
-              tire.rotation.x = Math.PI / 2;
-              tire.position.set(x, 0.24, z);
-              const strut = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.45, 6), chassisMat);
-              strut.position.set(x, 0.45, z * 0.75);
-              g.add(tire, strut);
-            });
-          });
-
-          // 高聳 Mastcam-Z 立體全景相機桅杆
-          const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.1, 6), chassisMat);
-          mast.position.set(0.45, 1.5, 0.3);
-          const camHead = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.18, 0.22), chassisMat);
-          camHead.position.set(0.45, 2.05, 0.3);
-          const lens1 = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.08, 8), lensMat);
-          lens1.rotation.z = Math.PI / 2; lens1.position.set(0.62, 2.05, 0.36);
-          const lens2 = lens1.clone(); lens2.position.z = 0.24;
-
-          // 前端可伸展採樣機械手臂
-          const armBase = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.6, 6), chassisMat);
-          armBase.rotation.z = -Math.PI / 3; armBase.position.set(0.9, 0.7, -0.25);
-          const drillHead = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.18), lensMat);
-          drillHead.position.set(1.2, 0.45, -0.25);
-
-          g.add(body, deck, mast, camHead, lens1, lens2, armBase, drillHead);
-          return g;
-        }
-      },
-      {
-        name: "冰淇淋童話甜品屋",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const coneMat = new THREE.MeshStandardMaterial({ color: 0xd4a373, roughness: 0.85 }); // 華夫餅格紋錐筒
-          const strawberryMat = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.4 });
-          const vanillaMat = new THREE.MeshStandardMaterial({ color: 0xffedd5, roughness: 0.4 });
-          const chocolateMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.3 });
-          const cherryMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.2 });
-
-          // 倒三角華夫格甜筒屋身
-          const coneHouse = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.2, 16), coneMat);
-          coneHouse.position.y = 1.1;
-          const door = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.85, 0.12), chocolateMat);
-          door.position.set(0, 0.42, 1.25);
-
-          // 雙球濃郁冰淇淋圓頂屋頂
-          const scoop1 = new THREE.Mesh(new THREE.SphereGeometry(1.25, 14, 12), strawberryMat);
-          scoop1.position.y = 2.35;
-          const scoop2 = new THREE.Mesh(new THREE.SphereGeometry(0.95, 12, 10), vanillaMat);
-          scoop2.position.set(0.2, 3.2, 0);
-
-          // 巧克力濃稠流淌淋醬與頂端大紅櫻桃
-          const drip = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.12, 6, 16), chocolateMat);
-          drip.rotation.x = Math.PI / 2; drip.position.y = 2.75;
-          const cherry = new THREE.Mesh(new THREE.SphereGeometry(0.26, 8, 8), cherryMat);
-          cherry.position.set(0.2, 4.2, 0);
-          const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.4, 4), chocolateMat);
-          stem.rotation.z = 0.4; stem.position.set(0.32, 4.45, 0);
-
-          g.add(coneHouse, door, scoop1, scoop2, drip, cherry, stem);
-          return g;
-        }
-      },
-      {
-        name: "海上明珠望海大觀亭",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const stoneBaseMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.8 });
-          const woodRedMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.5 });
-          const goldGlazeMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.35, metalness: 0.2 });
-
-          // 六角挑高臨水石台基座與圍欄
-          const base = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.5, 0.45, 6), stoneBaseMat);
-          base.position.y = 0.225;
-          const balustrade = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.08, 6, 6), stoneBaseMat);
-          balustrade.rotation.x = Math.PI / 2; balustrade.position.y = 0.65;
-
-          // 6 根朱紅油漆雕柱
-          for (let i = 0; i < 6; i++) {
-            const ang = (i / 6) * Math.PI * 2;
-            const p = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 2.1, 8), woodRedMat);
-            p.position.set(Math.cos(ang) * 1.8, 1.45, Math.sin(ang) * 1.8);
-            g.add(p);
-          }
-
-          // 亭中石雕棋桌與石凳
-          const table = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.5, 8), stoneBaseMat);
-          table.position.y = 0.65;
-
-          // 雙重飛簷金黃琉璃瓦重簷歇山頂 (Double Flying Eaves)
-          const lowerEave = new THREE.Mesh(new THREE.ConeGeometry(2.8, 0.85, 6), goldGlazeMat);
-          lowerEave.position.y = 2.75;
-          const upperEave = new THREE.Mesh(new THREE.ConeGeometry(1.9, 0.95, 6), goldGlazeMat);
-          upperEave.position.y = 3.65;
-          const topFinial = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8 }));
-          topFinial.position.y = 4.25;
-
-          g.add(base, balustrade, table, lowerEave, upperEave, topFinial);
-          return g;
-        }
-      },
-      {
-        name: "夢幻黃金皇冠噴泉",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const marbleMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
-          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.2 });
-          const waterMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, transparent: true, opacity: 0.8 });
-          const jewelMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.8 });
-
-          // 多層羅馬大理石湧泉水盆
-          const pool = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.5, 0.4, 16), marbleMat);
-          pool.position.y = 0.2;
-          const water = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.1, 0.35, 16), waterMat);
-          water.position.y = 0.22;
-
-          // 奢華立體雕花黃金皇冠本體 (Filigree Golden Crown)
-          const crownBase = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.05, 0.5, 16, 1, true), goldMat);
-          crownBase.position.y = 0.65;
-          const cushion = new THREE.Mesh(new THREE.SphereGeometry(1.0, 12, 10, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.6 }));
-          cushion.position.y = 0.65;
-
-          // 8 支鳶尾花尖角與璀璨紅寶石
-          for (let i = 0; i < 8; i++) {
-            const ang = (i / 8) * Math.PI * 2;
-            const spike = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.55, 4), goldMat);
-            spike.position.set(Math.cos(ang) * 1.15, 1.05, Math.sin(ang) * 1.15);
-            const gem = new THREE.Mesh(new THREE.SphereGeometry(0.09, 6, 6), jewelMat);
-            gem.position.set(Math.cos(ang) * 1.15, 1.35, Math.sin(ang) * 1.15);
-            g.add(spike, gem);
-          }
-
-          // 中央噴射晶瑩水柱花
-          const jet = new THREE.Mesh(new THREE.ConeGeometry(0.25, 1.6, 8), waterMat);
-          jet.position.y = 1.6;
-
-          g.add(pool, water, crownBase, cushion, jet);
-          return g;
-        }
-      },
-      {
-        name: "璀璨極光水晶金字塔",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const pyr = new THREE.Mesh(new THREE.ConeGeometry(2.0, 2.4, 4), new THREE.MeshStandardMaterial({ color: 0x2dd4bf, transparent: true, opacity: 0.8 })); pyr.rotation.y = Math.PI / 4; pyr.position.y = 1.2;
-          g.add(pyr); return g;
-        }
-      },
-      {
-        name: "森林奇境微縮火車軌",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const gravelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.95 });
-          const woodMat = new THREE.MeshStandardMaterial({ color: 0x543310, roughness: 0.8 });
-          const steelMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 });
-          const trainMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.5 });
-
-          // 環形道碴碎石基
-          const roadbed = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.35, 6, 32), gravelMat);
-          roadbed.rotation.x = Math.PI / 2; roadbed.position.y = 0.08;
-
-          // 雙重同心平滑鐵軌
-          [-0.12, 0.12].forEach(offset => {
-            const rail = new THREE.Mesh(new THREE.TorusGeometry(1.8 + offset, 0.025, 4, 32), steelMat);
-            rail.rotation.x = Math.PI / 2; rail.position.y = 0.15;
-            g.add(rail);
-          });
-
-          // 24 根微型木質枕木 (Ties)
-          for (let i = 0; i < 20; i++) {
-            const ang = (i / 20) * Math.PI * 2;
-            const tie = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.04, 0.1), woodMat);
-            tie.position.set(Math.cos(ang) * 1.8, 0.12, Math.sin(ang) * 1.8);
-            tie.rotation.y = -ang;
-            g.add(tie);
-          }
-
-          // 迷你復古綠皮蒸汽火車頭與小客車廂
-          const trainEngine = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.28, 0.22), trainMat);
-          trainEngine.position.set(1.8, 0.3, 0);
-          const chimney = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 0.2, 6), steelMat);
-          chimney.position.set(1.95, 0.48, 0);
-          const steamPuff = new THREE.Mesh(new THREE.SphereGeometry(0.1, 6, 6), new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 }));
-          steamPuff.position.set(2.0, 0.65, 0);
-
-          g.add(roadbed, trainEngine, chimney, steamPuff);
-          return g;
-        }
-      },
-      {
-        name: "雲端天鵝座觀星台",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const stoneMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
-          const domeMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.6, roughness: 0.25 });
-          const brassMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85 });
-
-          // 雙層八角星象石階平台與黃銅觀星圍欄
-          const base1 = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.5, 0.35, 8), stoneMat);
-          base1.position.y = 0.175;
-          const base2 = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.1, 0.25, 8), stoneMat);
-          base2.position.y = 0.45;
-          const railing = new THREE.Mesh(new THREE.TorusGeometry(1.95, 0.05, 6, 16), brassMat);
-          railing.rotation.x = Math.PI / 2; railing.position.y = 0.72;
-
-          // 天文圓頂基座建築體
-          const drum = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.45, 1.2, 16), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 }));
-          drum.position.y = 1.15;
-
-          // 可旋轉開合式半球形天文圓頂 (Slit Dome)
-          const dome = new THREE.Mesh(new THREE.SphereGeometry(1.38, 16, 12, 0, Math.PI * 1.75, 0, Math.PI / 2), domeMat);
-          dome.position.y = 1.75;
-
-          // 伸出圓頂開口的大口徑天文折射望遠鏡
-          const telescope = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 1.8, 8), brassMat);
-          telescope.rotation.x = 0.75; telescope.rotation.z = -0.35; telescope.position.set(-0.2, 2.45, 0.3);
-
-          g.add(base1, base2, railing, drum, dome, telescope);
-          return g;
-        }
-      },
-      {
-        name: "歡樂馬戲團彩條大帳篷",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const redMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.5 });
-          const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
-          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.75 });
-
-          // 圓形看台基底
-          const base = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.7, 0.3, 24), new THREE.MeshStandardMaterial({ color: 0x334155 }));
-          base.position.y = 0.15;
-
-          // 紅白相間大圓形立體帳篷頂 (Striped Big Top Tent)
-          const tentRoof = new THREE.Mesh(new THREE.ConeGeometry(2.5, 2.1, 16), redMat);
-          tentRoof.position.y = 1.85;
-          const valance = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.1, 6, 24), goldMat);
-          valance.rotation.x = Math.PI / 2; valance.position.y = 0.8;
-
-          // 雙主桅桿與頂部飄揚三角金旗
-          [-0.35, 0.35].forEach(x => {
-            const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2, 6), goldMat);
-            mast.position.set(x, 2.8, 0);
-            const flag = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.18, 0.02), whiteMat);
-            flag.position.set(x + 0.18, 3.3, 0);
-            g.add(mast, flag);
-          });
-
-          // 狂歡節拱形迎賓大紅門簾
-          const door = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.75, 0.2), new THREE.MeshStandardMaterial({ color: 0x0f172a }));
-          door.position.set(0, 0.5, 2.45);
-
-          g.add(base, tentRoof, valance, door);
-          return g;
-        }
-      },
-      {
-        name: "童話圓夢大城堡",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const stoneMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
-          const blueSpireMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 });
-          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8 });
-          const gateMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.8 });
-
-          // 城堡主城牆與雉堞護牆 (Main Keep)
-          const keep = new THREE.Mesh(new THREE.BoxGeometry(2.8, 2.2, 2.2), stoneMat);
-          keep.position.y = 1.1;
-          const battlement = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.35, 2.4), stoneMat);
-          battlement.position.y = 2.25;
-
-          // 拱形吊橋大門口
-          const gate = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.2, 0.2), gateMat);
-          gate.position.set(0, 0.6, 1.15);
-
-          // 四角守護圓柱副塔 (4 Flanking Towers with Spires)
-          [-1.35, 1.35].forEach(x => {
-            [-1.05, 1.05].forEach(z => {
-              const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 3.2, 10), stoneMat);
-              tower.position.set(x, 1.6, z);
-              const spire = new THREE.Mesh(new THREE.ConeGeometry(0.52, 1.6, 10), blueSpireMat);
-              spire.position.set(x, 3.9, z);
-              const flag = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.16, 0.02), goldMat);
-              flag.position.set(x + 0.18, 4.75, z);
-              g.add(tower, spire, flag);
-            });
-          });
-
-          // 中央巍峨主王權尖塔 (Central Grand Spire)
-          const centerTower = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 2.2, 12), stoneMat);
-          centerTower.position.y = 3.2;
-          const mainSpire = new THREE.Mesh(new THREE.ConeGeometry(0.85, 2.4, 12), blueSpireMat);
-          mainSpire.position.y = 5.2;
-          const crownSpire = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), goldMat);
-          crownSpire.position.y = 6.45;
-
-          g.add(keep, battlement, gate, centerTower, mainSpire, crownSpire);
-          return g;
-        }
-      },
-      {
-        name: "七彩星光迎賓大拱門",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.2 });
-          const rainbowColors = [0xef4444, 0xf97316, 0xfacc15, 0x22c55e, 0x06b6d4, 0x6366f1, 0xa855f7];
-
-          // 左右大理石基座花壇
-          [-1.9, 1.9].forEach(x => {
-            const base = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.6, 0.95), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-            base.position.set(x, 0.3, 0);
-            const trim = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.1, 1.05), goldMat);
-            trim.position.set(x, 0.62, 0);
-            g.add(base, trim);
-          });
-
-          // 多重七彩立體拱形同心光環 (Concentric Rainbow Arches)
-          rainbowColors.forEach((col, idx) => {
-            const rad = 1.9 - idx * 0.08;
-            const arch = new THREE.Mesh(
-              new THREE.TorusGeometry(rad, 0.05, 6, 24, Math.PI),
-              new THREE.MeshStandardMaterial({ color: col, roughness: 0.3 })
-            );
-            arch.position.set(0, 0.6, (idx - 3) * 0.05);
-            g.add(arch);
-          });
-
-          // 拱頂金色閃耀榮耀大五角星徽章
-          const star = new THREE.Mesh(new THREE.DodecahedronGeometry(0.35), goldMat);
-          star.position.set(0, 2.7, 0);
-
-          g.add(star); return g;
-        }
-      },
-      {
-        name: "鵝鑾鼻燈塔",
+        name: "史奴比（漫步小島）",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
           const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
-          const baseMat = new THREE.MeshStandardMaterial({ color: 0x78716c, roughness: 0.85 });
-          const darkMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
-          const roofMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
-          const glassMat = new THREE.MeshStandardMaterial({ color: 0xe0f2fe, roughness: 0.1, transparent: true, opacity: 0.75 });
+          const blackMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.25 });
+          const redCollarMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.5 });
+          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.2 });
 
-          // 1. 基底沙石矮坡與方型入口門廳 (整體微縮，更精巧)
-          const mound = new THREE.Mesh(new THREE.CylinderGeometry(1.85, 2.15, 0.3, 18), baseMat);
-          mound.position.y = 0.15;
-          const entrance = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.7, 0.4), whiteMat);
-          entrance.position.set(0, 0.38, 0.95);
-          const entranceDoor = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.48, 0.05), darkMat);
-          entranceDoor.position.set(0, 0.28, 1.16);
-          const entranceRoof = new THREE.Mesh(new THREE.ConeGeometry(0.42, 0.25, 4), whiteMat);
-          entranceRoof.rotation.y = Math.PI / 4;
-          entranceRoof.position.set(0, 0.82, 0.95);
+          const body = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.36, 0.52, 12), whiteMat);
+          body.position.y = 0.62;
+          body.castShadow = true;
 
-          // 2. 圓錐塔身 (收窄纖細化，去除臃腫感，更符合真實比例)
-          const towerBody = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 1.05, 3.6, 20), whiteMat);
-          towerBody.position.y = 1.95;
-          towerBody.castShadow = true;
+          const backSpot = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 10), blackMat);
+          backSpot.scale.set(0.9, 1.2, 0.4);
+          backSpot.position.set(0, 0.64, -0.32);
 
-          // 塔身立體黑窗 (三層交錯，縮小貼合)
-          const winGeo = new THREE.BoxGeometry(0.14, 0.2, 0.04);
-          const w1 = new THREE.Mesh(winGeo, darkMat); w1.position.set(-0.24, 3.0, 0.74);
-          const w2 = new THREE.Mesh(winGeo, darkMat); w2.position.set(0.24, 3.0, 0.74);
-          const w3 = new THREE.Mesh(winGeo, darkMat); w3.position.set(-0.25, 2.1, 0.84);
-          const w4 = new THREE.Mesh(winGeo, darkMat); w4.position.set(0.34, 2.1, 0.82);
-          const w5 = new THREE.Mesh(winGeo, darkMat); w5.position.set(0.26, 1.25, 0.96);
+          const collar = new THREE.Mesh(new THREE.TorusGeometry(0.33, 0.045, 8, 20), redCollarMat);
+          collar.rotation.x = Math.PI / 2;
+          collar.position.y = 0.88;
+          const tag = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.02, 8), goldMat);
+          tag.rotation.x = Math.PI / 2;
+          tag.position.set(0, 0.86, 0.36);
 
-          // 3. 頂部八角形外擴挑高走廊平台 (胸牆與圓環過渡，纖細收邊)
-          const balconyFlare = new THREE.Mesh(new THREE.CylinderGeometry(1.18, 0.72, 0.38, 16), whiteMat);
-          balconyFlare.position.y = 3.9;
-          const balconyDeck = new THREE.Mesh(new THREE.CylinderGeometry(1.22, 1.22, 0.16, 16), whiteMat);
-          balconyDeck.position.y = 4.14;
-          const balustrade = new THREE.Mesh(new THREE.TorusGeometry(1.18, 0.035, 6, 20), darkMat);
-          balustrade.rotation.x = Math.PI / 2;
-          balustrade.position.y = 4.38;
+          const headGroup = new THREE.Group();
+          headGroup.position.set(0, 1.18, 0.02);
 
-          // 4. 頂部燈室 (Lantern) 與圓錐黑頂蓋
-          const lanternWall = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.72, 0.7, 16), glassMat);
-          lanternWall.position.y = 4.58;
-          const roof = new THREE.Mesh(new THREE.ConeGeometry(0.82, 0.55, 16), roofMat);
-          roof.position.y = 5.18;
-          const finial = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), darkMat);
-          finial.position.y = 5.52;
+          const cranium = new THREE.Mesh(new THREE.SphereGeometry(0.34, 16, 14), whiteMat);
+          cranium.scale.set(0.92, 1.0, 0.95);
+          cranium.position.set(0, 0.02, -0.06);
 
-          // 5. 旋轉燈頭組 (包含燈芯、旋轉實體聚光燈與微光光束)
-          const rotatingLanternGroup = new THREE.Group();
-          rotatingLanternGroup.position.set(0, 4.58, 0);
+          const snout = new THREE.Mesh(new THREE.SphereGeometry(0.25, 16, 14), whiteMat);
+          snout.scale.set(0.85, 0.88, 1.45);
+          snout.position.set(0, -0.03, 0.22);
 
-          // 核心常亮高光燈球 (白光)
-          const coreBulb = new THREE.Mesh(
-            new THREE.SphereGeometry(0.28, 16, 16),
-            new THREE.MeshBasicMaterial({ color: 0xffffff })
-          );
-          // 外層柔和金色光暈 (加法混合發光)
-          const bulbGlow = new THREE.Mesh(
-            new THREE.SphereGeometry(0.38, 16, 16),
-            new THREE.MeshBasicMaterial({
-              color: 0xfde047,
-              transparent: true,
-              opacity: 0.45,
-              blending: THREE.AdditiveBlending
-            })
-          );
-          rotatingLanternGroup.add(coreBulb, bulbGlow);
+          const jaw = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 12), whiteMat);
+          jaw.position.set(0, -0.08, 0.06);
 
-          // 燈頭內建暖黃微光點光源
-          const lanternPointLight = new THREE.PointLight(0xfef3c7, 0.55, 9, 2.0);
-          rotatingLanternGroup.add(lanternPointLight);
+          const nose = new THREE.Mesh(new THREE.SphereGeometry(0.078, 12, 10), blackMat);
+          nose.scale.set(1.15, 0.92, 0.85);
+          nose.position.set(0, 0.08, 0.54);
 
-          // 動態生成柔化無硬邊光束貼圖 (超柔和羽化高斯過渡，消除幾何硬邊)
-          const beamCanvas = document.createElement('canvas');
-          beamCanvas.width = 128;
-          beamCanvas.height = 256;
-          const bCtx = beamCanvas.getContext('2d');
-          const bData = bCtx.createImageData(128, 256);
-          for (let py = 0; py < 256; py++) {
-            const ny = py / 256; // 0 (近端) ~ 1 (遠端)
-            const lengthFade = Math.sin(Math.pow(1 - ny, 0.75) * Math.PI * 0.5) * (1 - ny * 0.85);
-            for (let px = 0; px < 128; px++) {
-              const nx = (px - 64) / 64; // -1 ~ 1
-              const crossFade = Math.max(0, Math.cos(Math.abs(nx) * Math.PI * 0.5));
-              const alpha = Math.pow(crossFade, 2.4) * lengthFade;
-              const idx = (py * 128 + px) * 4;
-              bData.data[idx] = 254;
-              bData.data[idx + 1] = 244;
-              bData.data[idx + 2] = 199;
-              bData.data[idx + 3] = Math.floor(Math.min(1, Math.max(0, alpha)) * 255);
-            }
-          }
-          bCtx.putImageData(bData, 0, 0);
-          const hazyBeamTex = new THREE.CanvasTexture(beamCanvas);
+          const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.036, 8, 8), blackMat);
+          eyeL.scale.set(0.45, 1.25, 0.65);
+          eyeL.position.set(-0.16, 0.11, 0.15);
+          const eyeR = eyeL.clone();
+          eyeR.position.x = 0.16;
 
-          // 3 組交錯羽化扇形光面 (無硬邊幾何體，任意視角皆如朦朧夜霧光芒)
-          const beamGroup = new THREE.Group();
-          const beamMat = new THREE.MeshBasicMaterial({
-            map: hazyBeamTex,
-            color: 0xfef3c7,
-            transparent: true,
-            opacity: 0.0,
-            side: THREE.DoubleSide,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false
-          });
+          const browL = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.015, 0.02), blackMat);
+          browL.rotation.z = -0.15;
+          browL.position.set(-0.16, 0.18, 0.13);
+          const browR = browL.clone();
+          browR.rotation.z = 0.15;
+          browR.position.x = 0.16;
 
-          const beamLen = 32;
-          const nearW = 0.5;
-          const farW = 6.8;
-          const planeGeo = new THREE.PlaneGeometry(1, beamLen, 1, 8);
-          planeGeo.translate(0, beamLen / 2, 0);
-          const posAttr = planeGeo.attributes.position;
-          for (let i = 0; i < posAttr.count; i++) {
-            const y = posAttr.getY(i);
-            const progress = y / beamLen;
-            const w = nearW + (farW - nearW) * progress;
-            posAttr.setX(i, posAttr.getX(i) * w);
-          }
-          planeGeo.computeVertexNormals();
-          planeGeo.rotateX(Math.PI / 2);
+          const smileL = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.012, 4, 8, Math.PI * 0.45), blackMat);
+          smileL.rotation.y = -Math.PI / 2;
+          smileL.rotation.z = 0.3;
+          smileL.position.set(-0.21, -0.09, 0.2);
+          const smileR = smileL.clone();
+          smileR.rotation.y = Math.PI / 2;
+          smileR.position.x = 0.21;
 
-          [0, Math.PI / 3, (Math.PI * 2) / 3].forEach(rotAngle => {
-            const pMesh = new THREE.Mesh(planeGeo, beamMat);
-            pMesh.rotation.z = rotAngle;
-            beamGroup.add(pMesh);
-          });
-          beamGroup.position.set(0, 0, 0.2);
-          beamGroup.rotation.x = 0.05;
-          beamGroup.visible = false;
-          rotatingLanternGroup.add(beamGroup);
+          const createEar = (isLeft) => {
+            const ear = new THREE.Group();
+            const earMain = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 0.44, 12), blackMat);
+            earMain.scale.set(0.35, 1.0, 1.0);
+            earMain.position.y = -0.2;
+            const earTip = new THREE.Mesh(new THREE.SphereGeometry(0.15, 12, 8), blackMat);
+            earTip.scale.set(0.35, 0.65, 1.0);
+            earTip.position.y = -0.42;
+            ear.add(earMain, earTip);
 
-          // 照向海面的柔和聚光燈 (極限羽化 penumbra=1.0，稍微增強強度至 0.92)
-          const spotLight = new THREE.SpotLight(0xfff7ed, 0.0, 52, Math.PI / 6, 1.0, 2.0);
-          spotLight.position.set(0, 0, 0.2);
-          const spotTarget = new THREE.Object3D();
-          spotTarget.position.set(0, -2.5, 24);
-          spotLight.target = spotTarget;
-          rotatingLanternGroup.add(spotLight, spotTarget);
-
-          // 6. 依照參考圖片加入可愛的藍白相間遮陽傘 (依比例精緻縮小)
-          const umbrellaGroup = new THREE.Group();
-          umbrellaGroup.position.set(1.35, 0.28, 1.05);
-          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 1.1, 6), darkMat);
-          pole.position.y = 0.55;
-          const canopy = new THREE.Mesh(new THREE.ConeGeometry(0.68, 0.45, 8), new THREE.MeshStandardMaterial({
-            color: 0x38bdf8,
-            roughness: 0.4
-          }));
-          canopy.position.y = 1.1;
-          umbrellaGroup.add(pole, canopy);
-
-          g.add(
-            mound, entrance, entranceDoor, entranceRoof,
-            towerBody, w1, w2, w3, w4, w5,
-            balconyFlare, balconyDeck, balustrade,
-            lanternWall, roof, finial,
-            rotatingLanternGroup, umbrellaGroup
-          );
-
-          // 註冊給全域動畫迴圈
-          g.userData.lighthouseData = {
-            rotator: rotatingLanternGroup,
-            beamMesh: beamGroup,
-            bulbGlowMat: bulbGlow.material,
-            spot: spotLight,
-            beamMat: beamMat,
-            pointLight: lanternPointLight
+            const side = isLeft ? -1 : 1;
+            ear.position.set(side * 0.31, 0.08, -0.08);
+            ear.rotation.z = side * 0.28;
+            ear.rotation.x = -0.18;
+            ear.rotation.y = side * 0.15;
+            return ear;
           };
 
+          const earL = createEar(true);
+          const earR = createEar(false);
+
+          headGroup.add(cranium, snout, jaw, nose, eyeL, eyeR, browL, browR, smileL, smileR, earL, earR);
+
+          const armL = new THREE.Group();
+          armL.position.set(-0.35, 0.68, 0.05);
+          const armMeshL = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.26, 6), whiteMat);
+          armMeshL.rotation.x = 0.35;
+          armL.add(armMeshL);
+
+          const armR = new THREE.Group();
+          armR.position.set(0.35, 0.68, 0.05);
+          const armMeshR = armMeshL.clone();
+          armR.add(armMeshR);
+
+          const legL = new THREE.Group();
+          legL.position.set(-0.16, 0.24, 0);
+          const footL = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.14, 0.32), whiteMat);
+          footL.position.set(0, -0.07, 0.06);
+          legL.add(footL);
+
+          const legR = new THREE.Group();
+          legR.position.set(0.16, 0.24, 0);
+          const footR = footL.clone();
+          legR.add(footR);
+
+          const tail = new THREE.Group();
+          tail.position.set(0, 0.48, -0.32);
+          const tailMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 0.24, 6), whiteMat);
+          tailMesh.rotation.x = -Math.PI / 3;
+          tailMesh.position.set(0, 0.08, -0.08);
+          tail.add(tailMesh);
+
+          g.add(body, backSpot, collar, tag, headGroup, armL, armR, legL, legR, tail);
+
+          walkingCelebrities.push({
+            group: g, head: headGroup, armL, armR, legL, legR, tail,
+            baseX: pos.x, baseZ: pos.z, baseY: pos.y,
+            radiusX: 2.5, radiusZ: 2.0, speed: 0.90, offset: Math.random() * Math.PI * 2
+          });
+          return g;
+        }
+      },
+      {
+        name: "小熊維尼（漫步小島）",
+        build: (pos) => {
+          const g = new THREE.Group(); g.position.copy(pos);
+          const furMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 });
+          const shirtMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.5 });
+          const darkMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 });
+          const muzzleMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.6 });
+
+          const belly = new THREE.Mesh(new THREE.SphereGeometry(0.48, 14, 14), furMat);
+          belly.scale.set(1.05, 1.15, 1.05);
+          belly.position.y = 0.68;
+
+          const shirt = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.5, 0.42, 14), shirtMat);
+          shirt.position.y = 0.82;
+          const shirtCollar = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.06, 6, 14), shirtMat);
+          shirtCollar.rotation.x = Math.PI / 2;
+          shirtCollar.position.y = 1.02;
+
+          const headGroup = new THREE.Group();
+          headGroup.position.set(0, 1.32, 0);
+
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.44, 14, 14), furMat);
+          head.scale.set(1.05, 0.98, 1.02);
+
+          const earL = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), furMat);
+          earL.scale.set(0.6, 1.0, 1.0);
+          earL.position.set(-0.35, 0.35, -0.05);
+          const earR = earL.clone();
+          earR.position.x = 0.35;
+
+          const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 10), muzzleMat);
+          muzzle.scale.set(1.15, 0.85, 1.1);
+          muzzle.position.set(0, -0.08, 0.3);
+
+          const nose = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), darkMat);
+          nose.scale.set(1.1, 0.8, 0.9);
+          nose.position.set(0, 0.02, 0.48);
+
+          const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.045, 6, 6), darkMat);
+          eyeL.position.set(-0.12, 0.1, 0.38);
+          const eyeR = eyeL.clone();
+          eyeR.position.x = 0.12;
+
+          const browMat = new THREE.MeshStandardMaterial({ color: 0xb45309 });
+          const browL = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.025, 0.02), browMat);
+          browL.rotation.z = -0.15;
+          browL.position.set(-0.12, 0.18, 0.39);
+          const browR = browL.clone();
+          browR.rotation.z = 0.15;
+          browR.position.x = 0.12;
+
+          headGroup.add(head, earL, earR, muzzle, nose, eyeL, eyeR, browL, browR);
+
+          const armL = new THREE.Group();
+          armL.position.set(-0.46, 0.86, 0);
+          const sleeveL = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.15, 0.2, 8), shirtMat);
+          sleeveL.rotation.z = 0.4;
+          const pawL = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 8), furMat);
+          pawL.position.set(-0.12, -0.16, 0.08);
+          armL.add(sleeveL, pawL);
+
+          const armR = new THREE.Group();
+          armR.position.set(0.46, 0.86, 0);
+          const sleeveR = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.15, 0.2, 8), shirtMat);
+          sleeveR.rotation.z = -0.4;
+          const pawR = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 8), furMat);
+          pawR.position.set(0.12, -0.16, 0.08);
+          armR.add(sleeveR, pawR);
+
+          const legL = new THREE.Group();
+          legL.position.set(-0.22, 0.28, 0);
+          const legMeshL = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.14, 0.26, 8), furMat);
+          const footL = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 8), furMat);
+          footL.scale.set(0.9, 0.65, 1.35);
+          footL.position.set(0, -0.12, 0.08);
+          legL.add(legMeshL, footL);
+
+          const legR = new THREE.Group();
+          legR.position.set(0.22, 0.28, 0);
+          const legMeshR = legMeshL.clone();
+          const footR = footL.clone();
+          legR.add(legMeshR, footR);
+
+          const tail = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), furMat);
+          tail.position.set(0, 0.45, -0.46);
+
+          g.add(belly, shirt, shirtCollar, headGroup, armL, armR, legL, legR, tail);
+
+          walkingCelebrities.push({
+            group: g, head: headGroup, armL, armR, legL, legR,
+            baseX: pos.x, baseZ: pos.z, baseY: pos.y,
+            radiusX: 2.5, radiusZ: 2.1, speed: 0.85, offset: Math.random() * Math.PI * 2
+          });
           return g;
         }
       }
@@ -3533,7 +3209,8 @@
     // 雁行遷徙白候鳥群專屬變數
     let migratoryFlockGroup = null;
     let migratoryFlockUnlocked = false;
-    let migratoryFlockAngle = 0;
+    let migratoryFlockDir = 1; // 1: 左到右, -1: 右到左
+    let migratoryFlockTargetYaw = Math.PI / 2; // 目標轉向角度
     const migratoryBirds = [];
 
     // 全域相機角度與滾輪縮放距離變數
@@ -3986,6 +3663,9 @@
     // 單隻優雅白候鳥模型
     function createMigratoryBirdModel() {
       const bird = new THREE.Group();
+      // 尺寸微型化：縮小到約原本的 40%~45%
+      bird.scale.set(0.42, 0.42, 0.42);
+
       const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.45 });
       const beakMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 });
 
@@ -4035,27 +3715,27 @@
       migratoryFlockGroup = new THREE.Group();
       migratoryBirds.length = 0;
 
-      // 經典 V 字雁行排列座標（7 隻編隊）
+      // 經典 V 字雁行排列座標（共 21 隻：1 隻領頭雁 + 左右各 10 隻）
       const vOffsets = [
-        { x: 0, z: 0 },         // 領頭雁
-        { x: -1.2, z: -1.3 },   // 左翼 1
-        { x: 1.2, z: -1.3 },    // 右翼 1
-        { x: -2.4, z: -2.6 },   // 左翼 2
-        { x: 2.4, z: -2.6 },    // 右翼 2
-        { x: -3.6, z: -3.9 },   // 左翼 3
-        { x: 3.6, z: -3.9 }     // 右翼 3
+        { x: 0, z: 0 } // 領頭雁
       ];
+      for (let i = 1; i <= 10; i++) {
+        vOffsets.push({ x: -i * 0.95, z: -i * 1.15 }); // 左翼隊形
+        vOffsets.push({ x:  i * 0.95, z: -i * 1.15 }); // 右翼隊形
+      }
 
       vOffsets.forEach((pos, idx) => {
         const birdData = createMigratoryBirdModel();
         birdData.group.position.set(pos.x, 0, pos.z);
-        birdData.phase = idx * 0.35;
+        birdData.phase = idx * 0.28;
         migratoryBirds.push(birdData);
         migratoryFlockGroup.add(birdData.group);
       });
 
-      migratoryFlockAngle = 0;
-      migratoryFlockGroup.position.set(23, 21.5, 0);
+      migratoryFlockDir = 1;
+      migratoryFlockTargetYaw = Math.PI / 2;
+      migratoryFlockGroup.rotation.set(0, Math.PI / 2, 0);
+      migratoryFlockGroup.position.set(-52, 22.0, -2.0); // 從左側遠方高空開始
       migratoryFlockGroup.scale.set(0.01, 0.01, 0.01);
       scene.add(migratoryFlockGroup);
 
@@ -5522,27 +5202,30 @@
         createGrandRainbow();
       }
 
-      // 全島四面八方隨機擴散演算法 (360° 黃金角有機分佈，避免重疊或死板排成一列)
-      const goldenAngle = 2.39996; // 黃金角度 (約 137.5 度)
-      const angle = (specialMonumentsSpawned * goldenAngle) + (Math.random() * 0.4 - 0.2);
-      
       let posX, posZ, posY;
 
-      // 特殊水上大型艦船（如「外海遠洋大商船」）：固定泊錨在外海深水區，絕不擱淺在陸地或河流
-      if (monument.name.includes("大商船")) {
+      // 若是第 50 座地標（鵝鑾鼻燈塔），特意固定座落於小島正中央！
+      if (monument.name.includes("燈塔") || specialMonumentsSpawned === 50) {
+        posX = 0;
+        posZ = 0;
+        posY = 1.35;
+      } else if (monument.name.includes("大商船")) {
+        // 特殊水上大型艦船：固定泊錨在外海深水區
+        const goldenAngle = 2.39996;
+        const angle = (specialMonumentsSpawned * goldenAngle) + (Math.random() * 0.4 - 0.2);
         const oceanRad = 31.0 + (Math.random() * 5.0);
         posX = Math.cos(angle) * oceanRad;
         posZ = Math.sin(angle) * oceanRad;
-        posY = 0.12; // 貼齊海平面
+        posY = 0.12;
       } else {
-        // 距離中心半徑從 3.5 (內陸平原) 擴散到 16.0 (海岸沙灘邊緣)
-        const rRatio = 0.2 + (Math.random() * 0.75);
-        const rad = 3.5 + Math.sqrt(rRatio) * 12.0;
+        // 其他 1~49 個地標：保留島中央半徑 3.8 緩衝區，散佈在半徑 4.5 到 16.0 之間
+        const goldenAngle = 2.39996;
+        const angle = (specialMonumentsSpawned * goldenAngle) + (Math.random() * 0.4 - 0.2);
+        const rRatio = 0.08 + (Math.random() * 0.88);
+        const rad = 4.5 + Math.sqrt(rRatio) * 11.5;
 
         posX = Math.cos(angle) * rad;
         posZ = Math.sin(angle) * rad;
-
-        // 依距離判斷高度：若在沙灘/近海邊緣 (rad > 15.0) 則貼近沙灘 (0.32)，若在內陸則座落於草坪 (1.35)
         posY = (rad > 15.0) ? 0.32 : 1.35;
       }
 
@@ -5683,7 +5366,8 @@
     // 依指定召喚單一紀念人物／生物，放置於專屬領地並給予動態特寫鏡頭，數秒後自動回退原視角
     function summonSpecificCharacter(charName, customScale = 1.35, isTrialSpawn = false) {
       sound.init();
-      const monument = SPECIAL_MONUMENTS.find(m => m.name.includes(charName));
+      const monument = HIDDEN_CHARACTERS.find(m => m.name.includes(charName)) 
+        || SPECIAL_MONUMENTS.find(m => m.name.includes(charName));
       if (monument) {
         const isFlyer = charName.includes("翼手龍");
         
@@ -5932,7 +5616,7 @@
         return;
       }
       if (code === 'd') {
-        summonSpecificCharacter("小恐龍", 0.85);
+        summonSpecificCharacter("小恐龍", 1.05);
         return;
       }
       if (code === 'buzz' || val === '巴斯光年') {
@@ -6359,28 +6043,40 @@
       spawnedIslandObjects.forEach(obj => {
         if (obj && obj.userData && obj.userData.lighthouseData) {
           const lh = obj.userData.lighthouseData;
-          const isNight = (timePhase === 3);
+          // 從晚霞 (2)、夜晚 (3) 一路亮到清晨 (0)，僅在中午 (1) 關閉休息
+          const isLighthouseActive = (timePhase === 2 || timePhase === 3 || timePhase === 0);
 
-          if (isNight) {
-            // 夜晚：燈頭 360° 優雅慢速旋轉 (約 35 秒轉一圈，寧靜詩意)
+          if (isLighthouseActive) {
+            // 燈頭 360° 優雅慢速旋轉 (約 35 秒轉一圈，寧靜詩意)
             lh.rotator.rotation.y += dt * 0.18;
             if (lh.rotator.rotation.y > Math.PI * 2) {
               lh.rotator.rotation.y -= Math.PI * 2;
             }
 
-            // 柔和朦朧光效：光芒稍微增強一點點 (透明度 0.52，聚光燈強度 0.92)
+            // 依時段微調強度：深夜 (3) 最為飽滿璀璨，晚霞 (2) 與清晨 (0) 維持柔和晨昏光暈
+            const targetBeamOpacity = (timePhase === 3) ? 0.52 : 0.38;
+            const targetSpotIntensity = (timePhase === 3) ? 0.92 : 0.65;
+            const targetPointLight = (timePhase === 3) ? 0.55 : 0.40;
+
             if (lh.beamMesh) lh.beamMesh.visible = true;
-            if (lh.beamMat) lh.beamMat.opacity += (0.52 - lh.beamMat.opacity) * 0.05;
-            if (lh.spot) lh.spot.intensity += (0.92 - lh.spot.intensity) * 0.05;
-            if (lh.pointLight) lh.pointLight.intensity += (0.55 - lh.pointLight.intensity) * 0.05;
-            if (lh.bulbGlowMat) lh.bulbGlowMat.opacity = 0.45;
+            if (lh.beamMat) lh.beamMat.opacity += (targetBeamOpacity - lh.beamMat.opacity) * 0.05;
+            if (lh.spot) lh.spot.intensity += (targetSpotIntensity - lh.spot.intensity) * 0.05;
+            if (lh.pointLight) lh.pointLight.intensity += (targetPointLight - lh.pointLight.intensity) * 0.05;
+            if (lh.bulbGlowMat) lh.bulbGlowMat.opacity = (timePhase === 3) ? 0.45 : 0.32;
           } else {
-            // 白天：光束完全關閉隱藏，停止夜間光效
-            if (lh.beamMesh) lh.beamMesh.visible = false;
-            if (lh.beamMat) lh.beamMat.opacity = 0.0;
-            if (lh.spot) lh.spot.intensity = 0.0;
-            if (lh.pointLight) lh.pointLight.intensity = 0.0;
-            if (lh.bulbGlowMat) lh.bulbGlowMat.opacity = 0.0;
+            // 中午時段：光束平滑淡出並隱藏，回歸常態
+            if (lh.beamMat && lh.beamMat.opacity > 0.01) {
+              lh.beamMat.opacity += (0.0 - lh.beamMat.opacity) * 0.08;
+              if (lh.spot) lh.spot.intensity += (0.0 - lh.spot.intensity) * 0.08;
+              if (lh.pointLight) lh.pointLight.intensity += (0.0 - lh.pointLight.intensity) * 0.08;
+              if (lh.bulbGlowMat) lh.bulbGlowMat.opacity += (0.0 - lh.bulbGlowMat.opacity) * 0.08;
+            } else {
+              if (lh.beamMesh) lh.beamMesh.visible = false;
+              if (lh.beamMat) lh.beamMat.opacity = 0.0;
+              if (lh.spot) lh.spot.intensity = 0.0;
+              if (lh.pointLight) lh.pointLight.intensity = 0.0;
+              if (lh.bulbGlowMat) lh.bulbGlowMat.opacity = 0.0;
+            }
           }
         }
       });
@@ -6415,20 +6111,36 @@
         if (fc.wingR) fc.wingR.rotation.z = -flap;
       });
 
-      // 雁行遷徙白候鳥群在高空優雅迴旋伴飛
+      // 雁行遷徙白候鳥群在天際水平直線往返飛行 (左 ⇄ 右)
       if (migratoryFlockGroup) {
-        migratoryFlockAngle += dt * 0.14; // 慢速優雅迴旋
-        const flockRadius = 22.5;
-        const fx = Math.cos(migratoryFlockAngle) * flockRadius;
-        const fz = Math.sin(migratoryFlockAngle) * flockRadius;
-        const flockWave = Math.sin(currentTime * 0.0012) * 0.55;
-        migratoryFlockGroup.position.set(fx, 21.5 + flockWave, fz);
-        // 鳥頭順著航向切線方向前進，並略帶氣流內傾角
-        migratoryFlockGroup.rotation.y = -migratoryFlockAngle - Math.PI / 2;
-        migratoryFlockGroup.rotation.z = 0.12;
+        const flySpeed = 5.8; // 水平前進速度
+        migratoryFlockGroup.position.x += migratoryFlockDir * flySpeed * dt;
 
+        // 到達右側邊界 (X = 52) 時轉向往左；到達左側邊界 (X = -52) 時轉向往右
+        if (migratoryFlockGroup.position.x >= 52 && migratoryFlockDir > 0) {
+          migratoryFlockDir = -1;
+          migratoryFlockTargetYaw = -Math.PI / 2; // 朝向左方
+        } else if (migratoryFlockGroup.position.x <= -52 && migratoryFlockDir < 0) {
+          migratoryFlockDir = 1;
+          migratoryFlockTargetYaw = Math.PI / 2; // 朝向右方
+        }
+
+        // 平順轉向插值，避免突然翻轉
+        let diffYaw = migratoryFlockTargetYaw - migratoryFlockGroup.rotation.y;
+        while (diffYaw < -Math.PI) diffYaw += Math.PI * 2;
+        while (diffYaw > Math.PI) diffYaw -= Math.PI * 2;
+        migratoryFlockGroup.rotation.y += diffYaw * 2.8 * dt;
+
+        // 轉向時帶有細微氣流側傾角，增添自然感
+        migratoryFlockGroup.rotation.z = -diffYaw * 0.35;
+
+        // 高度維持在天空高處 (22.0)，並帶有極微幅的上下波浪起伏 (±0.35)
+        const waveH = Math.sin(currentTime * 0.0012) * 0.35;
+        migratoryFlockGroup.position.y = 22.0 + waveH;
+
+        // 每隻候鳥的自然振翅動作
         migratoryBirds.forEach(b => {
-          const flap = Math.sin(currentTime * 0.004 + b.phase) * 0.42;
+          const flap = Math.sin(currentTime * 0.0045 + b.phase) * 0.42;
           b.wingL.rotation.z = flap;
           b.wingR.rotation.z = -flap;
         });
