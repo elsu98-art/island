@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>我的夢想島：中文打字開拓記（SV.01 - 86）</title>
-  <!-- 版本：SV.01 - 86｜一般區塊加強外圈與左右分布；保留島面邊界、地標範圍及輸入隱藏模式 -->
+  <title>我的夢想島：中文打字開拓記（SV.01 - 91）</title>
+  <!-- 版本：SV.01 - 90｜補回台北101煙火低音回音，整體音效增強約130% -->
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -344,7 +344,7 @@
     <!-- 底部操作提示與左下角版本編號 -->
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
-      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-86)</span>
+      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-91)</span>
       <span>拖曳旋轉 360° 全景 ‧ 滑鼠滾輪或雙指縮放視角</span>
     </footer>
   </div>
@@ -1974,7 +1974,7 @@
       {
         name: "台北一零一摩天大樓",
         build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
+          const g = new THREE.Group(); g.name = "台北一零一摩天大樓"; g.userData.isTaipei101 = true; g.position.copy(pos);
           const glassMat = new THREE.MeshStandardMaterial({
             color: 0x7dd3fc,
             metalness: 0.25,
@@ -3508,6 +3508,8 @@
     class SoundEngine {
       constructor() {
         this.ctx = null;
+        this.sfxMasterGain = null;
+        this.sfxGainMultiplier = 1.80; // SV.01-91：所有非環境遊戲音效與背景音樂總輸出提高至 180%
         this.muted = false;
         this.bgmMode = 1; // 1: 音樂1, 2: 音樂2, 3: 音樂3, 0: 音樂關
         this.nightTimer = null;
@@ -3541,6 +3543,16 @@
         if (this.ctx && this.ctx.state === 'suspended') {
           this.ctx.resume();
         }
+      }
+      // 非環境音的遊戲音效與音樂共用總輸出；環境音仍保有獨立音量控制。
+      getSfxOutput() {
+        if (!this.ctx) return null;
+        if (!this.sfxMasterGain) {
+          this.sfxMasterGain = this.ctx.createGain();
+          this.sfxMasterGain.gain.setValueAtTime(this.sfxGainMultiplier, this.ctx.currentTime);
+          this.sfxMasterGain.connect(this.ctx.destination);
+        }
+        return this.sfxMasterGain;
       }
       // 建立獨立的程序化自然音效：不使用外部音檔，也不接入遊戲音效總線
       startAmbient(volume = 30) {
@@ -3911,7 +3923,7 @@
           gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
           gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
           osc.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.getSfxOutput());
           osc.start();
           osc.stop(this.ctx.currentTime + duration);
         } catch (e) {}
@@ -3939,7 +3951,7 @@
 
           osc.connect(filter);
           filter.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.getSfxOutput());
 
           osc.start(now);
           osc.stop(now + duration);
@@ -3962,7 +3974,7 @@
           gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
           osc.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.getSfxOutput());
 
           osc.start(now);
           osc.stop(now + duration);
@@ -3991,10 +4003,50 @@
 
           osc.connect(filter);
           filter.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.getSfxOutput());
 
           osc.start(now);
           osc.stop(now + duration);
+        } catch (e) {}
+      }
+
+      // SV.01-91：台北101煙火低音爆響與短回音，接入音效總線並遵守音效開關。
+      playFireworkBoom(intensity = 1) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const ctx = this.ctx;
+          const now = ctx.currentTime;
+          const output = this.getSfxOutput();
+          const osc = ctx.createOscillator();
+          const lowGain = ctx.createGain();
+          const filter = ctx.createBiquadFilter();
+          const delay = ctx.createDelay(0.8);
+          const feedback = ctx.createGain();
+          const echoGain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(78, now);
+          osc.frequency.exponentialRampToValueAtTime(34, now + 0.42);
+          lowGain.gain.setValueAtTime(0.0001, now);
+          lowGain.gain.exponentialRampToValueAtTime(0.48 * intensity, now + 0.025);
+          lowGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.05);
+          filter.type = 'lowpass';
+          filter.frequency.value = 420;
+          delay.delayTime.value = 0.24;
+          feedback.gain.value = 0.22;
+          echoGain.gain.setValueAtTime(0.34, now);
+          echoGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.45);
+          osc.connect(filter);
+          filter.connect(lowGain);
+          lowGain.connect(output);
+          lowGain.connect(delay);
+          delay.connect(echoGain);
+          echoGain.connect(output);
+          delay.connect(feedback);
+          feedback.connect(delay);
+          osc.start(now);
+          osc.stop(now + 1.1);
         } catch (e) {}
       }
 
@@ -4012,7 +4064,7 @@
           gain.gain.setValueAtTime(gainVal, now);
           gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
           osc.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.getSfxOutput());
           osc.start(now);
           osc.stop(now + 0.12);
         } catch (e) {}
@@ -4033,7 +4085,7 @@
           oscGain.gain.setValueAtTime(gainVal * 0.7, now);
           oscGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
           osc.connect(oscGain);
-          oscGain.connect(this.ctx.destination);
+          oscGain.connect(this.getSfxOutput());
           osc.start(now);
           osc.stop(now + 0.07);
 
@@ -4085,7 +4137,7 @@
           gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
           noise.connect(filter);
           filter.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.getSfxOutput());
           noise.start(now);
         } catch (e) {}
       }
@@ -4115,7 +4167,7 @@
 
           osc.connect(filter);
           filter.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.getSfxOutput());
 
           osc.start(now);
           osc.stop(now + duration);
@@ -4138,7 +4190,7 @@
           gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
           osc.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.getSfxOutput());
 
           osc.start(now);
           osc.stop(now + duration);
@@ -4167,7 +4219,7 @@
 
           osc.connect(filter);
           filter.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.getSfxOutput());
 
           osc.start(now);
           osc.stop(now + duration);
@@ -4379,7 +4431,7 @@
               gain.gain.setValueAtTime(0.012, now + dt);
               gain.gain.exponentialRampToValueAtTime(0.0001, now + dt + 0.035);
               osc.connect(gain);
-              gain.connect(this.ctx.destination);
+              gain.connect(this.getSfxOutput());
               osc.start(now + dt);
               osc.stop(now + dt + 0.035);
             });
@@ -4424,6 +4476,10 @@
 
     const spawnedIslandObjects = [];
     const islandNightLights = [];
+    // SV.01-91：台北101彩色夜間煙火粒子與夜晚觸發狀態
+    const activeFireworkParticles = [];
+    let fireworksNightCycleTriggered = false;
+    let fireworksShowTimer = null;
     const movingPeople = [];
     const walkingCelebrities = [];
     const flyingCreatures = [];
@@ -5771,22 +5827,16 @@
           nearest = Math.min(nearest, Math.hypot(candidate.x - existing.x, candidate.z - existing.z));
         }
 
-        // SV.01-86：一般區塊採用「全候選評分」，不在遇到第一個空格時提前返回。
-        // 先前的提前返回會跳過左右側加權，讓候選點仍可能集中在中央；現在會比較完整批次候選點。
-        // 島面橢圓邊界維持不變，地標生成函式不受此規則影響。
-        const outerBandBonus = radius >= 13 ? 5.0 : radius >= 10.5 ? 2.5 : radius >= 8.5 ? 0.8 : 0;
-        const sideZoneBonus = Math.abs(candidate.x) >= 9.5 ? 8.0 : Math.abs(candidate.x) >= 7.5 ? 3.0 : 0;
-        const emptyCellBonus = cellCount === 0 ? 3.5 : 0;
+        // 分布均衡優先；同時偏好遠離既有物件的位置。
         const score = (nearest === Infinity ? 12 : Math.min(nearest, 12))
-          - cellCount * 5.5
-          + outerBandBonus
-          + sideZoneBonus
-          + emptyCellBonus
-          + rand() * 0.25;
+          - cellCount * 4
+          + rand() * 0.35;
         if (score > bestScore) {
           bestScore = score;
           best = candidate;
         }
+        // 只在空區域且間距充足時提前採用；不再因第一個空格而固定落在同一圈。
+        if (cellCount === 0 && nearest >= minGap) return candidate;
       }
 
       // 空間較擁擠時回傳最好的候選位置，避免生成流程中斷。
@@ -5794,8 +5844,8 @@
     }
 
     function spawnOrUpgradeIslandCreation(blueprint) {
-      // SV.01-86：一般區塊加強外圈與左右兩側分布；地標仍使用 spawnSpecialMonument 的原範圍。
-      // 保留 18.5 的候選半徑與島面橢圓邊界，使用完整評分避免第一個空格提前返回而忽略側區權重。
+      // SV.01-83：一般區塊重新擴展到島嶼兩側；地標仍使用 spawnSpecialMonument 的原範圍。
+      // 使用 18.5 的候選半徑並在取樣時套用島面橢圓邊界，避免單純擴大圓形範圍導致物件落海。
       const placement = getBalancedIslandPlacement(currentCreationIndex, 2.5, 18.5, 3.0);
       const posX = placement.x;
       const posZ = placement.z;
@@ -6577,6 +6627,137 @@
       adjustCameraViewport();
     }
 
+    // SV.01-91：以多波彩色煙火呈現較長、柔和的夜間煙火秀，並播放低音回響
+    function spawnTaipei101Fireworks(towerObj) {
+      if (!towerObj || !scene) return;
+      const origin = towerObj.getWorldPosition(new THREE.Vector3());
+      origin.y += 11.8;
+      const palette = [0xff477e, 0xfacc15, 0x38bdf8, 0xc084fc, 0xffffff, 0x34d399, 0xfb923c, 0xf472b6];
+      const burstOffsets = [
+        new THREE.Vector3(-1.8, 1.0, 0),
+        new THREE.Vector3(1.5, 2.1, 0.4),
+        new THREE.Vector3(0, 3.2, -0.5)
+      ];
+      burstOffsets.forEach((offset, burstIndex) => {
+        const center = origin.clone().add(offset);
+        for (let i = 0; i < 34; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const elev = Math.random() * 1.15 + 0.28;
+          const speed = 2.0 + Math.random() * 2.5;
+          const material = new THREE.MeshBasicMaterial({
+            color: palette[(i + burstIndex * 3) % palette.length],
+            transparent: true, opacity: 1, depthWrite: false
+          });
+          const particle = new THREE.Mesh(
+            new THREE.SphereGeometry(0.055 + Math.random() * 0.045, 6, 6), material
+          );
+          particle.position.copy(center);
+          scene.add(particle);
+          activeFireworkParticles.push({
+            mesh: particle,
+            velocity: new THREE.Vector3(Math.cos(angle) * Math.cos(elev) * speed, Math.sin(elev) * speed, Math.sin(angle) * Math.cos(elev) * speed),
+            age: 0,
+            life: 1.8 + Math.random() * 0.8
+          });
+        }
+      });
+    }
+
+    let fireworkGlowTexture = null;
+    function getFireworkGlowTexture() {
+      if (fireworkGlowTexture) return fireworkGlowTexture;
+      const canvas = document.createElement('canvas');
+      canvas.width = 128; canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      const gradient = ctx.createRadialGradient(64, 64, 1, 64, 64, 63);
+      gradient.addColorStop(0, 'rgba(255,255,255,1)');
+      gradient.addColorStop(0.12, 'rgba(255,255,255,0.9)');
+      gradient.addColorStop(0.32, 'rgba(255,255,255,0.38)');
+      gradient.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = gradient; ctx.fillRect(0, 0, 128, 128);
+      fireworkGlowTexture = new THREE.CanvasTexture(canvas);
+      return fireworkGlowTexture;
+    }
+
+    function startTaipei101FireworksShow() {
+      if (fireworksNightCycleTriggered || !scene) return;
+      const tower = scene.getObjectByName("台北一零一摩天大樓");
+      if (!tower) return;
+      fireworksNightCycleTriggered = true;
+      if (fireworksShowTimer) clearInterval(fireworksShowTimer);
+      let burstCount = 0;
+      // 14 波、間隔 520ms：比原版多一點時間，並輪替多種鮮明色彩
+      fireworksShowTimer = setInterval(() => {
+        const palette = [0xff477e, 0x38bdf8, 0xfacc15, 0xc084fc, 0x34d399, 0xfb923c, 0xffffff];
+        const color = palette[burstCount % palette.length];
+        const origin = tower.getWorldPosition(new THREE.Vector3());
+        origin.y += 10.8 + Math.random() * 2.8;
+        const count = 28 + Math.floor(Math.random() * 12);
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const elev = Math.random() * 1.2 + 0.25;
+          const speed = 2.2 + Math.random() * 2.5;
+          const particleColor = palette[(burstCount + i % 4) % palette.length];
+          const material = new THREE.MeshBasicMaterial({
+            color: particleColor, transparent: true, opacity: 1, depthWrite: false,
+            blending: THREE.AdditiveBlending
+          });
+          const particle = new THREE.Mesh(new THREE.SphereGeometry(0.065 + Math.random() * 0.055, 8, 8), material);
+          particle.position.copy(origin);
+          scene.add(particle);
+          // 柔和彩色光暈：中心亮點搭配較大的加色混合光圈，避免只像小顆粒。
+          const glowMaterial = new THREE.SpriteMaterial({
+            map: getFireworkGlowTexture(), color: particleColor, transparent: true,
+            opacity: 0.72, blending: THREE.AdditiveBlending, depthWrite: false,
+            toneMapped: false
+          });
+          const glow = new THREE.Sprite(glowMaterial);
+          glow.position.copy(origin);
+          const glowSize = 0.42 + Math.random() * 0.32;
+          glow.scale.set(glowSize, glowSize, 1);
+          scene.add(glow);
+          activeFireworkParticles.push({
+            mesh: particle, glow,
+            velocity: new THREE.Vector3(Math.cos(angle) * Math.cos(elev) * speed, Math.sin(elev) * speed, Math.sin(angle) * Math.cos(elev) * speed),
+            age: 0, life: 1.8 + Math.random() * 0.9
+          });
+        }
+        // 每一波煙火同步播放低音爆響與短回音；音效 OFF 時會尊重靜音設定。
+        if (sound && typeof sound.playFireworkBoom === 'function') {
+          sound.playFireworkBoom(burstCount % 4 === 0 ? 2.4 : 1.8);
+        }
+        burstCount++;
+        if (burstCount >= 14) {
+          clearInterval(fireworksShowTimer);
+          fireworksShowTimer = null;
+        }
+      }, 520);
+    }
+
+    function updateFireworkParticles(dt) {
+      for (let i = activeFireworkParticles.length - 1; i >= 0; i--) {
+        const p = activeFireworkParticles[i];
+        p.age += dt;
+        p.velocity.y -= 2.7 * dt;
+        p.mesh.position.addScaledVector(p.velocity, dt);
+        p.mesh.material.opacity = Math.max(0, 1 - p.age / p.life);
+        p.mesh.scale.setScalar(Math.max(0.08, 1 - p.age / p.life));
+        if (p.glow) {
+          p.glow.position.copy(p.mesh.position);
+          const fade = Math.max(0, 1 - p.age / p.life);
+          p.glow.material.opacity = 0.72 * fade;
+          p.glow.scale.multiplyScalar(1 + dt * 0.22);
+        }
+        if (p.age >= p.life) {
+          scene.remove(p.mesh);
+          p.mesh.geometry.dispose();
+          p.mesh.material.dispose();
+          if (p.glow) { scene.remove(p.glow); p.glow.material.dispose(); }
+          activeFireworkParticles.splice(i, 1);
+        }
+      }
+    }
+
     function updateDayNightCycle(dt) {
       timeCycle = (timeCycle + dt * 0.012) % 1.0;
 
@@ -6638,6 +6819,8 @@
       if (p !== timePhase) {
         timePhase = p;
         dayTimeBadge.textContent = TIME_PHASE_NAMES[timePhase];
+        if (timePhase === 3) startTaipei101FireworksShow();
+        else fireworksNightCycleTriggered = false;
       }
     }
 
@@ -7807,6 +7990,7 @@
       lastTime = currentTime;
 
       updateDayNightCycle(dt);
+      updateFireworkParticles(dt);
       updateRainParticles(dt);
 
       // 環境音效由 SoundEngine 自己的低頻率計時器管理，不綁定螢幕保護模式。
