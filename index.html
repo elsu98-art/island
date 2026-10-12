@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>我的夢想島：中文打字開拓記</title>
+  <title>我的夢想島：中文打字開拓記（SV.01 - 86）</title>
+  <!-- 版本：SV.01 - 86｜一般區塊加強外圈與左右分布；保留島面邊界、地標範圍及輸入隱藏模式 -->
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -319,14 +320,17 @@
 
         <!-- 輸入框與送出按鈕 -->
         <div class="relative w-full flex items-center gap-2">
-          <input 
-            type="text" 
-            id="typeInput" 
-            placeholder="請在此輸入中文..." 
-            autocomplete="off"
-            spellcheck="false"
-            class="flex-1 px-3.5 py-2.5 sm:py-3 bg-slate-900/90 border-2 border-emerald-500/50 rounded-2xl text-white font-bold text-base sm:text-lg focus:outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-400/20 shadow-inner placeholder-slate-500 transition"
-          />
+          <div class="relative flex-1 min-w-0">
+            <input 
+              type="text" 
+              id="typeInput" 
+              placeholder="請在此輸入中文..." 
+              autocomplete="off"
+              spellcheck="false"
+              class="w-full px-3.5 py-2.5 sm:py-3 bg-slate-900/90 border-2 border-emerald-500/50 rounded-2xl text-white font-bold text-base sm:text-lg focus:outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-400/20 shadow-inner placeholder-slate-500 transition"
+            />
+            <span id="typeInputMask" aria-hidden="true" class="hidden absolute left-4 right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white font-bold text-base sm:text-lg whitespace-pre overflow-hidden"></span>
+          </div>
           <button 
             id="submitBtn" 
             class="px-4.5 py-2.5 sm:py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 active:scale-95 text-slate-950 font-black rounded-2xl shadow-lg transition duration-200">
@@ -340,7 +344,7 @@
     <!-- 底部操作提示與左下角版本編號 -->
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
-      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(V.01 / 61)</span>
+      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-86)</span>
       <span>拖曳旋轉 360° 全景 ‧ 滑鼠滾輪或雙指縮放視角</span>
     </footer>
   </div>
@@ -984,7 +988,6 @@
       { type: "animal_rabbit", name: "草地小白兔" },
       { type: "tree_jacaranda", name: "粉紫藍花楹" },
       { type: "sailboat_rainbow", name: "彩虹逐浪小帆船" },
-      { type: "fountain", name: "清泉噴水池" },
       { type: "tree_pine", name: "翠綠高山松" },
       { type: "animal_cat", name: "優雅毛色小貓" },
       { type: "cherry_tree", name: "日式粉櫻樹" },
@@ -994,8 +997,6 @@
       { type: "person_villager", name: "島嶼村民" },
       { type: "animal_deer", name: "奔馳梅花鹿" },
       { type: "tree_maple", name: "緋紅楓香樹" },
-      { type: "fountain", name: "典雅噴泉池" },
-      { type: "fountain", name: "清泉噴水池" },
       { type: "animal_sheep", name: "溫馴小綿羊" },
       { type: "tree_jacaranda", name: "紫霞童話樹" },
       { type: "animal_cow", name: "黑白乳牛" },
@@ -1123,39 +1124,47 @@
         name: "夢幻水晶旋轉木馬",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
-          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8, roughness: 0.25 });
-          const pinkMat = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.4 });
-          const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
-          const blueMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.4 });
+          // 整體縮小，讓旋轉木馬更精巧，不再壓過周圍地標。
+          g.scale.setScalar(0.70);
+          // SV.01-75：保留白色主體，加入柔和香檳金、淡薰衣草與霧藍，避免整座全白。
+          const goldMat = new THREE.MeshStandardMaterial({ color: 0xe6d3a8, metalness: 0.18, roughness: 0.42 });
+          const pinkMat = new THREE.MeshStandardMaterial({ color: 0xe9e1f2, roughness: 0.48 });
+          const whiteMat = new THREE.MeshStandardMaterial({ color: 0xfffdf8, roughness: 0.34 });
+          const blueMat = new THREE.MeshStandardMaterial({ color: 0xc9e5ed, roughness: 0.42 });
 
-          const base1 = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.65, 0.25, 24), goldMat);
-          base1.position.y = 0.125;
+          // 清楚可見的底座：寬底盤、淡藍側邊與香檳金飾條。
+          const foundation = new THREE.Mesh(new THREE.CylinderGeometry(2.72, 2.82, 0.22, 32), blueMat);
+          foundation.position.y = 0.11;
+          const foundationTrim = new THREE.Mesh(new THREE.TorusGeometry(2.73, 0.055, 8, 32), goldMat);
+          foundationTrim.rotation.x = Math.PI / 2; foundationTrim.position.y = 0.22;
+          const base1 = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.65, 0.25, 24), whiteMat);
+          base1.position.y = 0.31;
           const base2 = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.3, 0.18, 24), pinkMat);
-          base2.position.y = 0.34;
+          base2.position.y = 0.52;
           const fence = new THREE.Mesh(new THREE.TorusGeometry(2.32, 0.04, 6, 24), goldMat);
-          fence.rotation.x = Math.PI / 2; fence.position.y = 0.48;
+          fence.rotation.x = Math.PI / 2; fence.position.y = 0.66;
 
           const centerPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.55, 2.2, 12), goldMat);
-          centerPillar.position.y = 1.45;
-          const mirrorRing = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.08, 6, 16), new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9 }));
-          mirrorRing.rotation.x = Math.PI / 2; mirrorRing.position.y = 1.45;
+          centerPillar.position.y = 1.63;
+          const mirrorRing = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.08, 6, 16), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.35, roughness: 0.3 }));
+          mirrorRing.rotation.x = Math.PI / 2; mirrorRing.position.y = 1.63;
 
           const canopy = new THREE.Mesh(new THREE.ConeGeometry(2.65, 1.25, 24), pinkMat);
-          canopy.position.y = 3.0;
+          canopy.position.y = 3.18;
           const canopyRing = new THREE.Mesh(new THREE.TorusGeometry(2.65, 0.1, 8, 24), goldMat);
-          canopyRing.rotation.x = Math.PI / 2; canopyRing.position.y = 2.45;
+          canopyRing.rotation.x = Math.PI / 2; canopyRing.position.y = 2.63;
           const topFinial = new THREE.Mesh(new THREE.SphereGeometry(0.24, 8, 8), goldMat);
-          topFinial.position.y = 3.75;
+          topFinial.position.y = 3.93;
 
           for (let i = 0; i < 6; i++) {
             const ang = (i / 6) * Math.PI * 2;
             const px = Math.cos(ang) * 1.75;
             const pz = Math.sin(ang) * 1.75;
             const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 2.1, 8), goldMat);
-            pole.position.set(px, 1.45, pz);
+            pole.position.set(px, 1.63, pz);
 
             const horseGroup = new THREE.Group();
-            const hMat = (i % 2 === 0) ? whiteMat : blueMat;
+            const hMat = whiteMat;
             const hBody = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.32, 0.22), hMat);
             const hNeck = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.35, 0.18), hMat);
             hNeck.position.set(0.3, 0.22, 0); hNeck.rotation.z = -0.4;
@@ -1164,13 +1173,15 @@
             const saddle = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.12, 0.25), goldMat);
             saddle.position.set(0, 0.16, 0);
             horseGroup.add(hBody, hNeck, hHead, saddle);
-            horseGroup.position.set(px, 1.1 + (i % 2) * 0.35, pz);
+            horseGroup.position.set(px, 1.28 + (i % 2) * 0.35, pz);
             horseGroup.rotation.y = -ang - Math.PI / 2;
 
             g.add(pole, horseGroup);
           }
 
-          g.add(base1, base2, fence, centerPillar, mirrorRing, canopy, canopyRing, topFinial);
+          g.add(foundation, foundationTrim, base1, base2, fence, centerPillar, mirrorRing, canopy, canopyRing, topFinial);
+          // 旋轉木馬由全域動畫迴圈持續旋轉，底座與馬匹一起轉動。
+          g.userData.carouselData = { speed: 0.35 };
           return g;
         }
       },
@@ -1178,7 +1189,7 @@
         name: "古典凱旋門",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
-          g.scale.set(0.42, 0.42, 0.42); // 再縮小至約 42% 尺寸，更加精巧秀氣
+          g.scale.set(0.30, 0.30, 0.30); // SV.01-74：凱旋門再縮小，約為原模型 30%
           const stoneMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.75 });
           const darkStoneMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.85 });
           const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.7, roughness: 0.3 });
@@ -1215,6 +1226,8 @@
         name: "浪漫摩天輪",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
+          // SV.01-70：摩天輪整體縮小，保留原有造型比例。
+          g.scale.setScalar(0.78);
           const frameMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.6, roughness: 0.3 });
           const wheelMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, metalness: 0.5, roughness: 0.3 });
           const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8 });
@@ -1271,7 +1284,10 @@
             wheelGroup.add(hanger, cabin, cabinWindow);
           }
 
-          g.add(platform, stairs, wheelGroup); return g;
+          g.add(platform, stairs, wheelGroup);
+          // 動畫由主渲染迴圈更新，確保摩天輪在一般答題時也會轉動。
+          g.userData.ferrisWheelData = { wheelGroup, speed: 0.22 };
+          return g;
         }
       },
       {
@@ -1411,7 +1427,7 @@
         name: "比薩斜塔",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
-          g.scale.set(0.42, 0.42, 0.42); // 再縮小至約 42% 尺寸，更加精緻小巧
+          g.scale.set(0.12, 0.12, 0.12); // SV.01-74：比薩斜塔再縮小
           const marbleMat = new THREE.MeshStandardMaterial({ color: 0xfef9c3, roughness: 0.6 });
           const archMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5 });
           const darkMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
@@ -1761,6 +1777,8 @@
         name: "荷蘭古風巨型風車",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
+          // SV.01-70：只拉高整體比例，不改變原有造型與地面接觸位置。
+          g.scale.y = 1.28;
           const brickMat = new THREE.MeshStandardMaterial({ color: 0xa16207, roughness: 0.85 });
           const woodMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.7 });
           const whiteSailMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
@@ -1793,6 +1811,8 @@
           }
 
           g.add(base, body, balcony, railing, cap, axle, sailGroup);
+          // 風車扇葉獨立旋轉，建築本體保持固定。
+          g.userData.windmillData = { sailGroup, speed: 0.42 };
           return g;
         }
       },
@@ -2369,6 +2389,7 @@
         name: "鵝鑾鼻燈塔",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
+          // SV.01-73：不使用會被召喚動畫覆寫的整體縮放，直接調整塔身與上部構件幾何位置。
           const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
           const baseMat = new THREE.MeshStandardMaterial({ color: 0x78716c, roughness: 0.85 });
           const darkMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
@@ -2385,34 +2406,40 @@
           entranceRoof.rotation.y = Math.PI / 4;
           entranceRoof.position.set(0, 0.82, 0.95);
 
-          const towerBody = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 1.05, 3.6, 20), whiteMat);
-          towerBody.position.y = 1.95;
+          // SV.01-73：塔身幾何高度設為 4.3；中心設為 2.30，讓塔底位置維持不變。
+          const towerBody = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 1.05, 4.3, 20), whiteMat);
+          towerBody.position.y = 2.30;
           towerBody.castShadow = true;
 
-          const winGeo = new THREE.BoxGeometry(0.14, 0.2, 0.04);
-          const w1 = new THREE.Mesh(winGeo, darkMat); w1.position.set(-0.24, 3.0, 0.74);
-          const w2 = new THREE.Mesh(winGeo, darkMat); w2.position.set(0.24, 3.0, 0.74);
-          const w3 = new THREE.Mesh(winGeo, darkMat); w3.position.set(-0.25, 2.1, 0.84);
-          const w4 = new THREE.Mesh(winGeo, darkMat); w4.position.set(0.34, 2.1, 0.82);
-          const w5 = new THREE.Mesh(winGeo, darkMat); w5.position.set(0.26, 1.25, 0.96);
+          // SV.01-73：依參考圖保留五扇大小不同的窗戶；Z 軸位置貼合塔身斜面，避免窗戶陷入塔身。
+          const w1 = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.19, 0.06), darkMat);
+          w1.position.set(-0.20, 3.65, 0.80);
+          const w2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.06), darkMat);
+          w2.position.set(0.20, 3.05, 0.87);
+          const w3 = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.25, 0.06), darkMat);
+          w3.position.set(-0.22, 2.45, 0.94);
+          const w4 = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.19, 0.06), darkMat);
+          w4.position.set(0.22, 1.85, 0.99);
+          const w5 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.27, 0.06), darkMat);
+          w5.position.set(-0.20, 1.25, 1.03);
 
           const balconyFlare = new THREE.Mesh(new THREE.CylinderGeometry(1.18, 0.72, 0.38, 16), whiteMat);
-          balconyFlare.position.y = 3.9;
+          balconyFlare.position.y = 4.2;
           const balconyDeck = new THREE.Mesh(new THREE.CylinderGeometry(1.22, 1.22, 0.16, 16), whiteMat);
-          balconyDeck.position.y = 4.14;
+          balconyDeck.position.y = 4.44;
           const balustrade = new THREE.Mesh(new THREE.TorusGeometry(1.18, 0.035, 6, 20), darkMat);
           balustrade.rotation.x = Math.PI / 2;
-          balustrade.position.y = 4.38;
+          balustrade.position.y = 4.68;
 
           const lanternWall = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.72, 0.7, 16), glassMat);
-          lanternWall.position.y = 4.58;
+          lanternWall.position.y = 4.88;
           const roof = new THREE.Mesh(new THREE.ConeGeometry(0.82, 0.55, 16), roofMat);
-          roof.position.y = 5.18;
+          roof.position.y = 5.48;
           const finial = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), darkMat);
-          finial.position.y = 5.52;
+          finial.position.y = 5.82;
 
           const rotatingLanternGroup = new THREE.Group();
-          rotatingLanternGroup.position.set(0, 4.58, 0);
+          rotatingLanternGroup.position.set(0, 4.88, 0);
 
           const coreBulb = new THREE.Mesh(
             new THREE.SphereGeometry(0.28, 16, 16),
@@ -3973,7 +4000,7 @@
 
       // 專用樂器 4-A：飽滿低音大鼓 (Kick)
       playKick(gainVal = 0.075) {
-        if (this.bgmMode === 0 || this.muted) return;
+        if (this.bgmMode === 0) return;
         this.init();
         try {
           const now = this.ctx.currentTime;
@@ -3993,7 +4020,7 @@
 
       // 專用樂器 4-B：清脆動感軍鼓 (Snare / Rimshot)
       playSnare(gainVal = 0.045) {
-        if (this.bgmMode === 0 || this.muted) return;
+        if (this.bgmMode === 0) return;
         this.init();
         try {
           const now = this.ctx.currentTime;
@@ -4035,7 +4062,7 @@
 
       // 專用樂器 4-C：細緻金屬踩鈸 (Hi-hat)
       playHihat(isOpen = false, gainVal = 0.018) {
-        if (this.bgmMode === 0 || this.muted) return;
+        if (this.bgmMode === 0) return;
         this.init();
         try {
           const now = this.ctx.currentTime;
@@ -4065,7 +4092,7 @@
 
       // 專用樂器 4-D：彈跳切分低音貝斯 (Groovy Pluck Bass)
       playGrooveBass(freq, duration = 0.28, gainVal = 0.062) {
-        if (this.bgmMode === 0 || this.muted) return;
+        if (this.bgmMode === 0) return;
         this.init();
         try {
           const now = this.ctx.currentTime;
@@ -4554,6 +4581,20 @@
     })();
 
     const typeInput = document.getElementById('typeInput');
+    const typeInputMask = document.getElementById('typeInputMask');
+    let hideTypingMode = false;
+    function refreshTypingMask() {
+      if (!typeInputMask || !typeInput) return;
+      typeInputMask.textContent = hideTypingMode ? '*'.repeat(Array.from(typeInput.value).length) : '';
+      typeInputMask.classList.toggle('hidden', !hideTypingMode || !typeInput.value.length);
+      typeInput.style.color = hideTypingMode ? 'transparent' : '';
+      typeInput.style.caretColor = hideTypingMode ? '#ffffff' : '';
+    }
+    function setHideTypingMode(enabled) {
+      hideTypingMode = enabled;
+      refreshTypingMask();
+      typeInput.placeholder = enabled ? '隱藏輸入中（輸入 hide 並按 Enter 可關閉）' : '請在此輸入中文...';
+    }
     const submitBtn = document.getElementById('submitBtn');
     const startOverlay = document.getElementById('startOverlay');
     const gameOverOverlay = document.getElementById('gameOverOverlay');
@@ -5027,10 +5068,12 @@
       const treeMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.8 });
       const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
 
+      // 初始樹木沿島嶼四周平均配置，避免進入遊戲時某一側明顯空缺。
       const treeCoords = [
-        { x: -2.0, z: -3.5 }, { x: -4.5, z: -2.5 }, { x: 1.0, z: -4.8 },
-        { x: 3.5, z: -4.2 }, { x: 7.2, z: -3.5 }, { x: -8.0, z: 0.5 },
-        { x: 8.5, z: 1.2 }, { x: -3.0, z: 6.5 }, { x: 2.2, z: 5.8 }
+        { x: 10.2, z: 2.7 }, { x: 7.4, z: 7.4 }, { x: 2.7, z: 10.2 },
+        { x: -2.7, z: 10.2 }, { x: -7.4, z: 7.4 }, { x: -10.2, z: 2.7 },
+        { x: -10.2, z: -2.7 }, { x: -7.4, z: -7.4 }, { x: -2.7, z: -10.2 },
+        { x: 2.7, z: -10.2 }, { x: 7.4, z: -7.4 }, { x: 10.2, z: -2.7 }
       ];
 
       treeCoords.forEach(pos => {
@@ -5655,11 +5698,107 @@
       sound.upgradeFanfare();
     }
 
+    // 將島面切成角度區與內/中/外圈，優先填補物件較少的區域，
+    // 再以最近距離評分避開擁擠位置；不讓角度與半徑固定相關而形成單一環帶。
+    function getBalancedIslandPlacement(seed, minRadius = 3.0, maxRadius = 17.0, minGap = 2.8) {
+      // 以整個可用島面分布，不再只偏好單一半徑圈。
+      // 小山的中心與底座半徑取自 createRichIslandTerrain() 的 mountainPeaks；
+      // 生成位置需避開山體，並為大型物件保留額外安全距離。
+      const sectorCount = 12;
+      const radialBands = 4;
+      const bandWidth = (maxRadius - minRadius) / radialBands;
+      const counts = Array.from({ length: sectorCount * radialBands }, () => 0);
+      const existingPositions = [];
+
+      for (const existing of spawnedIslandObjects) {
+        if (!existing || !existing.position) continue;
+        const ex = existing.position.x;
+        const ez = existing.position.z;
+        const radius = Math.hypot(ex, ez);
+        if (radius < minRadius || radius > 22) continue;
+        let a = Math.atan2(ez, ex);
+        if (a < 0) a += Math.PI * 2;
+        const sector = Math.min(sectorCount - 1, Math.floor(a / (Math.PI * 2 / sectorCount)));
+        const band = Math.max(0, Math.min(radialBands - 1, Math.floor((radius - minRadius) / bandWidth)));
+        counts[band * sectorCount + sector]++;
+        existingPositions.push({ x: ex, z: ez });
+      }
+
+      const mountains = [
+        { x: -6.0, z: -5.5, r: 5.5 },
+        { x: -8.8, z: -3.8, r: 4.8 },
+        { x: -3.8, z: -7.5, r: 5.2 },
+        { x: -2.0, z: -8.0, r: 4.2 },
+        { x: -7.5, z: -6.8, r: 4.2 }
+      ];
+
+      let best = null;
+      let bestScore = -Infinity;
+      let state = ((Math.floor(Math.abs(seed) * 7919) + 104729) >>> 0) || 1;
+      const rand = () => { state = (1664525 * state + 1013904223) >>> 0; return state / 4294967296; };
+
+      for (let attempt = 0; attempt < 900; attempt++) {
+        const angle = rand() * Math.PI * 2;
+        // 面積均勻取樣，讓內圈、中圈、外圈都有機會使用。
+        const radius = Math.sqrt(minRadius * minRadius + rand() * (maxRadius * maxRadius - minRadius * minRadius));
+        const candidate = { x: Math.cos(angle) * radius, z: Math.sin(angle) * radius };
+
+        // 島面邊緣保留餘裕：圓形半徑之外再以橢圓限制兩軸，避免候選點落到沙灘外或海上。
+        // X 軸是島嶼較寬的左右方向；Z 軸較短，符合島面實際可用草地輪廓。
+        if (radius > maxRadius) continue;
+        const islandEdge = (candidate.x * candidate.x) / (18.8 * 18.8)
+          + (candidate.z * candidate.z) / (15.2 * 15.2);
+        if (islandEdge > 0.88) continue;
+
+        // 明確避開山體底座，額外留出物件的安全間距。
+        let insideMountain = false;
+        for (const m of mountains) {
+          const clearance = m.r + 2.0;
+          if (Math.hypot(candidate.x - m.x, candidate.z - m.z) < clearance) {
+            insideMountain = true;
+            break;
+          }
+        }
+        if (insideMountain) continue;
+
+        const sector = Math.min(sectorCount - 1, Math.floor(angle / (Math.PI * 2 / sectorCount)));
+        const band = Math.max(0, Math.min(radialBands - 1, Math.floor((radius - minRadius) / bandWidth)));
+        const cellIndex = band * sectorCount + sector;
+        const cellCount = counts[cellIndex];
+
+        let nearest = Infinity;
+        for (const existing of existingPositions) {
+          nearest = Math.min(nearest, Math.hypot(candidate.x - existing.x, candidate.z - existing.z));
+        }
+
+        // SV.01-86：一般區塊採用「全候選評分」，不在遇到第一個空格時提前返回。
+        // 先前的提前返回會跳過左右側加權，讓候選點仍可能集中在中央；現在會比較完整批次候選點。
+        // 島面橢圓邊界維持不變，地標生成函式不受此規則影響。
+        const outerBandBonus = radius >= 13 ? 5.0 : radius >= 10.5 ? 2.5 : radius >= 8.5 ? 0.8 : 0;
+        const sideZoneBonus = Math.abs(candidate.x) >= 9.5 ? 8.0 : Math.abs(candidate.x) >= 7.5 ? 3.0 : 0;
+        const emptyCellBonus = cellCount === 0 ? 3.5 : 0;
+        const score = (nearest === Infinity ? 12 : Math.min(nearest, 12))
+          - cellCount * 5.5
+          + outerBandBonus
+          + sideZoneBonus
+          + emptyCellBonus
+          + rand() * 0.25;
+        if (score > bestScore) {
+          bestScore = score;
+          best = candidate;
+        }
+      }
+
+      // 空間較擁擠時回傳最好的候選位置，避免生成流程中斷。
+      return best || { x: 12, z: 0 };
+    }
+
     function spawnOrUpgradeIslandCreation(blueprint) {
-      const angle = Math.random() * Math.PI * 2;
-      const rad = 2.2 + Math.random() * 11.0;
-      const posX = Math.cos(angle) * rad;
-      const posZ = Math.sin(angle) * rad;
+      // SV.01-86：一般區塊加強外圈與左右兩側分布；地標仍使用 spawnSpecialMonument 的原範圍。
+      // 保留 18.5 的候選半徑與島面橢圓邊界，使用完整評分避免第一個空格提前返回而忽略側區權重。
+      const placement = getBalancedIslandPlacement(currentCreationIndex, 2.5, 18.5, 3.0);
+      const posX = placement.x;
+      const posZ = placement.z;
 
       const objGroup = new THREE.Group();
       objGroup.position.set(posX, 1.35, posZ);
@@ -6244,13 +6383,47 @@
         return;
 
       } else if (blueprint.type === "fountain") {
-        const basin = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.35, 0.48, 14), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
-        basin.position.y = 0.25;
-        const water = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.35, 0.4, 14), new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1 }));
-        water.position.y = 0.3;
-        const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.22, 1.05, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
-        spire.position.y = 0.8;
-        objGroup.add(basin, water, spire);
+        // 清泉噴水池：多層石砌池台、清澈泉水、四道水流與柔和晶光。
+        const stoneMat = new THREE.MeshStandardMaterial({ color: 0xdbeafe, roughness: 0.48, metalness: 0.08 });
+        const trimMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.38, metalness: 0.12 });
+        const waterMat = new THREE.MeshStandardMaterial({ color: 0x38c9e8, roughness: 0.12, metalness: 0.18, transparent: true, opacity: 0.9 });
+        const glowMat = new THREE.MeshStandardMaterial({ color: 0x99f6ff, emissive: 0x38bdf8, emissiveIntensity: 0.55, roughness: 0.22 });
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(1.85, 1.95, 0.22, 24), stoneMat);
+        base.position.y = 0.12;
+        const lowerBasin = new THREE.Mesh(new THREE.CylinderGeometry(1.62, 1.42, 0.38, 24), stoneMat);
+        lowerBasin.position.y = 0.38;
+        const rim = new THREE.Mesh(new THREE.TorusGeometry(1.48, 0.12, 8, 28), trimMat);
+        rim.rotation.x = Math.PI / 2; rim.position.y = 0.57;
+        const lowerWater = new THREE.Mesh(new THREE.CylinderGeometry(1.43, 1.43, 0.08, 24), waterMat);
+        lowerWater.position.y = 0.52;
+        const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.62, 0.7, 12), trimMat);
+        pedestal.position.y = 0.86;
+        const upperBowl = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.48, 0.22, 20), stoneMat);
+        upperBowl.position.y = 1.27;
+        const upperWater = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.78, 0.06, 20), waterMat);
+        upperWater.position.y = 1.39;
+        const finial = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 10), glowMat);
+        finial.position.y = 1.62;
+        const jet = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.07, 0.62, 8), glowMat);
+        jet.position.y = 1.93;
+        const waterStreams = [];
+        for (let i = 0; i < 4; i++) {
+          const a = i * Math.PI / 2 + Math.PI / 4;
+          const stream = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.055, 0.78, 7), waterMat);
+          stream.position.set(Math.cos(a) * 0.88, 0.95, Math.sin(a) * 0.88);
+          stream.rotation.z = -Math.cos(a) * 0.55;
+          stream.rotation.x = Math.sin(a) * 0.55;
+          waterStreams.push(stream);
+        }
+        const gems = [];
+        for (let i = 0; i < 8; i++) {
+          const a = i * Math.PI / 4;
+          const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.11, 0), glowMat);
+          gem.position.set(Math.cos(a) * 1.7, 0.34, Math.sin(a) * 1.7);
+          gems.push(gem);
+        }
+        objGroup.add(base, lowerBasin, rim, lowerWater, pedestal, upperBowl, upperWater, finial, jet, ...waterStreams, ...gems);
+        animatedFlowers.push({ mesh: finial, speed: 1.4, amp: 0.06, offset: Math.random() * 2 });
 
       } else if (blueprint.type === "animal_cow") {
         const cowMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc });
@@ -6579,6 +6752,7 @@
       const hudLayer = document.querySelector('.hud-layer');
       if (isScreensaverActive) {
         if (hudLayer) hudLayer.classList.add('hidden');
+        if (renderModePanel) renderModePanel.classList.add('hidden');
         if (screensaverExitBadge) screensaverExitBadge.classList.remove('hidden');
       } else {
         if (hudLayer) hudLayer.classList.remove('hidden');
@@ -6687,8 +6861,8 @@
       let posX, posZ, posY;
       let angle = 0;
 
-      // 若是第 50 座地標（鵝鑾鼻燈塔），特意固定座落於小島正中央！
-      if (monument.name.includes("燈塔") || specialMonumentsSpawned === 50) {
+      // 只有正式第 50 座地標「鵝鑾鼻燈塔」固定在中央；其他名稱含「燈塔」的地標照一般規則分散，避免模型重疊。
+      if (monument.name === "鵝鑾鼻燈塔" || specialMonumentsSpawned === 50) {
         posX = 0;
         posZ = 0;
         posY = 1.35;
@@ -6702,15 +6876,21 @@
         posZ = Math.sin(angle) * oceanRad;
         posY = 0.12;
       } else {
-        // 其他 1~49 個地標：保留島中央半徑 3.8 緩衝區，散佈在半徑 4.5 到 16.0 之間
-        const goldenAngle = 2.39996;
-        angle = (specialMonumentsSpawned * goldenAngle) + (Math.random() * 0.4 - 0.2);
-        const rRatio = 0.08 + (Math.random() * 0.88);
-        const rad = 4.5 + Math.sqrt(rRatio) * 11.5;
-
-        posX = Math.cos(angle) * rad;
-        posZ = Math.sin(angle) * rad;
-        posY = (rad > 15.0) ? 0.32 : 1.35;
+        // 其他地標採用均勻角度與空位避讓，並可使用部分沙灘區域。
+        // 一般地標在島面平地生成；神殿額外拉大與既有物件的間距，避免浮空或互相交疊。
+        let placement = getBalancedIslandPlacement(specialMonumentsSpawned + 37, 3.0, 14.8,
+          monument.name.includes("古希臘神殿") ? 5.0 : 3.2);
+        if (monument.name.includes("古希臘神殿")) {
+          for (let attempt = 0; attempt < 8; attempt++) {
+            const candidate = getBalancedIslandPlacement(specialMonumentsSpawned + 137 + attempt * 19, 4.0, 14.0, 6.0);
+            const nearOther = spawnedIslandObjects.some(obj => obj && Math.hypot(obj.position.x - candidate.x, obj.position.z - candidate.z) < 5.5);
+            if (!nearOther) { placement = candidate; break; }
+          }
+        }
+        posX = placement.x;
+        posZ = placement.z;
+        angle = Math.atan2(posZ, posX);
+        posY = 1.35;
       }
 
       const monumentObj = monument.build(new THREE.Vector3(posX, posY, posZ));
@@ -7033,6 +7213,76 @@
       advanceWord();
     }
 
+    // SV.01-83 算圖模式：自動答對、持續生成一般物件與人物，直到第 50 座地標／永恆綠洲。
+    let renderModeActive = false;
+    let renderModeTimer = null;
+    let renderModePanel = null;
+
+    function ensureRenderModePanel() {
+      if (renderModePanel) return;
+      renderModePanel = document.createElement('div');
+      renderModePanel.id = 'renderModePanel';
+      renderModePanel.className = 'hidden fixed top-20 right-4 z-[120] w-64 rounded-2xl border border-cyan-300/50 bg-slate-950/95 p-4 text-white shadow-2xl';
+      renderModePanel.innerHTML = `
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <div class="font-black text-cyan-200">⚙ 算圖模式</div>
+          <span id="renderModeState" class="text-xs text-emerald-300">執行中</span>
+        </div>
+        <p id="renderModeDetail" class="text-xs leading-5 text-slate-300 mb-3">自動答題與生成物件中…</p>
+        <button id="renderModeExit" type="button" class="w-full rounded-xl bg-rose-500 hover:bg-rose-400 px-3 py-2 font-bold text-sm">退出算圖模式</button>`;
+      document.body.appendChild(renderModePanel);
+      document.getElementById('renderModeExit').addEventListener('click', () => stopRenderMode('已手動退出算圖模式。'));
+    }
+
+    function stopRenderMode(message = '算圖模式已停止。') {
+      renderModeActive = false;
+      if (renderModeTimer !== null) {
+        clearInterval(renderModeTimer);
+        renderModeTimer = null;
+      }
+      // 停止後完全收起面板，避免殘留在一般畫面或螢幕保護程式上。
+      if (renderModePanel) renderModePanel.classList.add('hidden');
+      const state = document.getElementById('renderModeState');
+      const detail = document.getElementById('renderModeDetail');
+      if (state) state.textContent = '已停止';
+      if (state) state.className = 'text-xs text-amber-300';
+      if (detail) detail.textContent = `${message} 地標：${Math.min(specialMonumentsSpawned, 50)} / 50。`;
+      if (typeInput && gameState === 'RUNNING' && !isScreensaverActive) typeInput.focus();
+    }
+
+    function startRenderMode() {
+      if (gameState !== 'RUNNING') {
+        upgradeBanner.textContent = '請先開始遊戲，再輸入 99999 啟動算圖模式。';
+        upgradeBanner.classList.remove('hidden');
+        setTimeout(() => upgradeBanner.classList.add('hidden'), 3000);
+        if (typeInput) typeInput.value = '';
+        return;
+      }
+      if (renderModeActive) return;
+      ensureRenderModePanel();
+      renderModeActive = true;
+      renderModePanel.classList.remove('hidden');
+      document.getElementById('renderModeState').textContent = '執行中';
+      document.getElementById('renderModeState').className = 'text-xs text-emerald-300';
+      if (typeInput) typeInput.value = '';
+      upgradeBanner.textContent = '算圖模式啟動：自動答題、種植、增加動物並召喚人物。';
+      upgradeBanner.classList.remove('hidden');
+      setTimeout(() => upgradeBanner.classList.add('hidden'), 3000);
+      renderModeTimer = setInterval(() => {
+        if (!renderModeActive) return;
+        // SV.01-83：保留原本里程碑試煉答題流程，不清除 activeTrial。
+        // 當第 10、15、20……50 座地標觸發人物試煉時，自動答對該試煉題，
+        // 由 onWordCorrect() 按原本流程召喚對應人物，不再每 5 題額外亂數召喚。
+        onWordCorrect();
+
+        const detail = document.getElementById('renderModeDetail');
+        if (detail) detail.textContent = `自動答題中｜正確題數 ${correctCount}｜地標 ${Math.min(specialMonumentsSpawned, 50)} / 50｜植物與動物持續生成。`;
+        if (specialMonumentsSpawned >= 50 && isEternalVitality) {
+          stopRenderMode('所有 50 座地標已解鎖，島嶼已進入永恆綠洲模式。');
+        }
+      }, 320);
+    }
+
     function checkTypingMatch(isExplicitSubmit = false) {
       if (gameState !== 'RUNNING') return;
       const target = activeTrial 
@@ -7040,6 +7290,20 @@
         : (currentWordList.length > 0 ? currentWordList[currentWordIndex % currentWordList.length].word : WORD_DB.easy[0].word);
       const val = typeInput.value.trim();
       const code = val.toLowerCase();
+
+      // SV.01-84：hide 啟動「下一次輸入」的一次性遮罩。輸入期間只顯示星號，
+      // 不做即時答題判定；按 Enter 後先解除遮罩，再以真實輸入內容正常判定答題／秘技。
+      if (isExplicitSubmit && code === 'hide') {
+        setHideTypingMode(true);
+        typeInput.value = '';
+        refreshTypingMask();
+        typeInput.focus();
+        return;
+      }
+      if (hideTypingMode && !isExplicitSubmit) return;
+      if (hideTypingMode && isExplicitSubmit) {
+        setHideTypingMode(false);
+      }
 
       // ⭐ 所有秘技與召喚指令：嚴格限制只有在按下 Enter 或點擊「送出」時才執行判定
       if (isExplicitSubmit) {
@@ -7061,6 +7325,13 @@
           typeInput.dispatchEvent(new Event('input', { bubbles: true }));
           typeInput.focus();
           setTimeout(() => { typeInput.value = ""; }, 0);
+          return;
+        }
+
+        // SV.01-83 算圖模式：輸入 99999 啟動自動答題與物件生成。
+        if (code === '99999') {
+          startRenderMode();
+          typeInput.value = '';
           return;
         }
 
@@ -7187,11 +7458,12 @@
     }
 
     typeInput.addEventListener('compositionend', () => {
-      setTimeout(() => checkTypingMatch(false), 10);
+      setTimeout(() => { refreshTypingMask(); if (!hideTypingMode) checkTypingMatch(false); }, 10);
     });
 
     typeInput.addEventListener('input', () => {
-      checkTypingMatch(false);
+      refreshTypingMask();
+      if (!hideTypingMode) checkTypingMatch(false);
     });
 
     typeInput.addEventListener('keydown', (e) => {
@@ -7203,6 +7475,10 @@
 
     // 全域鍵盤事件監聽：面板開啟時按 C / ESC 關閉，螢幕保護按 ESC 退出
     window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && renderModeActive) {
+        stopRenderMode('已按 Escape 退出算圖模式。');
+        return;
+      }
       const modal = document.getElementById('cheatSheetModal');
       const isModalOpen = modal && !modal.classList.contains('hidden') && modal.style.display !== 'none';
 
@@ -7539,6 +7815,7 @@
         sphericalAngle += 0.0018;
       }
 
+
       floatingClouds.forEach(c => {
         c.angle += c.speed;
         c.group.position.x = Math.cos(c.angle) * c.dist;
@@ -7555,6 +7832,15 @@
       });
 
       spawnedIslandObjects.forEach(obj => {
+        if (obj && obj.userData && obj.userData.carouselData) {
+          obj.rotation.y += dt * obj.userData.carouselData.speed;
+        }
+        if (obj && obj.userData && obj.userData.ferrisWheelData) {
+          obj.userData.ferrisWheelData.wheelGroup.rotation.z += dt * obj.userData.ferrisWheelData.speed;
+        }
+        if (obj && obj.userData && obj.userData.windmillData) {
+          obj.userData.windmillData.sailGroup.rotation.z -= dt * obj.userData.windmillData.speed;
+        }
         if (obj && obj.userData && obj.userData.lighthouseData) {
           const lh = obj.userData.lighthouseData;
           const isLighthouseActive = (timePhase === 2 || timePhase === 3 || timePhase === 0);
@@ -7770,6 +8056,14 @@
             a.head.rotation.x = graze > 0.3 ? 0.45 : 0.0;
             a.head.rotation.y = Math.sin(animTime * 2.5) * 0.2;
           }
+        }
+        // 動物會移動，因此每一幀都限制在島內安全半徑，避免走到海面。
+        const landLimit = 15.0;
+        const animalRadius = Math.hypot(a.group.position.x, a.group.position.z);
+        if (animalRadius > landLimit) {
+          const scale = landLimit / animalRadius;
+          a.group.position.x *= scale;
+          a.group.position.z *= scale;
         }
       });
 
