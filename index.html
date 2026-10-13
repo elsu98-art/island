@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>我的夢想島：中文打字開拓記（SV.01 - 91）</title>
+  <title>我的夢想島：中文打字開拓記（SV.01 - 92）</title>
   <!-- 版本：SV.01 - 90｜補回台北101煙火低音回音，整體音效增強約130% -->
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -344,7 +344,7 @@
     <!-- 底部操作提示與左下角版本編號 -->
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
-      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-91)</span>
+      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-93)</span>
       <span>拖曳旋轉 360° 全景 ‧ 滑鼠滾輪或雙指縮放視角</span>
     </footer>
   </div>
@@ -407,6 +407,22 @@
             <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
               <span class="text-slate-400">全體大集合+永恆綠洲</span>
               <span class="font-mono font-bold text-fuchsia-400 bg-slate-950 px-2 py-0.5 rounded">marshmallow</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-rose-500/40 flex items-center justify-between">
+              <span class="text-slate-300">台北 101 播放一輪煙火（含音效）</span>
+              <span class="font-mono font-bold text-rose-300 bg-slate-950 px-2 py-0.5 rounded">fire</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-sky-500/40 flex items-center justify-between">
+              <span class="text-slate-300">島上下起短暫小雨</span>
+              <span class="font-mono font-bold text-sky-300 bg-slate-950 px-2 py-0.5 rounded">rain</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-amber-500/40 flex items-center justify-between">
+              <span class="text-slate-300">暫停島上物件與人物動作</span>
+              <span class="font-mono font-bold text-amber-300 bg-slate-950 px-2 py-0.5 rounded">stop</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-emerald-500/40 flex items-center justify-between">
+              <span class="text-slate-300">恢復島上物件與人物動作</span>
+              <span class="font-mono font-bold text-emerald-300 bg-slate-950 px-2 py-0.5 rounded">run</span>
             </div>
           </div>
         </div>
@@ -3509,7 +3525,7 @@
       constructor() {
         this.ctx = null;
         this.sfxMasterGain = null;
-        this.sfxGainMultiplier = 1.80; // SV.01-91：所有非環境遊戲音效與背景音樂總輸出提高至 180%
+        this.sfxGainMultiplier = 1.80; // SV.01-93：所有非環境遊戲音效與背景音樂總輸出提高至 180%
         this.muted = false;
         this.bgmMode = 1; // 1: 音樂1, 2: 音樂2, 3: 音樂3, 0: 音樂關
         this.nightTimer = null;
@@ -3534,6 +3550,7 @@
         this.ambientCurrentRainSegment = null;
         this.ambientLastPhase = null;
         this.ambientVolume = 30;
+        this.ambientLastCyclePhase = null;
       }
       init() {
         if (!this.ctx) {
@@ -3569,7 +3586,7 @@
           const now = ctx.currentTime;
           const master = ctx.createGain();
           master.gain.setValueAtTime(0.0001, now);
-          master.gain.setTargetAtTime((this.ambientVolume / 100) * 0.42, now, 0.35);
+          master.gain.setTargetAtTime((this.ambientVolume / 100) * 2.0, now, 0.35);
           master.connect(ctx.destination);
           this.ambientMasterGain = master;
 
@@ -3650,7 +3667,7 @@
       setAmbientVolume(volume) {
         this.ambientVolume = Math.max(0, Math.min(100, Number(volume) || 0));
         if (!this.ctx || !this.ambientMasterGain) return;
-        const target = (this.ambientVolume / 100) * 0.42;
+        const target = (this.ambientVolume / 100) * 2.0;
         this.ambientMasterGain.gain.setTargetAtTime(target, this.ctx.currentTime, 0.18);
       }
 
@@ -3709,11 +3726,7 @@
           this.playAmbientInsectChirp();
           this.ambientNextInsect = t + 2.4 + Math.random() * 3.0;
         }
-        // 夜晚偶爾傳來遠方鐘聲；只在夜間播放，音量低、敲擊短促，避免長音像管風琴。
-        if (phase === 3 && t >= this.ambientNextBell) {
-          this.playAmbientDistantBell();
-          this.ambientNextBell = t + 58 + Math.random() * 42;
-        }
+        // 遠方鐘聲不再隨機敲響；改由遊戲日夜循環跨日時，每個循環只敲一次四音鐘聲。
         // 蛙鳴已移除，夜晚保留蟲鳴與遠方鐘聲。
         // 大商船登場時已觸發第一次船笛；之後才以不固定間隔偶爾鳴笛。
         if (this.ambientLargeShipSeen && !this.ambientShipHornPending && t >= this.ambientNextShipHorn) {
@@ -3759,14 +3772,19 @@
         } catch (e) {}
       }
 
+      playAmbientMidnightBell() {
+        if (!isAmbientSoundActive || !this.ctx || !this.ambientMasterGain) return;
+        this.playAmbientDistantBell();
+      }
+
       playAmbientDistantBell() {
         if (!this.ctx || !this.ambientMasterGain) return;
         try {
           const ctx = this.ctx;
           const start = ctx.currentTime + 0.04;
-          // 三個音階的遠方鐘聲；每一下都有獨立起音與衰減，避免連成管風琴長音。
-          [523.25, 440.00, 392.00].forEach((freq, i) => {
-            const at = start + i * 1.15;
+          // 午夜跨日時的四音鐘聲：Si-La-So-Mi（B-A-G-E），每音獨立起音與衰減。
+          [493.88, 440.00, 392.00, 329.63].forEach((freq, i) => {
+            const at = start + i * 0.92;
             const partials = [
               { ratio: 1, amp: 0.012 },
               { ratio: 2.71, amp: 0.0048 },
@@ -4010,7 +4028,7 @@
         } catch (e) {}
       }
 
-      // SV.01-91：台北101煙火低音爆響與短回音，接入音效總線並遵守音效開關。
+      // SV.01-93：台北101煙火低音爆響與短回音，接入音效總線並遵守音效開關。
       playFireworkBoom(intensity = 1) {
         if (this.muted) return;
         this.init();
@@ -4467,7 +4485,7 @@
     let isEternalVitality = false;
     let isScreensaverActive = false;
 
-    // 環境音效介面控制狀態（預設 OFF，音量 30%）
+    // 環境音效介面控制狀態（預設 OFF，音量 30%；環境總增益最高 2.0）
     let isAmbientSoundActive = false;
     let ambientVolume = 30;
 
@@ -4476,7 +4494,7 @@
 
     const spawnedIslandObjects = [];
     const islandNightLights = [];
-    // SV.01-91：台北101彩色夜間煙火粒子與夜晚觸發狀態
+    // SV.01-93：台北101彩色夜間煙火粒子與夜晚觸發狀態
     const activeFireworkParticles = [];
     let fireworksNightCycleTriggered = false;
     let fireworksShowTimer = null;
@@ -4508,6 +4526,7 @@
     let isRaining = false;
     let rainTimer = 18.0; // 縮短開局等待時間，更快迎來第一場小雨
     let currentRainOpacity = 0.0; // 平滑淡入淡出透明度
+    let isIslandPaused = false; // SV.01-93：stop / run 暫停與恢復島嶼動畫
 
     // 全域相機角度與滾輪縮放距離變數
     let sphericalAngle = 0;
@@ -4867,6 +4886,26 @@
 
       rainParticleSystem = new THREE.Points(rainGeo, rainMat);
       scene.add(rainParticleSystem);
+    }
+
+    // 🌧️ 秘技 rain：短暫降雨一次，8 秒後自動放晴。
+    function triggerShortRain() {
+      if (!rainParticleSystem) return;
+      isRaining = true;
+      rainTimer = 8.0;
+      rainParticleSystem.visible = true;
+      if (sound && typeof sound.updateAmbientEnvironment === 'function') {
+        sound.updateAmbientEnvironment(true, typeof timePhase !== 'undefined' ? timePhase : 0, true);
+      }
+      showCheatNotice('🌧️ 秘技生效：島上開始下起短暫小雨！');
+    }
+
+    function showCheatNotice(message) {
+      if (typeof upgradeBanner === 'undefined' || !upgradeBanner) return;
+      upgradeBanner.textContent = message;
+      upgradeBanner.className = "text-xs sm:text-sm font-black px-4 py-2 rounded-xl bg-gradient-to-r from-sky-300 to-cyan-200 text-slate-950 shadow-2xl tracking-wider transition-all duration-300";
+      upgradeBanner.classList.remove('hidden');
+      setTimeout(() => upgradeBanner.classList.add('hidden'), 2600);
     }
 
     // 🌧️ 雨滴每幀下落、頂部循環與「偶爾才下」週期自然過渡更新
@@ -6627,7 +6666,7 @@
       adjustCameraViewport();
     }
 
-    // SV.01-91：以多波彩色煙火呈現較長、柔和的夜間煙火秀，並播放低音回響
+    // SV.01-93：以多波彩色煙火呈現較長、柔和的夜間煙火秀，並播放低音回響
     function spawnTaipei101Fireworks(towerObj) {
       if (!towerObj || !scene) return;
       const origin = towerObj.getWorldPosition(new THREE.Vector3());
@@ -6679,8 +6718,8 @@
       return fireworkGlowTexture;
     }
 
-    function startTaipei101FireworksShow() {
-      if (fireworksNightCycleTriggered || !scene) return;
+    function startTaipei101FireworksShow(force = false) {
+      if ((!force && fireworksNightCycleTriggered) || !scene) return;
       const tower = scene.getObjectByName("台北一零一摩天大樓");
       if (!tower) return;
       fireworksNightCycleTriggered = true;
@@ -6688,6 +6727,7 @@
       let burstCount = 0;
       // 14 波、間隔 520ms：比原版多一點時間，並輪替多種鮮明色彩
       fireworksShowTimer = setInterval(() => {
+        if (isIslandPaused) return;
         const palette = [0xff477e, 0x38bdf8, 0xfacc15, 0xc084fc, 0x34d399, 0xfb923c, 0xffffff];
         const color = palette[burstCount % palette.length];
         const origin = tower.getWorldPosition(new THREE.Vector3());
@@ -6817,10 +6857,15 @@
       sound.stopNightAmbient();
 
       if (p !== timePhase) {
+        const previousPhase = timePhase;
         timePhase = p;
         dayTimeBadge.textContent = TIME_PHASE_NAMES[timePhase];
         if (timePhase === 3) startTaipei101FireworksShow();
         else fireworksNightCycleTriggered = false;
+        // 遊戲時間由夜晚跨入清晨，視為跨日時；環境音開啟時播放一次 Si-La-So-Mi。
+        if (previousPhase === 3 && timePhase === 0 && isAmbientSoundActive) {
+          sound.playAmbientMidnightBell();
+        }
       }
     }
 
@@ -7525,6 +7570,32 @@
           return;
         }
 
+        // SV.01-93 測試秘技：101 煙火、短暫降雨、暫停與恢復島嶼動畫。
+        if (code === 'fire') {
+          sound.init();
+          startTaipei101FireworksShow(true);
+          showCheatNotice('🎆 秘技生效：台北 101 開始播放一輪煙火！');
+          typeInput.value = '';
+          return;
+        }
+        if (code === 'rain') {
+          triggerShortRain();
+          typeInput.value = '';
+          return;
+        }
+        if (code === 'stop') {
+          isIslandPaused = true;
+          showCheatNotice('⏸️ 島嶼已暫停；輸入 run 可恢復動作。');
+          typeInput.value = '';
+          return;
+        }
+        if (code === 'run') {
+          isIslandPaused = false;
+          showCheatNotice('▶️ 島嶼動作已恢復。');
+          typeInput.value = '';
+          return;
+        }
+
         // 地標圖鑑開啟指令：12345
         if (val === '12345') {
           if (landmarkInspectorModal) {
@@ -7989,15 +8060,18 @@
       const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
       lastTime = currentTime;
 
-      updateDayNightCycle(dt);
-      updateFireworkParticles(dt);
-      updateRainParticles(dt);
+      if (!isIslandPaused) {
+        updateDayNightCycle(dt);
+        updateFireworkParticles(dt);
+        updateRainParticles(dt);
+      }
 
       // 環境音效由 SoundEngine 自己的低頻率計時器管理，不綁定螢幕保護模式。
 
-      if (isScreensaverActive) {
-        sphericalAngle += 0.0018;
-      }
+      if (!isIslandPaused) {
+        if (isScreensaverActive) {
+          sphericalAngle += 0.0018;
+        }
 
 
       floatingClouds.forEach(c => {
@@ -8324,7 +8398,8 @@
       currentCamLookAt.lerp(targetCamLookAt, 0.08);
 
       currentCamDist += (targetCamDist - currentCamDist) * 0.12;
-      applyCameraPosition(sphericalAngle, currentCamDist);
+        applyCameraPosition(sphericalAngle, currentCamDist);
+      }
 
       if (renderer && scene && camera) {
         renderer.render(scene, camera);
