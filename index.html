@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>我的夢想島：中文打字開拓記（SV.01 - 126）</title>
-  <!-- 版本：SV.01 - 126｜行動裝置右側可收合控制選單；桌面版保留原布局 -->
+  <title>我的夢想島：中文打字開拓記（SV.01 - 133）</title>
+  <!-- 版本：SV.01 - 133｜行動裝置右側可收合控制選單；所有答案須按 Enter 才送出；桌面版保留原布局 -->
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -324,7 +324,7 @@
     }
 
 
-    /* SV.01-126：只在手機／平板顯示的右側收合控制列；桌面版完全不套用。 */
+    /* SV.01-133：只在手機／平板顯示的右側收合控制列；桌面版完全不套用。 */
     #mobileControlDock { display: none; }
     @media (max-width: 760px) {
       #mobileControlDock {
@@ -361,6 +361,47 @@
     }
     @media (prefers-reduced-motion: reduce) { #mobileControlDock { transition:none; } }
 
+    /* SV.01-133：僅限行動裝置的精簡答題介面；760px 以上完全不套用。 */
+    @media (max-width: 760px) {
+      .hud-layer > header { padding-right: 54px; }
+      .hud-layer > header > div:nth-child(3) { gap: 5px; }
+      /* 行動版只保留地標與天色，積分可由遊戲進度需要時再查看，減少頂部擁擠。 */
+      .hud-layer > header > div:nth-child(3) > div:nth-child(3) { display: none !important; }
+      /* 題目區只保留拖曳列、題目、活力數字與輸入框；移除冗長的獎勵提示與活力長條。 */
+      #movableQuestionPanel {
+        max-height: 30dvh !important;
+        padding: 7px !important;
+        gap: 5px !important;
+        border-radius: 16px !important;
+        overflow: visible !important;
+      }
+      .panel-drag-toolbar { min-height: 26px !important; font-size: 10px !important; }
+      .panel-drag-handle, .panel-position-reset {
+        min-height: 27px !important; padding: 4px 7px !important; font-size: 10px !important;
+      }
+      #upgradeBanner { display: none !important; }
+      #movableQuestionPanel .w-full.bg-slate-900\/80 {
+        padding: 7px !important; border-radius: 13px !important;
+      }
+      #movableQuestionPanel .text-\[10px\].font-bold.tracking-widest { margin-bottom: 2px !important; }
+      #charCardsContainer { min-height: 0 !important; gap: 0 !important; }
+      .main-hanzi { font-size: clamp(1.5rem, 6vw, 1.9rem) !important; }
+      .zhuyin-ruby { font-size: .72rem !important; margin-bottom: 1px !important; }
+      #nextUpgradeHint { display: none !important; }
+      #movableQuestionPanel > .w-full:has(#vitalityBar) { display: none !important; }
+      #typeInput { min-height: 43px !important; padding: 9px 10px !important; }
+      #submitBtn { min-height: 43px !important; min-width: 66px !important; padding: 8px 12px !important; }
+      #mobileVitalityBadge {
+        display: block; position: fixed; z-index: 35;
+        top: max(66px, calc(env(safe-area-inset-top) + 60px));
+        right: 14px; color: white; font-size: clamp(25px, 7vw, 34px);
+        line-height: 1; font-weight: 900; font-style: italic;
+        text-shadow: 0 2px 8px rgba(0,0,0,.55); pointer-events: none;
+      }
+      #mobileControlDock.screensaver-hidden { display: none !important; }
+    }
+    @media (min-width: 761px) { #mobileVitalityBadge { display: none !important; } }
+
   </style>
 </head>
 <body class="relative w-full h-full overflow-hidden">
@@ -387,7 +428,7 @@
         <span id="currentDiffBadge" class="font-black text-emerald-400 text-xs sm:text-sm">簡易</span>
       </div>
 
-      <!-- 狀態欄：行動版保留地標數量、天色、積分；控制按鈕由 SV.01-126 側欄承載 -->
+      <!-- 狀態欄：行動版保留地標數量、天色、積分；控制按鈕由 SV.01-133 側欄承載 -->
       <div class="flex items-center gap-2 sm:gap-3">
         <!-- 100 種特殊紀念地標進度 -->
         <div class="glass-hud px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-2xl text-center">
@@ -533,7 +574,7 @@
     <!-- 底部操作提示與左下角版本編號 -->
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
-      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-126)</span>
+      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-133)</span>
       <span>拖曳旋轉 360° 全景 ‧ 滑鼠滾輪或雙指縮放視角</span>
     </footer>
   </div>
@@ -4603,6 +4644,9 @@
 
       // 打字答對提示音：保留 V.01/50 的音色、音高、旋律、節奏與時長；音量降為上一版的 20%。
       correctChime() {
+        // Enter／按鈕送出時，主動確保 Web Audio 已啟動，再播放答題成功三音提示。
+        this.init();
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
         this.playTone(523.25, 0.12, 'triangle', 0.0046);
         setTimeout(() => this.playTone(659.25, 0.15, 'triangle', 0.00575), 85);
         setTimeout(() => this.playTone(783.99, 0.25, 'triangle', 0.00575), 170);
@@ -7301,12 +7345,18 @@
       }
 
       const hudLayer = document.querySelector('.hud-layer');
+      const mobileDock = document.getElementById('mobileControlDock');
+      const mobileVitality = document.getElementById('mobileVitalityBadge');
       if (isScreensaverActive) {
         if (hudLayer) hudLayer.classList.add('hidden');
         if (renderModePanel) renderModePanel.classList.add('hidden');
+        if (mobileDock) mobileDock.classList.add('screensaver-hidden');
+        if (mobileVitality) mobileVitality.classList.add('screensaver-hidden');
         if (screensaverExitBadge) screensaverExitBadge.classList.remove('hidden');
       } else {
         if (hudLayer) hudLayer.classList.remove('hidden');
+        if (mobileDock) mobileDock.classList.remove('screensaver-hidden');
+        if (mobileVitality) mobileVitality.classList.remove('screensaver-hidden');
         if (screensaverExitBadge) screensaverExitBadge.classList.add('hidden');
         if (gameState === 'RUNNING' && typeInput) {
           typeInput.focus();
@@ -8581,26 +8631,81 @@
         }
       }
 
-      // 遊戲常規目標中文詞彙判定（輸入即時符合或按下 Enter 皆算答對）
-      if (val === target) {
+      // SV.01-133 修正：只有明確送出且答案正確時才判定；成功後確保清空輸入框並更新遮罩。
+      if (isExplicitSubmit && val === target) {
+        // 確保瀏覽器音訊已初始化／解除暫停，答對音效由 onWordCorrect() 統一播放一次。
+        if (sound && typeof sound.init === 'function') sound.init();
         onWordCorrect();
+        typeInput.value = '';
+        typeInput.dispatchEvent(new Event('input', { bubbles: true }));
+        refreshTypingMask();
+        typeInput.focus();
       }
     }
 
+    // SV.01-133：輸入及注音組字只更新畫面，不可在 Enter 前判定答案。
     typeInput.addEventListener('compositionend', () => {
-      setTimeout(() => { refreshTypingMask(); if (!hideTypingMode) checkTypingMatch(false); }, 10);
+      setTimeout(() => { refreshTypingMask(); }, 10);
     });
 
     typeInput.addEventListener('input', () => {
       refreshTypingMask();
-      if (!hideTypingMode) checkTypingMatch(false);
     });
 
-    typeInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        checkTypingMatch(true);
+    // SV.01-133：答題只以「送出當下的最終文字」判定。
+    // 先讓瀏覽器／注音輸入法完成 Enter 造成的組字提交，再讀取輸入框。
+    let typingSubmitPending = false;
+
+    function clearSubmittedAnswer() {
+      if (!typeInput) return;
+      typeInput.value = '';
+      typeInput.dispatchEvent(new Event('input', { bubbles: true }));
+      if (typeInputMask) {
+        typeInputMask.textContent = '';
+        typeInputMask.classList.add('hidden');
       }
+      refreshTypingMask();
+    }
+
+    function submitTypingAnswer() {
+      if (!typeInput || typingSubmitPending) return;
+      typingSubmitPending = true;
+
+      // 延後到目前鍵盤事件／輸入法組字處理結束後，才正式判題。
+      setTimeout(() => {
+        try {
+          if (!typeInput) return;
+          const before = correctCount;
+          checkTypingMatch(true);
+
+          // 正確答案會由 onWordCorrect() 播放音效並增加 correctCount。
+          // 無論 advanceWord 是否因特殊事件提早 return，只要確實答對就清空。
+          if (correctCount > before) {
+            clearSubmittedAnswer();
+
+            // 再於下一個事件循環確認清空，避免輸入法把已提交的舊字補回。
+            setTimeout(() => {
+              if (!typeInput) return;
+              clearSubmittedAnswer();
+              typeInput.focus();
+            }, 0);
+          }
+        } finally {
+          typingSubmitPending = false;
+        }
+      }, 0);
+    }
+
+    typeInput.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+
+      // Enter 若正在確認注音候選字，不能攔截，否則會阻止輸入法提交文字。
+      // 這次 Enter 只負責完成組字；等使用者再次按 Enter 才正式送出答案。
+      if (e.isComposing || e.keyCode === 229) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      submitTypingAnswer();
     });
 
     // 全域鍵盤事件監聽：面板開啟時按 C / ESC 關閉，螢幕保護按 ESC 退出
@@ -8948,9 +9053,8 @@
       event.preventDefault();
       event.stopPropagation();
       if (clicked.id === 'submitBtn') {
-        // 不把焦點先移走；直接讀取輸入框目前文字並判定。
-        checkTypingMatch(true);
-        if (typeInput) typeInput.focus();
+        // SV.01-133：按鈕與 Enter 共用提交流程，確保答對後清空。
+        submitTypingAnswer();
       } else if (clicked.id === 'lightningSystemBtn') {
         setLightningSystemEnabled(!lightningSystemEnabled);
       }
@@ -9387,7 +9491,7 @@
   </script>
 
   <script>
-  // SV.01-126：將既有控制按鈕移入手機／平板右側可收合選單；桌面寬度時還原原始 DOM 位置與布局。
+  // SV.01-133：將既有控制按鈕移入手機／平板右側可收合選單；桌面寬度時還原原始 DOM 位置與布局。
   (function () {
     const mq = window.matchMedia('(max-width: 760px)');
     const controlIds = ['bgmBtn','muteBtn','ambientSoundBtn','ambientVolSlider','lightningSystemBtn','screensaverBtn','inspectorBtn'];
@@ -9407,6 +9511,19 @@
         <section class="mobile-dock-group system"><h3>系統控制</h3><div id="mobileSystemControls"></div></section>
       </div>`;
     document.body.appendChild(dock);
+
+    // SV.01-133：行動版將島嶼活力改成畫面右上角單一數字；桌面版不建立此元件。
+    const mobileVitalityBadge = document.createElement('div');
+    mobileVitalityBadge.id = 'mobileVitalityBadge';
+    mobileVitalityBadge.setAttribute('aria-label', '島嶼活力');
+    mobileVitalityBadge.textContent = document.getElementById('vitalityPercent')?.textContent || '100%';
+    document.body.appendChild(mobileVitalityBadge);
+    const vitalitySource = document.getElementById('vitalityPercent');
+    if (vitalitySource && typeof MutationObserver !== 'undefined') {
+      new MutationObserver(() => {
+        mobileVitalityBadge.textContent = vitalitySource.textContent || '';
+      }).observe(vitalitySource, { childList: true, characterData: true, subtree: true });
+    }
     const rail = dock.querySelector('#mobileDockRail');
     const openBtn = dock.querySelector('#mobileDockOpen');
     const closeBtn = dock.querySelector('#mobileDockClose');
@@ -9417,7 +9534,7 @@
     controlIds.forEach(id => {
       const el = document.getElementById(id);
       if (!el || !el.parentNode) return;
-      const marker = document.createComment('SV.01-126 original location: ' + id);
+      const marker = document.createComment('SV.01-133 original location: ' + id);
       el.parentNode.insertBefore(marker, el);
       nodes.set(id, {el, marker, parent: marker.parentNode, next: el.nextSibling});
     });
@@ -9425,8 +9542,8 @@
     const sliderInfo = nodes.get('ambientVolSlider');
     if (sliderInfo) {
       const wrap = sliderInfo.el.parentElement;
-      if (wrap && wrap !== sliderInfo.parent) {
-        const wrapMarker = document.createComment('SV.01-126 environment volume wrapper');
+      if (wrap && wrap.parentNode) {
+        const wrapMarker = document.createComment('SV.01-133 environment volume wrapper');
         wrap.parentNode.insertBefore(wrapMarker, wrap);
         sliderInfo.wrap = wrap; sliderInfo.wrapMarker = wrapMarker;
       }
@@ -9466,8 +9583,11 @@
       nodes.forEach((info, id) => {
         if (id === 'ambientVolSlider' && info.wrap && info.wrapMarker.parentNode) {
           info.wrapMarker.parentNode.insertBefore(info.wrap, info.wrapMarker.nextSibling);
-          info.wrap.id = ''; info.wrap.classList.remove('mobile-dock-control');
-        } else if (info.marker.parentNode) {
+          info.wrap.id = '';
+          info.wrap.classList.remove('mobile-dock-control');
+          return;
+        }
+        if (info.marker.parentNode) {
           info.marker.parentNode.insertBefore(info.el, info.marker.nextSibling);
           info.el.classList.remove('mobile-dock-control');
         }
