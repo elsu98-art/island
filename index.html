@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>我的夢想島：中文打字開拓記（SV.01 - 134）</title>
-  <!-- 版本：SV.01 - 134｜只調整行動裝置輸入介面；桌面版樣式與功能沿用 SV.01-133 -->
+  <title>我的夢想島：中文打字開拓記（SV.01 - 140）</title>
+  <!-- 版本：SV.01-140｜版面切換按鈕獨立置於標題下方；保留行動版拖曳字卡把手與135版輸入流程 -->
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -401,7 +401,7 @@
       #mobileControlDock.screensaver-hidden { display: none !important; }
     }
 
-    /* SV.01-135：行動裝置專用「題目在上、輸入貼近系統鍵盤」版。
+    /* SV.01-138：行動裝置專用「題目在上、輸入貼近系統鍵盤」版。
        所有規則均限制在 max-width:760px，桌面版不受影響。 */
     @media (max-width: 760px) {
       /* 不再顯示整組大型控制台外框及拖曳列；只留下題目字卡。 */
@@ -467,6 +467,37 @@
 
     @media (min-width: 761px) { #mobileVitalityBadge { display: none !important; } }
 
+  
+    /* SV.01-140：縮小版面切換按鈕並移到標題正下方；手機顯示拖曳字卡把手。 */
+    #layoutModeToggle { background:#00c9a7 !important; border:0 !important; border-radius:999px !important; padding:3px 5px !important; display:flex; align-items:center; gap:4px; box-shadow:0 2px 7px rgba(0,0,0,.22); }
+    #layoutModeToggle .mode-icon-circle { width:19px; height:19px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; color:#111827; transition:transform .16s, background .16s, color .16s; }
+    #layoutModeToggle .mode-icon-circle.active { background:#eafff9; color:#009e82; box-shadow:inset 0 0 0 1.5px rgba(0,201,167,.28); transform:scale(1.04); }
+    #layoutModeToggle svg { display:block; width:13px; height:13px; }
+    #layoutModeToggle:focus-visible { outline:2px solid #fff; outline-offset:2px; }
+    @media (max-width:760px) { #layoutModeToggle { gap:3px; padding:2px 4px !important; } #layoutModeToggle .mode-icon-circle { width:17px;height:17px; } #layoutModeToggle svg {width:12px;height:12px;} }
+    /* SV.01-140：切換圖示小巧置於標題文字下方；手機版顯示拖曳字卡工具列。 */
+    #dreamIslandTitleStack { display:flex; flex-direction:column; align-items:flex-start; gap:3px; }
+    @media (max-width:760px) {
+      #movableQuestionPanel > .panel-drag-toolbar { display:flex !important; align-items:center; justify-content:flex-start; gap:5px; min-height:22px; margin:0 0 4px 2px; }
+      #movableQuestionPanel .panel-drag-handle { display:inline-flex !important; min-height:22px; padding:2px 7px; gap:4px; font-size:10px; border-radius:7px; }
+      #movableQuestionPanel .panel-drag-grip { font-size:12px; letter-spacing:1px; }
+      #movableQuestionPanel .panel-position-reset { display:inline-flex !important; min-height:22px; padding:2px 6px; font-size:10px; }
+    }
+    /* 手動切換只在需要跨裝置覆寫時生效；行動版答題欄仍完全沿用 SV.01-135。 */
+    @media (min-width:761px) {
+      body.force-mobile-layout #movableQuestionPanel { position:fixed !important;left:10px !important;right:10px !important;top:max(86px,calc(env(safe-area-inset-top) + 78px)) !important;bottom:auto !important;width:auto !important;max-width:none !important;max-height:26dvh !important;padding:0 !important;gap:0 !important;background:transparent !important;border:0 !important;box-shadow:none !important;border-radius:0 !important;overflow:visible !important; }
+      body.force-mobile-layout #movableQuestionPanel > .panel-drag-toolbar {display:flex !important;}
+      body.force-mobile-layout #movableQuestionPanel > #upgradeBanner, body.force-mobile-layout #movableQuestionPanel > #weihuaEntranceCard, body.force-mobile-layout #movableQuestionPanel > .w-full:has(#vitalityBar) {display:none !important;}
+      body.force-mobile-layout #movableQuestionPanel .w-full.bg-slate-900\/80 {display:block !important;width:100% !important;max-height:24dvh !important;overflow-y:auto !important;padding:10px 12px !important;border-radius:18px !important;background:rgba(15,23,42,.82) !important;}
+      body.force-mobile-layout #movableQuestionPanel > .relative.w-full.flex.items-center.gap-2 {position:fixed !important;left:10px !important;right:10px !important;bottom:max(8px,env(safe-area-inset-bottom)) !important;width:auto !important;z-index:95 !important;}
+      body.force-mobile-layout #submitBtn {display:none !important;} body.force-mobile-layout #mobileVitalityBadge {display:block !important;position:fixed;z-index:35;top:70px;right:14px;color:white;font-size:30px;font-weight:900;pointer-events:none;} body.force-mobile-layout #mobileControlDock {display:block !important;}
+    }
+    @media (max-width:760px) {
+      body.force-desktop-layout #movableQuestionPanel {position:absolute !important;left:auto !important;right:12px !important;top:auto !important;bottom:8px !important;width:min(400px,calc(100vw - 24px)) !important;max-height:43dvh !important;padding:12px !important;gap:10px !important;overflow-y:auto !important;background:rgba(15,23,42,.88) !important;border:1px solid rgba(52,211,153,.35) !important;border-radius:20px !important;box-shadow:0 20px 45px -10px rgba(0,0,0,.65) !important;}
+      body.force-desktop-layout #movableQuestionPanel > .panel-drag-toolbar, body.force-desktop-layout #movableQuestionPanel > #upgradeBanner, body.force-desktop-layout #movableQuestionPanel > #weihuaEntranceCard, body.force-desktop-layout #movableQuestionPanel > .w-full:has(#vitalityBar) {display:block !important;}
+      body.force-desktop-layout #movableQuestionPanel > .relative.w-full.flex.items-center.gap-2 {position:relative !important;left:auto !important;right:auto !important;bottom:auto !important;padding:0 !important;background:transparent !important;border:0 !important;box-shadow:none !important;}
+      body.force-desktop-layout #typeInput {height:auto !important;min-height:48px !important;} body.force-desktop-layout #submitBtn {display:flex !important;} body.force-desktop-layout #mobileControlDock {display:none !important;} body.force-desktop-layout #mobileVitalityBadge {display:none !important;}
+    }
   </style>
 </head>
 <body class="relative w-full h-full overflow-hidden">
@@ -480,11 +511,16 @@
     <!-- 頂部資訊列 -->
     <header class="flex justify-between items-center w-full max-w-7xl mx-auto interactive gap-2">
       <!-- 標題 -->
-      <div class="glass-hud px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl flex items-center gap-2.5">
-        <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
-        <div>
+      <div id="dreamIslandTitleStack" style="display:flex;flex-direction:column;align-items:flex-start;gap:3px;">
+        <div class="glass-hud px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl flex items-center gap-2.5">
+          <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
           <h1 class="text-xs sm:text-sm font-black tracking-wider text-emerald-300">我的夢想島</h1>
         </div>
+        <!-- SV.01-140：切換鈕獨立放在標題框下方，不放進題目字卡，也不包在標題玻璃框內。 -->
+        <button id="layoutModeToggle" type="button" aria-label="切換電腦版／行動裝置版面" title="切換電腦版／行動裝置版面" style="position:relative;z-index:120;margin-left:8px;pointer-events:auto;touch-action:manipulation;">
+          <span class="mode-icon-circle" id="desktopModeCircle" aria-hidden="true"><svg viewBox="0 0 32 28" fill="none"><rect x="3" y="2" width="26" height="18" rx="2.5" stroke="currentColor" stroke-width="2.4"/><path d="M11 24h10M16 20v4M7 26h18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+          <span class="mode-icon-circle" id="mobileModeCircle" aria-hidden="true"><svg viewBox="0 0 24 32" fill="none"><rect x="3" y="1.5" width="18" height="29" rx="4" stroke="currentColor" stroke-width="2.4"/><path d="M9 5h6M10 26.5h4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+        </button>
       </div>
 
       <!-- 當前難度顯示標籤 (遊戲進行中鎖定) -->
@@ -640,7 +676,7 @@
     <!-- 底部操作提示與左下角版本編號 -->
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
-      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-135)</span>
+      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-138)</span>
       <span>拖曳旋轉 360° 全景 ‧ 滑鼠滾輪或雙指縮放視角</span>
     </footer>
   </div>
@@ -9670,7 +9706,7 @@
 
 
   <style>
-    /* SV.01-135：依示意圖優化手機畫面；桌面版（761px 以上）完全不受影響。 */
+    /* SV.01-138：依示意圖優化手機畫面；桌面版（761px 以上）完全不受影響。 */
     @media (max-width: 760px) {
       /* 手機畫面優先保留小島視野；題目卡保持精簡並位於上方。 */
       #movableQuestionPanel {
@@ -9703,7 +9739,7 @@
     }
   </style>
   <script>
-    // SV.01-135：只處理行動裝置視覺視窗；不攔截鍵盤事件、不修改判題流程。
+    // SV.01-138：只處理行動裝置視覺視窗；不攔截鍵盤事件、不修改判題流程。
     (() => {
       const mq = window.matchMedia('(max-width: 760px)');
       const vv = window.visualViewport;
@@ -9724,6 +9760,33 @@
       window.addEventListener('resize', updateMobileKeyboardLayout);
       window.addEventListener('orientationchange', () => setTimeout(updateMobileKeyboardLayout, 150));
       updateMobileKeyboardLayout();
+    })();
+  </script>
+
+
+  <script>
+    // SV.01-140：手動切換版面。保留 SV.01-135 原有輸入欄、鍵盤視窗與判題程式。
+    (function(){
+      const btn=document.getElementById('layoutModeToggle');
+      const desk=document.getElementById('desktopModeCircle');
+      const mob=document.getElementById('mobileModeCircle');
+      if(!btn||!desk||!mob)return;
+      const key='dreamIslandLayoutModeSV138';
+      let mode='auto'; try{mode=localStorage.getItem(key)||'auto';}catch(e){}
+      function render(){
+        document.body.classList.remove('force-mobile-layout','force-desktop-layout');
+        if(mode==='mobile')document.body.classList.add('force-mobile-layout');
+        if(mode==='desktop')document.body.classList.add('force-desktop-layout');
+        const isMobile=mode==='mobile'||(mode==='auto'&&window.matchMedia('(max-width:760px)').matches);
+        mob.classList.toggle('active',isMobile); desk.classList.toggle('active',!isMobile);
+        btn.setAttribute('aria-label',isMobile?'目前行動裝置版面，點擊切換電腦版':'目前電腦版面，點擊切換行動裝置版');
+        btn.title=isMobile?'目前行動裝置版面；點擊切換電腦版':'目前電腦版面；點擊切換行動裝置版';
+      }
+      btn.addEventListener('click',()=>{
+        const isMobile=mode==='mobile'||(mode==='auto'&&window.matchMedia('(max-width:760px)').matches);
+        mode=isMobile?'desktop':'mobile'; try{localStorage.setItem(key,mode);}catch(e){} render();
+      });
+      window.addEventListener('resize',()=>{if(mode==='auto')render();}); render();
     })();
   </script>
 
