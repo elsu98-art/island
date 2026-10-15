@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>我的夢想島：中文打字開拓記（SV.01 - 147）</title>
-  <!-- 版本：SV.01-147｜修正初始樹木根部高度與陰影設定；保留既有功能 -->
+  <title>我的夢想島：中文打字開拓記（SV.01-158）</title>
+  <!-- 版本：SV.01-158｜安平古堡防重疊並調至第35位 -->
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -735,7 +735,7 @@
     <!-- 底部操作提示與左下角版本編號 -->
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
-      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-147)</span>
+      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-158)</span>
       <span>拖曳旋轉 360° 全景 ‧ 滑鼠滾輪或雙指縮放視角</span>
     </footer>
   </div>
@@ -768,13 +768,19 @@
           </h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
+              <span class="text-slate-400">開啟地標圖鑑</span>
+              <span class="font-mono font-bold text-cyan-400 bg-slate-950 px-2 py-0.5 rounded">12345</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
               <span class="text-slate-400">開啟秘技面板</span>
               <span class="font-mono font-bold text-emerald-400 bg-slate-950 px-2 py-0.5 rounded">00000</span>
             </div>
             <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
-              <span class="text-slate-400">開啟地標圖鑑</span>
-              <span class="font-mono font-bold text-cyan-400 bg-slate-950 px-2 py-0.5 rounded">12345</span>
+              <span class="text-slate-400">天色變化</span>
+              <span class="font-mono font-bold text-fuchsia-300 bg-slate-950 px-2 py-0.5 rounded">day / night / club</span>
             </div>
+
+
             <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
               <span class="text-slate-400">永恆綠洲（生命全滿不扣血）</span>
               <span class="font-mono font-bold text-teal-400 bg-slate-950 px-2 py-0.5 rounded">life</span>
@@ -791,23 +797,23 @@
               <span class="text-slate-400">召喚所有人物</span>
               <span class="font-mono font-bold text-fuchsia-400 bg-slate-950 px-2 py-0.5 rounded">marshmallow</span>
             </div>
-            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-rose-500/40 flex items-center justify-between">
+            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
               <span class="text-slate-300">台北 101 播放一輪煙火（含音效）</span>
               <span class="font-mono font-bold text-rose-300 bg-slate-950 px-2 py-0.5 rounded">fire</span>
             </div>
-            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-sky-500/40 flex items-center justify-between">
+            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
               <span class="text-slate-300">島上下起短暫小雨</span>
               <span class="font-mono font-bold text-sky-300 bg-slate-950 px-2 py-0.5 rounded">rain</span>
             </div>
-            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-cyan-500/40 flex items-center justify-between">
+            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
               <span class="text-slate-300">停止下雨，讓島上放晴</span>
               <span class="font-mono font-bold text-cyan-300 bg-slate-950 px-2 py-0.5 rounded">sun</span>
             </div>
-            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-amber-500/40 flex items-center justify-between">
+            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
               <span class="text-slate-300">暫停島上物件與人物動作</span>
               <span class="font-mono font-bold text-amber-300 bg-slate-950 px-2 py-0.5 rounded">stop</span>
             </div>
-            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-emerald-500/40 flex items-center justify-between">
+            <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
               <span class="text-slate-300">恢復島上物件與人物動作</span>
               <span class="font-mono font-bold text-emerald-300 bg-slate-950 px-2 py-0.5 rounded">run</span>
             </div>
@@ -2115,44 +2121,6 @@
         }
       },
       {
-        name: "威尼斯浪漫貢多拉",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const blackHullMat = new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.3, metalness: 0.1 });
-          const silverMetalMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.2 });
-          const velvetMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.6 });
-          const woodMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 });
-
-          const hull = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.35, 0.95), blackHullMat);
-          hull.position.y = 0.22;
-          const bowUpturn = new THREE.Mesh(new THREE.ConeGeometry(0.48, 0.9, 4), blackHullMat);
-          bowUpturn.rotation.z = Math.PI / 2.3; bowUpturn.position.set(2.2, 0.45, 0);
-          const sternUpturn = new THREE.Mesh(new THREE.ConeGeometry(0.48, 0.8, 4), blackHullMat);
-          sternUpturn.rotation.z = -Math.PI / 2.4; sternUpturn.position.set(-2.15, 0.42, 0);
-
-          const ferro = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.65, 0.35), silverMetalMat);
-          ferro.position.set(2.55, 0.75, 0);
-
-          const seatBase = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.2, 0.65), velvetMat);
-          seatBase.position.set(0.1, 0.38, 0);
-          const seatBack = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.42, 0.65), velvetMat);
-          seatBack.position.set(-0.35, 0.58, 0);
-
-          const oarlock = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.35, 0.1), woodMat);
-          oarlock.position.set(-1.2, 0.5, 0.48);
-          const oar = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 3.2, 6), woodMat);
-          oar.rotation.x = 0.55; oar.rotation.y = 0.25; oar.position.set(-0.8, 0.6, 0.6);
-
-          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 1.8, 8), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
-          pole.position.set(1.4, 0.8, 0.75);
-          const stripe = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.03, 6, 12), silverMetalMat);
-          stripe.rotation.x = Math.PI / 2; stripe.position.set(1.4, 1.1, 0.75);
-
-          g.add(hull, bowUpturn, sternUpturn, ferro, seatBase, seatBack, oarlock, oar, pole, stripe);
-          return g;
-        }
-      },
-      {
         name: "露天星空音樂劇場",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
@@ -2161,6 +2129,92 @@
           const arch = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.15, 8, 16, Math.PI), new THREE.MeshStandardMaterial({ color: 0xf8fafc }));
           arch.position.set(0, 0.3, -0.6);
           g.add(stage, arch); return g;
+        }
+      },
+      {
+        name: "淡江大橋",
+        build: (pos) => {
+          const g = new THREE.Group(); g.position.copy(pos);
+          const concrete = new THREE.MeshStandardMaterial({ color: 0xd7e0e8, roughness: 0.58, metalness: 0.12 });
+          const pylonMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.42, metalness: 0.15 });
+          const deck = new THREE.Mesh(new THREE.BoxGeometry(22, 0.22, 0.58), concrete); deck.position.y=1.15; g.add(deck);
+          // 淡江大橋主塔：橋面以下由兩根斜向塔柱自海面升起，穿過橋面後逐漸合併為單一高塔。
+          // 以多段長方柱形成「下部分岔、上方合一」的剪影，避免看起來像單根直柱。
+          const lowerPylonMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.48, metalness: 0.12 });
+          function addPylonSegment(x1,y1,x2,y2,width,depth,mat) {
+            const a = new THREE.Vector3(x1,y1,0), b = new THREE.Vector3(x2,y2,0);
+            const d = new THREE.Vector3().subVectors(b,a);
+            const mesh = new THREE.Mesh(new THREE.BoxGeometry(width,d.length(),depth),mat);
+            mesh.position.copy(a).add(b).multiplyScalar(0.5);
+            mesh.rotation.z = -Math.atan2(d.x,d.y);
+            g.add(mesh);
+          }
+          // 海面到橋面：兩根分開的塔柱；橋面以上：向中央收攏並合併成單塔。
+          for (const side of [-1,1]) {
+            addPylonSegment(side*0.72,0.02,side*0.60,1.15,0.34,0.40,lowerPylonMat);
+            addPylonSegment(side*0.60,1.15,side*0.40,2.35,0.30,0.38,lowerPylonMat);
+            addPylonSegment(side*0.40,2.35,side*0.18,3.15,0.28,0.36,pylonMat);
+          }
+          const upperPylon = new THREE.Mesh(new THREE.BoxGeometry(0.34,6.0,0.38),pylonMat);
+          upperPylon.position.set(0,5.25,0); g.add(upperPylon);
+          // 夜間斜張鋼索燈：白光 → 藍光 → 粉紅光 → 紫光 → 白光，持續循環。
+          // 每條鋼索使用獨立材質並稍微錯開相位，呈現沿橋身流動的燈色變化。
+          const cableTopY = 8.05;
+          const cableBottomY = 1.30;
+          const cableColors = [
+            new THREE.Color(0xffffff), // 白
+            new THREE.Color(0x55aaff), // 藍
+            new THREE.Color(0xff82d7), // 粉紅
+            new THREE.Color(0x9b6cff), // 紫
+            new THREE.Color(0xffffff)  // 回到白
+          ];
+          function sampleCableColor(progress) {
+            const scaled = progress * (cableColors.length - 1);
+            const idx = Math.min(cableColors.length - 2, Math.floor(scaled));
+            return cableColors[idx].clone().lerp(cableColors[idx + 1], scaled - idx);
+          }
+          // 左右兩側各 14 條鋼索，從塔頂附近向外逐步拉開，形成雙側扇形。
+          let cableIndex = 0;
+          for (const side of [-1, 1]) {
+            for (let i=0; i<14; i++) {
+              const t = (i + 1) / 14;
+              const x = side * (0.45 + t * 8.25);
+              const start = new THREE.Vector3(side * 0.08, cableTopY - t * 0.18, 0);
+              const end = new THREE.Vector3(x, cableBottomY, 0);
+              const d = new THREE.Vector3().subVectors(end, start);
+              const cableMat = new THREE.MeshStandardMaterial({
+                color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1.25,
+                roughness: 0.35, metalness: 0.12
+              });
+              const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.018,0.018,d.length(),5), cableMat);
+              cable.position.copy(start).add(end).multiplyScalar(0.5);
+              cable.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), d.normalize());
+              const phaseOffset = cableIndex / 28;
+              cable.onBeforeRender = () => {
+                const cycle = ((performance.now() / 1000 / 8) + phaseOffset * 0.22) % 1;
+                const color = sampleCableColor(cycle);
+                cableMat.color.copy(color);
+                cableMat.emissive.copy(color);
+              };
+              g.add(cable);
+              cableIndex++;
+            }
+          }
+          // 主塔上的紅色航空警示燈：塔頂、上段與中段皆有紅色發光燈點。
+          const redBeaconMat = new THREE.MeshStandardMaterial({
+            color: 0xff2525, emissive: 0xff1010, emissiveIntensity: 3.2,
+            roughness: 0.25, metalness: 0.0
+          });
+          for (const beaconY of [8.35, 6.25, 3.95]) {
+            const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.095, 12, 10), redBeaconMat);
+            beacon.position.set(0, beaconY, 0.23);
+            g.add(beacon);
+          }
+          // 橋面支柱與兩端引橋
+          for(let i=0;i<13;i++){ const rail=new THREE.Mesh(new THREE.BoxGeometry(0.045,0.18,0.045),pylonMat); rail.position.set(-8.2+i*1.35,1.34,0.31); g.add(rail); }
+          const pierMat=new THREE.MeshStandardMaterial({color:0x94a3b8,roughness:0.8});
+          for(const x of [-6,-3,3,6]){const pier=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.95,0.22),pierMat);pier.position.set(x,0.62,0);g.add(pier);}
+          return g;
         }
       },
       {
@@ -2529,37 +2583,48 @@
         }
       },
       {
-        name: "童話南瓜馬車",
+        name: "安平古堡",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
-          const pumpkinMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.5 });
-          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8, roughness: 0.25 });
-          const greenMat = new THREE.MeshStandardMaterial({ color: 0x16a34a });
-
-          const pumpkinGroup = new THREE.Group();
-          pumpkinGroup.position.y = 1.15;
-          for (let i = 0; i < 6; i++) {
-            const lobe = new THREE.Mesh(new THREE.SphereGeometry(0.85, 10, 10), pumpkinMat);
-            lobe.scale.set(0.9, 0.85, 1.15);
-            lobe.rotation.y = (i / 6) * Math.PI;
-            pumpkinGroup.add(lobe);
+          const brick = new THREE.MeshStandardMaterial({ color: 0xb9673e, roughness: 0.9 });
+          const whiteTower = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.72 });
+          const roofRed = new THREE.MeshStandardMaterial({ color: 0xa92f27, roughness: 0.78 });
+          const windowMat = new THREE.MeshStandardMaterial({ color: 0x24364b, roughness: 0.42, metalness: 0.12 });
+          // 加寬安平古堡下方的整體園區：大型基座、環繞紅磚城牆、寬闊院落與多棟附屬建築
+          const base = new THREE.Mesh(new THREE.BoxGeometry(5.8, 0.34, 4.65), brick); base.position.y = 0.17; g.add(base);
+          const courtyard = new THREE.Mesh(new THREE.BoxGeometry(5.25, 0.08, 4.1), new THREE.MeshStandardMaterial({ color: 0xc99a72, roughness: 0.95 })); courtyard.position.y = 0.38; g.add(courtyard);
+          // 四周低矮厚實的紅磚城牆，讓地標不再像單獨一間小房子
+          const wallH = 0.58, wallT = 0.22;
+          const wallFront = new THREE.Mesh(new THREE.BoxGeometry(5.65, wallH, wallT), brick); wallFront.position.set(0, 0.66, 2.2); g.add(wallFront);
+          const wallBack = new THREE.Mesh(new THREE.BoxGeometry(5.65, wallH, wallT), brick); wallBack.position.set(0, 0.66, -2.2); g.add(wallBack);
+          const wallLeft = new THREE.Mesh(new THREE.BoxGeometry(wallT, wallH, 4.25), brick); wallLeft.position.set(-2.72, 0.66, 0); g.add(wallLeft);
+          const wallRight = new THREE.Mesh(new THREE.BoxGeometry(wallT, wallH, 4.25), brick); wallRight.position.set(2.72, 0.66, 0); g.add(wallRight);
+          // 中央主建築加寬，並增加兩側附屬房舍，呈現照片中寬廣的古堡建築群
+          const keepMat = new THREE.MeshStandardMaterial({ color: 0xf1e8d7, roughness: 0.92 });
+          const keep = new THREE.Mesh(new THREE.BoxGeometry(2.55, 1.18, 1.72), keepMat); keep.position.set(-0.28, 1.02, 0.12); g.add(keep);
+          const roof = new THREE.Mesh(new THREE.BoxGeometry(2.78, 0.18, 1.92), brick); roof.position.set(-0.28, 1.7, 0.12); g.add(roof);
+          for (const side of [-1, 1]) {
+            const wing = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.78, 1.28), keepMat); wing.position.set(side * 1.62, 0.82, 0.28); g.add(wing);
+            const wingRoof = new THREE.Mesh(new THREE.BoxGeometry(1.18, 0.14, 1.4), brick); wingRoof.position.set(side * 1.62, 1.28, 0.28); g.add(wingRoof);
           }
-          const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.4, 6), greenMat);
-          stem.position.y = 0.95;
-          const crown = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.06, 6, 12), goldMat);
-          crown.rotation.x = Math.PI / 2; crown.position.y = 0.98;
-          pumpkinGroup.add(stem, crown);
-
-          for (let dx of [-0.95, 0.95]) {
-            for (let dz of [-0.75, 0.75]) {
-              const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.05, 6, 16), goldMat);
-              wheel.position.set(dx, 0.38, dz);
-              const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.1, 8), goldMat);
-              hub.rotation.x = Math.PI / 2; hub.position.set(dx, 0.38, dz);
-              g.add(wheel, hub);
-            }
+          // 寬闊正面階梯連接城牆外側與院落
+          const stairMat = new THREE.MeshStandardMaterial({ color: 0xa85d3b, roughness: 0.92 });
+          for (let i=0;i<4;i++) { const step = new THREE.Mesh(new THREE.BoxGeometry(1.9 + i*0.32, 0.12, 0.32), stairMat); step.position.set(0, 0.25 + i*0.12, 2.42 + i*0.25); g.add(step); }
+          // 安平古堡特色瞭望塔：加高純白塔身、上方觀景窗艙、紅色斜屋頂
+          const tx = 0.48, tz = -0.18;
+          const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.48, 1.72, 0.48), whiteTower); shaft.position.set(tx, 2.66, tz); g.add(shaft);
+          const shaftBase = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.12, 0.58), whiteTower); shaftBase.position.set(tx, 1.82, tz); g.add(shaftBase);
+          const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.94, 0.66, 0.88), whiteTower); cabin.position.set(tx, 3.82, tz); g.add(cabin);
+          // 深色觀景窗，四面可見
+          for (const side of [-1, 1]) {
+            const frontWindow = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.32, 0.025), windowMat); frontWindow.position.set(tx, 3.84, tz + side * 0.448); g.add(frontWindow);
+            const sideWindow = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.32, 0.56), windowMat); sideWindow.position.set(tx + side * 0.478, 3.84, tz); g.add(sideWindow);
           }
-          g.add(pumpkinGroup); return g;
+          // 紅色四坡屋頂，以四角錐表現斜屋頂輪廓
+          const towerRoof = new THREE.Mesh(new THREE.ConeGeometry(0.78, 0.72, 4), roofRed); towerRoof.position.set(tx, 4.48, tz); towerRoof.rotation.y = Math.PI / 4; g.add(towerRoof);
+          const roofTip = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.16, 6), roofRed); roofTip.position.set(tx, 4.91, tz); g.add(roofTip);
+          for (let i=0;i<5;i++){ const slit=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.28,0.04),new THREE.MeshStandardMaterial({color:0x514238})); slit.position.set(-0.62+i*0.28,1.05,0.79); g.add(slit); }
+          return g;
         }
       },
       {
@@ -2607,14 +2672,17 @@
         }
       },
       {
-        name: "童話薑餅人糖果屋",
+        name: "童話薑餅人糖果屋（與地標14交換）",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
-          const w = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.1, 1.3), new THREE.MeshStandardMaterial({ color: 0x92400e }));
-          w.position.y = 0.55;
-          const rf = new THREE.Mesh(new THREE.ConeGeometry(1.3, 0.7, 4), new THREE.MeshStandardMaterial({ color: 0xf43f5e }));
-          rf.rotation.y = Math.PI / 4; rf.position.y = 1.35;
-          g.add(w, rf); return g;
+          const wall = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.1, 1.3), new THREE.MeshStandardMaterial({ color: 0xf4c7a1, roughness: 0.82 }));
+          wall.position.y = 0.55; g.add(wall);
+          const roof = new THREE.Mesh(new THREE.ConeGeometry(1.25, 0.8, 4), new THREE.MeshStandardMaterial({ color: 0xd94645, roughness: 0.7 }));
+          roof.rotation.y=Math.PI/4; roof.position.y=1.45; g.add(roof);
+          const trim = new THREE.MeshStandardMaterial({color:0xfef3c7,roughness:0.6});
+          for(const x of [-0.45,0,0.45]){const candy=new THREE.Mesh(new THREE.SphereGeometry(0.13,10,8),new THREE.MeshStandardMaterial({color:x===0?0x60a5fa:0xf472b6})); candy.position.set(x,0.7,0.67);g.add(candy);}
+          const door=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.55,0.05),trim);door.position.set(0,0.28,0.68);g.add(door);
+          return g;
         }
       },
       {
@@ -2628,14 +2696,37 @@
         }
       },
       {
-        name: "黃金招財開運貓雕像",
+        name: "童話南瓜馬車",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
-          const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 1.1, 10), new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.7 }));
-          body.position.y = 0.55;
-          const paw = new THREE.Mesh(new THREE.SphereGeometry(0.18, 6, 6), new THREE.MeshStandardMaterial({ color: 0xfacc15 }));
-          paw.position.set(0.3, 1.0, 0.4);
-          g.add(body, paw); return g;
+          const pumpkinMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.5 });
+          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8, roughness: 0.25 });
+          const greenMat = new THREE.MeshStandardMaterial({ color: 0x16a34a });
+
+          const pumpkinGroup = new THREE.Group();
+          pumpkinGroup.position.y = 1.15;
+          for (let i = 0; i < 6; i++) {
+            const lobe = new THREE.Mesh(new THREE.SphereGeometry(0.85, 10, 10), pumpkinMat);
+            lobe.scale.set(0.9, 0.85, 1.15);
+            lobe.rotation.y = (i / 6) * Math.PI;
+            pumpkinGroup.add(lobe);
+          }
+          const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.4, 6), greenMat);
+          stem.position.y = 0.95;
+          const crown = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.06, 6, 12), goldMat);
+          crown.rotation.x = Math.PI / 2; crown.position.y = 0.98;
+          pumpkinGroup.add(stem, crown);
+
+          for (let dx of [-0.95, 0.95]) {
+            for (let dz of [-0.75, 0.75]) {
+              const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.05, 6, 16), goldMat);
+              wheel.position.set(dx, 0.38, dz);
+              const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.1, 8), goldMat);
+              hub.rotation.x = Math.PI / 2; hub.position.set(dx, 0.38, dz);
+              g.add(wheel, hub);
+            }
+          }
+          g.add(pumpkinGroup); return g;
         }
       },
       {
@@ -3926,6 +4017,7 @@
         this.ambientNextBird = 0;
         this.ambientNextInsect = 0;
         this.ambientNextOwl = 0;
+        this.ambientOwlUntil = 0;
         this.ambientNextBell = 0;
         this.ambientNextShipHorn = Infinity;
         this.ambientLargeShipSeen = false;
@@ -3933,6 +4025,8 @@
         this.ambientRainBuffer = null;
         this.ambientShipHornBuffer = null;
         this.ambientShipHornLoading = false;
+        this.ambientOwlBuffer = null;
+        this.ambientOwlLoading = false;
         this.ambientRainNextStart = 0;
         this.ambientCurrentRainSegment = null;
         this.ambientLastPhase = null;
@@ -3997,6 +4091,21 @@
             } catch (e) { this.ambientShipHornLoading = false; }
           }
 
+          // 使用使用者提供的貓頭鷹叫聲，嵌入 HTML，離線也可播放。
+          if (!this.ambientOwlBuffer && !this.ambientOwlLoading) {
+            this.ambientOwlLoading = true;
+            const owlBase64 = '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VVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+3Rk/wASvDnOawwayDkkyd0lIw9KFHExp7DKaOGS5rz0oGVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+yRE8A9xCRdHSEEY8CngKNkgAAAAAAH+AAAAIAWAY0AQAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xRk4Y/wAAB/gAAACAAAD/AAAAEAAAH+AAAAIAAAP8AAAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xRk4Y/wAAB/gAAACAAAD/AAAAEAAAGkAAAAIAAANIAAAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xRk4Y/wAABpAAAACAAADSAAAAEAAAGkAAAAIAAANIAAAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xRk4Y/wAABpAAAACAAADSAAAAEAAAGkAAAAIAAANIAAAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=';
+            try {
+              const binary = atob(owlBase64);
+              const bytes = new Uint8Array(binary.length);
+              for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+              ctx.decodeAudioData(bytes.buffer).then(buffer => {
+                this.ambientOwlBuffer = buffer;
+                this.ambientOwlLoading = false;
+              }).catch(() => { this.ambientOwlLoading = false; });
+            } catch (e) { this.ambientOwlLoading = false; }
+          }
+
           // 若大商船在環境音效關閉時已登場，開啟環境音效後補播第一次船笛。
           if (this.ambientShipHornPending && this.ambientLargeShipSeen && this.ambientShipHornBuffer && this.ambientMasterGain) {
             this.playAmbientShipHorn();
@@ -4037,6 +4146,7 @@
           this.ambientNextBird = 0;
           this.ambientNextInsect = 0;
           this.ambientNextOwl = 0;
+        this.ambientOwlUntil = 0;
           this.ambientNextBell = Date.now() / 1000 + 18 + Math.random() * 22;
           // 大商船出現前不播放船笛；第一次由大商船登場事件觸發。
             this.ambientLastPhase = null;
@@ -4077,6 +4187,8 @@
         this.ambientSources = [];
         this.ambientNodes = {};
         this.ambientRainBuffer = null;
+        this.ambientOwlBuffer = null;
+        this.ambientOwlLoading = false;
         this.ambientMasterGain = null;
         this.ambientLastPhase = null;
       }
@@ -4099,7 +4211,7 @@
         if (this.ambientLastPhase !== phase) {
           this.ambientLastPhase = phase;
           this.ambientNextBird = t + 1.5 + Math.random() * 3.5;
-          this.ambientNextInsect = t + 1.0 + Math.random() * 2.0;
+          this.ambientNextInsect = t + 8 + Math.random() * 7;
           this.ambientNextOwl = t + 10 + Math.random() * 14;
         }
 
@@ -4108,10 +4220,19 @@
           this.playAmbientBirdCall();
           this.ambientNextBird = t + (raining ? 7 : 4.5) + Math.random() * (raining ? 5 : 5.5);
         }
-        // 夜晚以短促、分組的蟲鳴為主，不鋪滿連續底噪。
-        if (phase === 3 && t >= this.ambientNextInsect) {
+        // 夜巡模式蟲鳴每 8–15 秒才出現；CLUB 更安靜，每 18–28 秒一次且音量更低。
+        if (phase === 3 && t >= this.ambientNextInsect && t >= this.ambientOwlUntil) {
           this.playAmbientInsectChirp();
-          this.ambientNextInsect = t + 2.4 + Math.random() * 3.0;
+          const clubQuiet = (typeof clubMode !== 'undefined' && clubMode);
+          this.ambientNextInsect = t + (clubQuiet ? 18 : 8) + Math.random() * (clubQuiet ? 10 : 7);
+        }
+        // 使用者提供的貓頭鷹叫聲：一般日夜循環只在夜間播放；night 夜巡也播放，CLUB 暫不加入。
+        if (phase === 3 && !(typeof clubMode !== 'undefined' && clubMode) && t >= this.ambientNextOwl) {
+          this.playAmbientOwlCall();
+          // 貓頭鷹叫聲播放期間暫停蟲鳴排程，避免蟲鳴蓋掉叫聲尾音。
+          this.ambientOwlUntil = t + 8.0;
+          this.ambientNextInsect = Math.max(this.ambientNextInsect, this.ambientOwlUntil + 2.0);
+          this.ambientNextOwl = t + 45 + Math.random() * 35;
         }
         // 遠方鐘聲不再隨機敲響；改由遊戲日夜循環跨日時，每個循環只敲一次四音鐘聲。
         // 蛙鳴已移除，夜晚保留蟲鳴與遠方鐘聲。
@@ -4137,7 +4258,13 @@
       }
 
       scheduleNextAmbientShipHorn() {
-        this.ambientNextShipHorn = Date.now() / 1000 + 65 + Math.random() * 95;
+        // SV.01-158：夜巡與 CLUB 光球模式提高船笛頻率；一般模式維持原本間隔。
+        const frequentNightHorn = (typeof nightPatrolMode !== 'undefined' && nightPatrolMode) ||
+          (typeof clubMode !== 'undefined' && clubMode);
+        const delay = frequentNightHorn
+          ? 25 + Math.random() * 20
+          : 65 + Math.random() * 95;
+        this.ambientNextShipHorn = Date.now() / 1000 + delay;
       }
 
       playAmbientShipHorn() {
@@ -4266,7 +4393,9 @@
               filter.frequency.setValueAtTime(carrier, at);
               filter.Q.setValueAtTime(1.2, at);
               gain.gain.setValueAtTime(0.0001, at);
-              gain.gain.linearRampToValueAtTime(0.018 + Math.random() * 0.009, at + 0.01);
+              const clubQuiet = (typeof clubMode !== 'undefined' && clubMode);
+              const peakGain = clubQuiet ? (0.0045 + Math.random() * 0.0025) : (0.009 + Math.random() * 0.004);
+              gain.gain.linearRampToValueAtTime(peakGain, at + 0.01);
               gain.gain.exponentialRampToValueAtTime(0.0001, at + duration);
               osc.connect(filter);
               filter.connect(gain);
@@ -4281,39 +4410,49 @@
       }
 
       playAmbientOwlCall() {
-        if (!this.ctx || !this.ambientMasterGain) return;
+        if (!this.ctx || !this.ambientMasterGain || !this.ambientOwlBuffer) return;
         try {
           const ctx = this.ctx;
-          const start = ctx.currentTime + 0.05;
-          const pitch = 390 + Math.random() * 100;
-          const offsets = [0, 0.72 + Math.random() * 0.18];
-          offsets.forEach((offset, i) => {
-            const at = start + offset;
-            const osc = ctx.createOscillator();
-            const harmonic = ctx.createOscillator();
-            const filter = ctx.createBiquadFilter();
-            const gain = ctx.createGain();
-            osc.type = 'sine';
-            harmonic.type = 'triangle';
-            osc.frequency.setValueAtTime(pitch * (i === 0 ? 1.05 : 0.92), at);
-            osc.frequency.exponentialRampToValueAtTime(pitch * (i === 0 ? 0.78 : 0.7), at + 0.62);
-            harmonic.frequency.setValueAtTime(pitch * 2.02, at);
-            harmonic.frequency.exponentialRampToValueAtTime(pitch * 1.42, at + 0.62);
-            filter.type = 'lowpass';
-            filter.frequency.setValueAtTime(1150, at);
-            gain.gain.setValueAtTime(0.0001, at);
-            gain.gain.linearRampToValueAtTime(0.035, at + 0.12);
-            gain.gain.setTargetAtTime(0.016, at + 0.16, 0.16);
-            gain.gain.setTargetAtTime(0.0001, at + 0.4, 0.18);
-            osc.connect(filter);
-            harmonic.connect(filter);
-            filter.connect(gain);
-            gain.connect(this.ambientMasterGain);
-            osc.start(at);
-            harmonic.start(at);
-            osc.stop(at + 0.82);
-            harmonic.stop(at + 0.82);
-          });
+          const source = ctx.createBufferSource();
+          const dryGain = ctx.createGain();
+          const wetGain = ctx.createGain();
+          const convolver = ctx.createConvolver();
+          const lowpass = ctx.createBiquadFilter();
+          source.buffer = this.ambientOwlBuffer;
+          // 隨機播一聲（取前段）或完整兩聲；降低原聲音量，並加入柔和、逐漸消散的遠方迴音。
+          const oneCall = Math.random() < 0.55;
+          const duration = oneCall ? Math.min(1.45, source.buffer.duration) : source.buffer.duration;
+          const now = ctx.currentTime;
+          const impulseDuration = 0.85;
+          const impulse = ctx.createBuffer(2, Math.floor(ctx.sampleRate * impulseDuration), ctx.sampleRate);
+          for (let channel = 0; channel < 2; channel++) {
+            const data = impulse.getChannelData(channel);
+            for (let i = 0; i < data.length; i++) {
+              const decay = Math.pow(1 - i / data.length, 3.2);
+              data[i] = (Math.random() * 2 - 1) * decay * 0.32;
+            }
+          }
+          convolver.buffer = impulse;
+          lowpass.type = 'lowpass';
+          lowpass.frequency.setValueAtTime(2600, now);
+          lowpass.Q.setValueAtTime(0.35, now);
+          dryGain.gain.setValueAtTime(0.0001, now);
+          dryGain.gain.linearRampToValueAtTime(0.085, now + 0.12);
+          dryGain.gain.setTargetAtTime(0.0001, now + Math.max(0.2, duration - 0.22), 0.2);
+          wetGain.gain.setValueAtTime(0.0001, now);
+          wetGain.gain.linearRampToValueAtTime(0.032, now + 0.18);
+          wetGain.gain.setTargetAtTime(0.0001, now + duration + 0.08, 0.32);
+          source.connect(lowpass);
+          lowpass.connect(dryGain);
+          dryGain.connect(this.ambientMasterGain);
+          lowpass.connect(convolver);
+          convolver.connect(wetGain);
+          wetGain.connect(this.ambientMasterGain);
+          source.start(now + 0.04, 0, duration);
+          this.ambientSources.push(source);
+          source.onended = () => {
+            try { lowpass.disconnect(); convolver.disconnect(); dryGain.disconnect(); wetGain.disconnect(); } catch (e) {}
+          };
         } catch (e) {}
       }
 
@@ -4907,6 +5046,11 @@
 
     let timeCycle = 0.35;
     let timePhase = 1;
+    // SV.01-158：night 祕技啟用時，只循環晚霞至深夜的色彩，不進入白天。
+    let nightPatrolMode = false;
+    let nightPatrolCycle = 0;
+    // SV.01-158：club 模式常駐展開防護罩，並以多色極光流光循環。
+    let clubMode = false;
 
     const spawnedIslandObjects = [];
     const islandNightLights = [];
@@ -4914,6 +5058,8 @@
     const activeFireworkParticles = [];
     let fireworksNightCycleTriggered = false;
     let fireworksShowTimer = null;
+    // SV.01-158：CLUB 模式每 30 秒自動播放一輪台北101煙火。
+    let clubFireworksInterval = null;
     const movingPeople = [];
     const walkingCelebrities = [];
     const flyingCreatures = [];
@@ -5009,27 +5155,30 @@
       else media.addListener(place);
     })();
 
-    // 題目字卡／輸入控制台自由移動：只拖曳專用把手，避免攔截打字與按鈕操作。
+    // SV.01-158：修正行動版拖曳真正無法移動的原因。
+    // 行動版 CSS 對面板設定 transform:none !important，因此不能再靠 transform 位移；改為拖曳時直接更新 fixed 面板的 left/top。
+    // 桌面版仍沿用原本 transform 位移方式，完全不改桌面版字卡外觀與操作。
     (function initMovableQuestionPanel() {
       const panel = document.getElementById('movableQuestionPanel');
       const handle = document.getElementById('questionPanelDragHandle');
       const resetButton = document.getElementById('resetQuestionPanelPosition');
-      if (!panel || !handle || !resetButton) return;
+      if (!panel || !handle) return;
 
-      let offsetX = 0;
-      let offsetY = 0;
-      let dragState = null;
-      const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-      const applyOffset = () => {
+      let offsetX = 0, offsetY = 0, dragState = null;
+      const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+      const isMobileLayout = () => window.matchMedia('(max-width:760px)').matches || document.body.classList.contains('force-mobile-layout');
+      const applyDesktopOffset = () => {
         panel.style.setProperty('--panel-drag-x', `${offsetX}px`);
         panel.style.setProperty('--panel-drag-y', `${offsetY}px`);
       };
       const resetPosition = () => {
-        offsetX = 0;
-        offsetY = 0;
-        applyOffset();
+        offsetX = 0; offsetY = 0;
+        if (isMobileLayout()) {
+          panel.style.removeProperty('left'); panel.style.removeProperty('top');
+          panel.style.removeProperty('right'); panel.style.removeProperty('bottom');
+        } else applyDesktopOffset();
       };
-      resetButton.addEventListener('click', resetPosition);
+      if (resetButton) resetButton.addEventListener('click', resetPosition);
 
       handle.addEventListener('pointerdown', (event) => {
         if (event.button !== undefined && event.button !== 0) return;
@@ -5037,62 +5186,82 @@
         const rect = panel.getBoundingClientRect();
         dragState = {
           pointerId: event.pointerId,
-          startX: event.clientX,
-          startY: event.clientY,
-          offsetX,
-          offsetY,
-          rectLeft: rect.left,
-          rectRight: rect.right,
-          rectTop: rect.top,
-          rectBottom: rect.bottom
+          startX: event.clientX, startY: event.clientY,
+          left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom,
+          startOffsetX: offsetX, startOffsetY: offsetY,
+          mobile: isMobileLayout()
         };
-        try { handle.setPointerCapture?.(event.pointerId); } catch (e) {}
-        event.preventDefault();
-        event.stopPropagation();
+        try { handle.setPointerCapture(event.pointerId); } catch (_) {}
+        event.preventDefault(); event.stopPropagation();
       });
 
       const moveDrag = (event) => {
         if (!dragState || event.pointerId !== dragState.pointerId) return;
-        const rawX = event.clientX - dragState.startX;
-        const rawY = event.clientY - dragState.startY;
-        const minX = 12 - dragState.rectLeft;
-        const maxX = window.innerWidth - 12 - dragState.rectRight;
-        const minY = 12 - dragState.rectTop;
-        const maxY = window.innerHeight - 12 - dragState.rectBottom;
-        offsetX = dragState.offsetX + clamp(rawX, minX, maxX);
-        offsetY = dragState.offsetY + clamp(rawY, minY, maxY);
-        applyOffset();
+        const dx = event.clientX - dragState.startX;
+        const dy = event.clientY - dragState.startY;
+        const rect = panel.getBoundingClientRect();
+        const width = rect.width || (dragState.right - dragState.left);
+        const height = rect.height || (dragState.bottom - dragState.top);
+        const maxLeft = Math.max(8, window.innerWidth - width - 8);
+        const maxTop = Math.max(8, window.innerHeight - height - 8);
+
+        if (dragState.mobile || isMobileLayout()) {
+          // 重要：行動版面板有 transform:none !important，必須直接移動 fixed 定位座標。
+          const left = clamp(dragState.left + dx, 8, maxLeft);
+          const top = clamp(dragState.top + dy, 8, maxTop);
+          panel.style.setProperty('left', `${left}px`, 'important');
+          panel.style.setProperty('right', 'auto', 'important');
+          panel.style.setProperty('top', `${top}px`, 'important');
+          panel.style.setProperty('bottom', 'auto', 'important');
+        } else {
+          // 桌面版保留原本 transform 位移與外觀；以拖曳起點計算總位移，
+          // 邊界固定依拖曳開始時的面板矩形計算，避免每次 pointermove 都縮小可移動範圍而像撞牆。
+          offsetX = clamp(dragState.startOffsetX + dx, 8 - dragState.left, window.innerWidth - 8 - dragState.right);
+          offsetY = clamp(dragState.startOffsetY + dy, 8 - dragState.top, window.innerHeight - 8 - dragState.bottom);
+          applyDesktopOffset();
+        }
         if (event.cancelable) event.preventDefault();
       };
       const finishDrag = (event) => {
         if (!dragState || (event && event.pointerId !== undefined && event.pointerId !== dragState.pointerId)) return;
         dragState = null;
       };
-      // 在 window 接收移動事件，避免觸控時把手因版面變動而失去 pointermove。
       window.addEventListener('pointermove', moveDrag, { passive:false });
       window.addEventListener('pointerup', finishDrag);
       window.addEventListener('pointercancel', finishDrag);
       handle.addEventListener('lostpointercapture', finishDrag);
+      // iOS 舊版／部分 WebView 的保底觸控事件；防止 touch-action 或 pointer capture 導致拖曳無反應。
+      let touchState = null;
+      handle.addEventListener('touchstart', (e) => {
+        if (!e.touches || e.touches.length !== 1) return;
+        const t=e.touches[0], r=panel.getBoundingClientRect();
+        touchState={x:t.clientX,y:t.clientY,left:r.left,top:r.top,width:r.width,height:r.height};
+        e.preventDefault();
+      }, {passive:false});
+      window.addEventListener('touchmove', (e) => {
+        if (!touchState || !e.touches || e.touches.length !== 1 || !isMobileLayout()) return;
+        const t=e.touches[0];
+        const left=clamp(t.clientX-(touchState.x-touchState.left),8,Math.max(8,window.innerWidth-touchState.width-8));
+        const top=clamp(t.clientY-(touchState.y-touchState.top),8,Math.max(8,window.innerHeight-touchState.height-8));
+        panel.style.setProperty('left',`${left}px`,'important');
+        panel.style.setProperty('right','auto','important');
+        panel.style.setProperty('top',`${top}px`,'important');
+        panel.style.setProperty('bottom','auto','important');
+        e.preventDefault();
+      }, {passive:false});
+      const endTouch = () => { touchState=null; };
+      window.addEventListener('touchend',endTouch,{passive:true});
+      window.addEventListener('touchcancel',endTouch,{passive:true});
       handle.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          handle.focus();
-        }
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handle.focus(); }
       });
-
       window.addEventListener('resize', () => {
-        const rect = panel.getBoundingClientRect();
-        let dx = 0;
-        let dy = 0;
-        if (rect.left < 12) dx = 12 - rect.left;
-        else if (rect.right > window.innerWidth - 12) dx = window.innerWidth - 12 - rect.right;
-        if (rect.top < 12) dy = 12 - rect.top;
-        else if (rect.bottom > window.innerHeight - 12) dy = window.innerHeight - 12 - rect.bottom;
-        if (dx || dy) {
-          offsetX += dx;
-          offsetY += dy;
-          applyOffset();
-        }
+        if (!isMobileLayout()) return;
+        const rect=panel.getBoundingClientRect();
+        const left=clamp(rect.left,8,Math.max(8,window.innerWidth-rect.width-8));
+        const top=clamp(rect.top,8,Math.max(8,window.innerHeight-rect.height-8));
+        if (panel.style.left) panel.style.setProperty('left',`${left}px`,'important');
+        if (panel.style.top) panel.style.setProperty('top',`${top}px`,'important');
       });
     })();
 
@@ -5163,7 +5332,7 @@
         sunLight.castShadow = true;
         sunLight.shadow.mapSize.width = 2048;
         sunLight.shadow.mapSize.height = 2048;
-        // SV.01-147：改善樹木陰影在島嶼旋轉／移動時的浮離與抖動。
+        // SV.01-158：改善樹木陰影在島嶼旋轉／移動時的浮離與抖動。
         sunLight.shadow.bias = -0.00015;
         sunLight.shadow.normalBias = 0.035;
         sunLight.shadow.radius = 3;
@@ -5343,6 +5512,10 @@
     // 🌧️ 秘技 rain：短暫降雨一次，8 秒後自動放晴。
     function triggerShortRain() {
       if (!rainParticleSystem) return;
+      if (typeof clubMode !== 'undefined' && clubMode) {
+        showCheatNotice('💠 光球模式維持晴朗，不啟動降雨。');
+        return;
+      }
       isRaining = true;
       rainPhasesRemaining = 1;
       rainTimer = 8.0;
@@ -5362,17 +5535,27 @@
       setTimeout(() => upgradeBanner.classList.add('hidden'), 2600);
     }
 
-    // 🌧️ 雨勢以遊戲時段計算：每場隨機 1～3 個時段，夜晚必定停雨。
+    // 🌧️ 一般模式夜晚停雨；夜巡與光球模式允許夜間隨機降雨。
     function updateRainParticles(dt) {
       if (!rainParticleSystem || !rainVelocities) return;
 
       const phaseNow = (typeof timePhase !== 'undefined' ? timePhase : lastRainPhase);
+      // CLUB 光球模式刻意保持無雨；只有 night 夜巡模式允許夜間自動降雨。
+      const isClubDryMode = (typeof clubMode !== 'undefined' && clubMode);
+      const nightRainAllowed = !isClubDryMode && (typeof nightPatrolMode !== 'undefined' && nightPatrolMode);
+      if (isClubDryMode && isRaining) {
+        isRaining = false;
+        rainPhasesRemaining = 0;
+        rainTimer = 45.0 + Math.random() * 25.0;
+        if (sound && typeof sound.updateAmbientEnvironment === 'function') sound.updateAmbientEnvironment(false, phaseNow, true);
+      }
+      const isNightPhaseBlocked = isClubDryMode || (phaseNow === 3 && !nightRainAllowed);
       if (phaseNow !== lastRainPhase) {
         // 每跨過一個時段，扣除本場雨的剩餘時段。
         if (isRaining && rainPhasesRemaining > 0) {
           rainPhasesRemaining--;
-          // 夜晚時段（3）一律放晴，不讓雨下整晚。
-          if (phaseNow === 3 || rainPhasesRemaining <= 0) {
+          // 一般模式夜晚放晴；夜巡／光球模式可保留夜間降雨。
+          if (isNightPhaseBlocked || rainPhasesRemaining <= 0) {
             isRaining = false;
             rainPhasesRemaining = 0;
             rainTimer = 28.0 + Math.random() * 22.0;
@@ -5386,9 +5569,9 @@
 
       if (!isRaining) {
         rainTimer -= dt;
-        if (rainTimer <= 0 && phaseNow !== 3) {
+        if (rainTimer <= 0 && !isNightPhaseBlocked) {
           isRaining = true;
-          // 隨機只下 1、2 或 3 個時段；夜晚會強制結束。
+          // 每場降雨有時間上限；夜巡／光球模式夜間也可隨機開始下雨。
           rainPhasesRemaining = 1 + Math.floor(Math.random() * 3);
           // 避免單一時段內持續太久：再加一個短時長上限。
           rainTimer = 38.0 + Math.random() * 22.0;
@@ -5656,7 +5839,7 @@
 
       treeCoords.forEach(pos => {
         const tree = new THREE.Group();
-        tree.position.set(pos.x, 0.72, pos.z); // SV.01-147：樹幹底部貼合草地表面，避免影子與樹根分離
+        tree.position.set(pos.x, 0.72, pos.z); // SV.01-158：樹幹底部貼合草地表面，避免影子與樹根分離
         const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.26, 1.4, 6), trunkMat);
         trunk.position.y = 0.7;
         trunk.castShadow = true;
@@ -7341,38 +7524,58 @@
     }
 
     function updateDayNightCycle(dt) {
-      timeCycle = (timeCycle + dt * 0.012) % 1.0;
-
       let p = 1;
       let skyCol = new THREE.Color(0x38bdf8);
       let sunIntensity = 0.95;
       let starOpacity = 0.0;
       let isNight = false;
 
-      if (timeCycle < 0.25) {
-        p = 0;
-        const alpha = timeCycle / 0.25;
-        skyCol = new THREE.Color(0x1e1b4b).lerp(new THREE.Color(0xfdba74), alpha);
-        sunIntensity = 0.4 + alpha * 0.55;
-        starOpacity = Math.max(0, 1.0 - alpha * 2.0);
-      } else if (timeCycle < 0.5) {
-        p = 1;
-        skyCol = new THREE.Color(0x38bdf8);
-        sunIntensity = 0.95;
-        starOpacity = 0.0;
-      } else if (timeCycle < 0.75) {
-        p = 2;
-        const alpha = (timeCycle - 0.5) / 0.25;
-        skyCol = new THREE.Color(0x38bdf8).lerp(new THREE.Color(0xf43f5e), alpha);
-        sunIntensity = 0.95 - alpha * 0.5;
-        starOpacity = 0.0;
-      } else {
+      if (nightPatrolMode) {
+        // 夜巡色票：橘紅（艷而不刺眼）→桃紅→紫→深紫→藍紫→深藍→極深藍，再反向返回。
+        // 循環速度沿用原日夜週期速度；每段以 lerp 平滑過渡。
+        const nightColors = [0xC94B35, 0xC92F78, 0x7040A8, 0x32184F, 0x303B83, 0x142957, 0x030817,
+                             0x142957, 0x303B83, 0x32184F, 0x7040A8, 0xC92F78];
+        nightPatrolCycle = (nightPatrolCycle + dt * 0.012) % 1.0;
+        const segmentCount = nightColors.length;
+        const scaled = nightPatrolCycle * segmentCount;
+        const idx = Math.floor(scaled) % segmentCount;
+        const alpha = scaled - Math.floor(scaled);
+        const from = new THREE.Color(nightColors[idx]);
+        const to = new THREE.Color(nightColors[(idx + 1) % segmentCount]);
+        skyCol = from.lerp(to, alpha);
         p = 3;
-        const alpha = (timeCycle - 0.75) / 0.25;
-        skyCol = new THREE.Color(0xf43f5e).lerp(new THREE.Color(0x020617), alpha);
-        sunIntensity = 0.15;
+        sunIntensity = 0.055; // 深夜階段維持極低日光
         starOpacity = 1.0;
         isNight = true;
+        if (ambientLight) ambientLight.intensity = 0.30;
+      } else {
+        timeCycle = (timeCycle + dt * 0.012) % 1.0;
+        if (timeCycle < 0.25) {
+          p = 0;
+          const alpha = timeCycle / 0.25;
+          skyCol = new THREE.Color(0x1e1b4b).lerp(new THREE.Color(0xfdba74), alpha);
+          sunIntensity = 0.4 + alpha * 0.55;
+          starOpacity = Math.max(0, 1.0 - alpha * 2.0);
+        } else if (timeCycle < 0.5) {
+          p = 1;
+          skyCol = new THREE.Color(0x38bdf8);
+          sunIntensity = 0.95;
+          starOpacity = 0.0;
+        } else if (timeCycle < 0.75) {
+          p = 2;
+          const alpha = (timeCycle - 0.5) / 0.25;
+          skyCol = new THREE.Color(0x38bdf8).lerp(new THREE.Color(0xf43f5e), alpha);
+          sunIntensity = 0.95 - alpha * 0.5;
+          starOpacity = 0.0;
+        } else {
+          p = 3;
+          const alpha = (timeCycle - 0.75) / 0.25;
+          skyCol = new THREE.Color(0xf43f5e).lerp(new THREE.Color(0x020617), alpha);
+          sunIntensity = 0.15;
+          starOpacity = 1.0;
+          isNight = true;
+        }
+        if (ambientLight) ambientLight.intensity = 0.72;
       }
 
       if (scene) {
@@ -7380,11 +7583,9 @@
         if (scene.fog) scene.fog.color = skyCol;
       }
       if (sunLight) sunLight.intensity = sunIntensity;
-
       if (starsParticleSystem && starsParticleSystem.material) {
         starsParticleSystem.material.opacity = starOpacity;
       }
-
       islandNightLights.forEach(item => {
         if (isNight) {
           item.mat.emissive.setHex(item.glowColor);
@@ -7394,28 +7595,23 @@
           item.mat.emissiveIntensity = 0.0;
         }
       });
-
-      // 停用原本夜晚播放蟋蟀聲的呼叫（sound.startNightAmbient()），確保夜晚保持安靜
       sound.stopNightAmbient();
-
       if (p !== timePhase) {
         const previousPhase = timePhase;
         timePhase = p;
-        dayTimeBadge.textContent = TIME_PHASE_NAMES[timePhase];
+        dayTimeBadge.textContent = clubMode ? '光球模式' : (nightPatrolMode ? '夜巡模式' : TIME_PHASE_NAMES[timePhase]);
         if (timePhase === 3) {
-          // 夜晚煙火屬於環境音效：只有環境音效開啟時才喚醒音訊環境。
           if (isAmbientSoundActive && sound && typeof sound.startAmbient === 'function') {
             sound.startAmbient(ambientVolume);
-            if (sound.ctx && sound.ctx.state === 'suspended') {
-              sound.ctx.resume().catch(() => {});
-            }
+            if (sound.ctx && sound.ctx.state === 'suspended') sound.ctx.resume().catch(() => {});
           }
           startTaipei101FireworksShow();
         } else fireworksNightCycleTriggered = false;
-        // 遊戲時間由夜晚跨入清晨，視為跨日時；環境音開啟時播放一次 Si-La-So-Mi。
-        if (previousPhase === 3 && timePhase === 0 && isAmbientSoundActive) {
-          sound.playAmbientMidnightBell();
-        }
+        if (previousPhase === 3 && timePhase === 0 && isAmbientSoundActive) sound.playAmbientMidnightBell();
+      } else if (clubMode && dayTimeBadge) {
+        dayTimeBadge.textContent = '光球模式';
+      } else if (nightPatrolMode && dayTimeBadge) {
+        dayTimeBadge.textContent = '夜巡模式';
       }
     }
 
@@ -7629,11 +7825,33 @@
         showCheatNotice('台北一零一摩天大樓已經在島上了！');
         return;
       }
-      const spot = getBalancedIslandPlacement(101 + spawnedIslandObjects.length, 4.0, 11.5, 4.0);
-      // 避免靠近中央（鵝鑾鼻燈塔專屬位置）。
-      let x = spot.x, z = spot.z;
-      if (Math.hypot(x, z) < 7.0) { const a = Math.atan2(z || 0.1, x || 0.1); x = Math.cos(a) * 9.0; z = Math.sin(a) * 9.0; }
-      const obj = definition.build(new THREE.Vector3(x, 1.35, z));
+      // SV.01-158 修正：台北101不得只把中央附近的候選點直接推到半徑9，
+      // 因為推移後可能落進山體。重新檢查島面邊界、所有山峰、燈塔及既有物件。
+      const taipeiMountains = [
+        { x: -6.0, z: -5.5, r: 5.5 },
+        { x: -8.8, z: -3.8, r: 4.8 },
+        { x: -3.8, z: -7.5, r: 5.2 },
+        { x: -2.0, z: -8.0, r: 4.2 },
+        { x: -7.5, z: -6.8, r: 4.2 },
+        { x: 5.8, z: -6.5, r: 4.8 }
+      ];
+      let safeSpot = null;
+      for (let attempt = 0; attempt < 80; attempt++) {
+        const candidate = getBalancedIslandPlacement(101 + spawnedIslandObjects.length + attempt * 37, 7.0, 11.5, 4.0);
+        const xTry = candidate.x, zTry = candidate.z;
+        const radius = Math.hypot(xTry, zTry);
+        const insideIsland = (xTry * xTry) / (18.8 * 18.8) + (zTry * zTry) / (15.2 * 15.2) <= 0.88;
+        const insideMountain = taipeiMountains.some(m => Math.hypot(xTry - m.x, zTry - m.z) < m.r + 2.5);
+        const tooCloseToObject = spawnedIslandObjects.some(existing => existing && existing.position &&
+          Math.hypot(xTry - existing.position.x, zTry - existing.position.z) < 4.0);
+        if (radius >= 7.0 && insideIsland && !insideMountain && !tooCloseToObject) {
+          safeSpot = { x: xTry, z: zTry };
+          break;
+        }
+      }
+      // 極端擁擠時使用已知不在山體內的島面位置，避免掉到山上。
+      if (!safeSpot) safeSpot = { x: 12.0, z: 4.0 };
+      const obj = definition.build(new THREE.Vector3(safeSpot.x, 1.35, safeSpot.z));
       obj.userData = { ...(obj.userData || {}), isTaipei101: true, targetScale: 1.0, cheatSpawned: true };
       obj.scale.set(0.01, 0.01, 0.01);
       scene.add(obj);
@@ -7646,7 +7864,7 @@
         if (progress >= 1) { obj.scale.setScalar(1); clearInterval(timer); }
       }, 16);
       sound.upgradeFanfare();
-      showCheatNotice('台北一零一摩天大樓已出現在島上（中央保留給鵝鑾鼻燈塔）！');
+      showCheatNotice('召喚台北101成功！');
     }
 
     function spawnSpecialMonument() {
@@ -7678,6 +7896,8 @@
 
       let posX, posZ, posY;
       let angle = 0;
+      // SV.01-158：記錄外海船隻的船身旋轉角，讓淡江大橋橋面與船身保持平行。
+      let bridgeShipRotation = null;
 
       // 只有正式第 50 座地標「鵝鑾鼻燈塔」固定在中央；其他名稱含「燈塔」的地標照一般規則分散，避免模型重疊。
       if (monument.name === "鵝鑾鼻燈塔" || specialMonumentsSpawned === 50) {
@@ -7685,6 +7905,36 @@
         posZ = 0;
         posY = 1.35;
         angle = 0;
+      } else if (monument.name === "安平古堡") {
+        // SV.01-158：安平古堡固定在島嶼左側紅圈草地區，填補島邊空間；不再使用隨機地標選址。
+        // 固定座標靠近島嶼左側，並朝向島心／主要觀景方向，讓白塔與寬闊紅磚建築群容易辨識。
+        posX = -10.2;
+        posZ = 1.2;
+        posY = 1.35;
+        angle = Math.atan2(posZ, posX) + Math.PI;
+      } else if (monument.name.includes("淡江大橋")) {
+        // 淡江大橋固定放在遠洋大漁船的正對面，與島嶼距離接近；船在 11 點方向，橋就在 5 點方向。
+        // 優先找外海半徑 25–40 的既有大型船隻，再沿相反方向放置橋體。
+        const ship = spawnedIslandObjects.find(obj => {
+          if (!obj || !obj.position) return false;
+          const r = Math.hypot(obj.position.x, obj.position.z);
+          return obj.name === "外海遠洋大商船" && r >= 25 && r <= 40;
+        });
+        const bridgeOceanRad = 34.0;
+        if (ship) {
+          const shipRad = Math.hypot(ship.position.x, ship.position.z) || 1;
+          posX = -(ship.position.x / shipRad) * bridgeOceanRad;
+          posZ = -(ship.position.z / shipRad) * bridgeOceanRad;
+          angle = Math.atan2(posZ, posX);
+          // 船與橋分處島嶼相反方向，但橋身方向直接沿用船身旋轉角，避免只對向卻不平行。
+          bridgeShipRotation = ship.rotation ? ship.rotation.y : 0;
+        } else {
+          // 若大漁船尚未生成，使用預設海上方向。
+          angle = Math.PI * 1.5;
+          posX = Math.cos(angle) * bridgeOceanRad;
+          posZ = Math.sin(angle) * bridgeOceanRad;
+        }
+        posY = -1.0; // 保留已確認可見的海面高度
       } else if (monument.name.includes("大商船")) {
         // 特殊水上大型艦船：固定泊錨在外海深水區
         const goldenAngle = 2.39996;
@@ -7697,13 +7947,25 @@
         // 其他地標採用均勻角度與空位避讓，並可使用部分沙灘區域。
         // 一般地標在島面平地生成；神殿額外拉大與既有物件的間距，避免浮空或互相交疊。
         let placement = getBalancedIslandPlacement(specialMonumentsSpawned + 37, 3.0, 14.8,
-          monument.name.includes("古希臘神殿") ? 5.0 : 3.2);
+          monument.name.includes("古希臘神殿") ? 5.0 : (monument.name === "安平古堡" ? 7.0 : 3.2));
         if (monument.name.includes("古希臘神殿")) {
           for (let attempt = 0; attempt < 8; attempt++) {
             const candidate = getBalancedIslandPlacement(specialMonumentsSpawned + 137 + attempt * 19, 4.0, 14.0, 6.0);
             const nearOther = spawnedIslandObjects.some(obj => obj && Math.hypot(obj.position.x - candidate.x, obj.position.z - candidate.z) < 5.5);
             if (!nearOther) { placement = candidate; break; }
           }
+        } else if (monument.name === "安平古堡") {
+          // 安平古堡是寬幅建築群：加強專屬避讓，避免與希臘神殿或其他地標重疊。
+          // 基座寬約 5.8 單位，優先挑選距離既有地標至少 7.5 單位的位置。
+          let foundSafePlacement = false;
+          for (let attempt = 0; attempt < 24; attempt++) {
+            const candidate = getBalancedIslandPlacement(specialMonumentsSpawned + 237 + attempt * 23, 4.0, 13.8, 7.5);
+            const nearOther = spawnedIslandObjects.some(obj => obj && obj.position &&
+              Math.hypot(obj.position.x - candidate.x, obj.position.z - candidate.z) < 7.5);
+            if (!nearOther) { placement = candidate; foundSafePlacement = true; break; }
+          }
+          // 若島面空間不足，仍使用具備較大間距的預設位置，不讓地標消失。
+          if (!foundSafePlacement) placement = getBalancedIslandPlacement(specialMonumentsSpawned + 937, 5.0, 13.5, 7.0);
         }
         posX = placement.x;
         posZ = placement.z;
@@ -7721,6 +7983,9 @@
       // 朝向微調：大商船自然順著切線側身或隨機微調
       if (monument.name.includes("大商船")) {
         monumentObj.rotation.y = -angle + Math.PI / 2 + (Math.random() * 0.4 - 0.2);
+      } else if (monument.name.includes("淡江大橋")) {
+        // 橋身與已找到的外海船隻平行；若船隻尚未生成，使用水平預設方向。
+        monumentObj.rotation.y = bridgeShipRotation !== null ? bridgeShipRotation : 0;
       } else {
         monumentObj.rotation.y = Math.random() * Math.PI * 2;
       }
@@ -7959,7 +8224,7 @@
         vitalityPercent.className = 'text-emerald-400 font-black';
       }
 
-      upgradeBanner.textContent = "已清除島上所有開拓物件，小島恢復初始純淨樣貌！";
+      upgradeBanner.textContent = "開拓者你好，歡迎來到我的夢想島！";
       upgradeBanner.className = "text-xs sm:text-sm font-black px-4 py-2 rounded-xl bg-slate-700 text-white shadow-2xl tracking-wider transition-all duration-300";
       upgradeBanner.classList.remove('hidden');
       setTimeout(() => upgradeBanner.classList.add('hidden'), 3500);
@@ -8234,6 +8499,7 @@
         const ribbon = new THREE.Mesh(new THREE.TubeGeometry(curve, 260, tubeRadius, 8, false), material);
         ribbon.userData.shieldRibbon = true;
         ribbon.userData.baseOpacity = opacity;
+        ribbon.userData.originalColor = color;
         islandShieldMagicGroup.add(ribbon);
       };
 
@@ -8422,14 +8688,16 @@
         lightningFlashTimer -= dt;
         lightningFlashLight.intensity = 0;
       }
-      if (islandShieldDome && lightningShieldActive) {
-        islandShieldPulse += dt * 2.4;
+      if (islandShieldDome && (lightningShieldActive || clubMode)) {
+        islandShieldPulse += dt * (clubMode ? 1.55 : 2.4);
         const pulse = 0.43 + (Math.sin(islandShieldPulse) + 1) * 0.07;
         islandShieldDome.material.opacity = 0.10 + (Math.sin(islandShieldPulse) + 1) * 0.025;
-        islandShieldDome.material.color = new THREE.Color(0xff3fa4);
-        islandShieldDome.material.emissive = new THREE.Color(0xff168f);
-        islandShieldDome.material.emissiveIntensity = 0.16 + (Math.sin(islandShieldPulse) + 1) * 0.06;
-        if (islandShieldMagicGroup) { islandShieldMagicGroup.rotation.y += dt * 0.08; islandShieldMagicGroup.children.forEach((child, i) => { if (child.userData.shieldRibbon) { child.material.opacity = child.userData.baseOpacity * (0.78 + (Math.sin(islandShieldPulse * 1.35 + i * 0.7) + 1) * 0.11); } else if (child.geometry && child.geometry.type === 'SphereGeometry') { child.material.opacity = 0.38 + (Math.sin(islandShieldPulse * 1.35 + i) + 1) * 0.13; } }); }
+        const clubPalette = [0xff62c8, 0xb86cff, 0x6a8dff, 0x55e8ff, 0x8dffda, 0xffd36b, 0xff82a8];
+        const clubColor = clubPalette[Math.floor((islandShieldPulse * 0.34) % clubPalette.length)];
+        islandShieldDome.material.color = new THREE.Color(clubMode ? clubColor : 0xff3fa4);
+        islandShieldDome.material.emissive = new THREE.Color(clubMode ? clubPalette[Math.floor((islandShieldPulse * 0.34 + 2) % clubPalette.length)] : 0xff168f);
+        islandShieldDome.material.emissiveIntensity = clubMode ? 0.22 + (Math.sin(islandShieldPulse * 1.2) + 1) * 0.07 : 0.16 + (Math.sin(islandShieldPulse) + 1) * 0.06;
+        if (islandShieldMagicGroup) { islandShieldMagicGroup.rotation.y += dt * 0.08; islandShieldMagicGroup.children.forEach((child, i) => { if (child.userData.shieldRibbon) { child.material.opacity = child.userData.baseOpacity * (clubMode ? (0.86 + (Math.sin(islandShieldPulse * 1.6 + i * 0.7) + 1) * 0.16) : (0.78 + (Math.sin(islandShieldPulse * 1.35 + i * 0.7) + 1) * 0.11)); if (clubMode) child.material.color.setHex([0xff72d2,0x8f7bff,0x58eaff,0x79ffd7,0xffd46e][Math.floor((islandShieldPulse * 0.55 + i) % 5)]); else if (child.userData.originalColor) child.material.color.setHex(child.userData.originalColor); } else if (child.geometry && child.geometry.type === 'SphereGeometry') { child.material.opacity = 0.38 + (Math.sin(islandShieldPulse * 1.35 + i) + 1) * 0.13; } }); }
         if (islandShieldRim) {
           islandShieldRim.material.opacity = 0.72 + (Math.sin(islandShieldPulse * 1.5) + 1) * 0.14;
         }
@@ -8687,6 +8955,68 @@
         if (code === '99999') {
           startRenderMode();
           typeInput.value = '';
+          return;
+        }
+
+        // SV.01-158：club = night 夜巡模式 + 多彩防護罩，保留夜巡天色循環。
+        if (code === 'club') {
+          if (clubFireworksInterval) clearInterval(clubFireworksInterval);
+          clubFireworksInterval = null;
+          clubMode = true;
+          nightPatrolMode = true;
+          // SV.01-158：進入 CLUB 時預設關閉閃電系統，避免閃電流程移除常駐光球防護罩。
+          if (typeof setLightningSystemEnabled === 'function') setLightningSystemEnabled(false);
+          isRaining = false;
+          rainPhasesRemaining = 0;
+          rainTimer = 45.0 + Math.random() * 25.0;
+          nightPatrolCycle = 0;
+          if (sound && typeof sound.scheduleNextAmbientShipHorn === 'function' && sound.ambientLargeShipSeen) sound.scheduleNextAmbientShipHorn();
+          timePhase = 3;
+          if (dayTimeBadge) dayTimeBadge.textContent = '光球模式';
+          if (!islandShieldDome || !islandShieldMagicGroup || !islandShieldRim) createIslandShieldDome();
+          // CLUB 模式啟動時先播放一輪，之後每 30 秒再播放一輪。
+          startTaipei101FireworksShow(true);
+          clubFireworksInterval = setInterval(() => {
+            if (clubMode && !isIslandPaused) startTaipei101FireworksShow(true);
+          }, 30000);
+          showCheatNotice('💠 CLUB 模式已啟動：夜巡天色循環＋多彩防護罩光球，台北101約每30秒施放煙火！');
+          typeInput.value = '';
+          typeInput.dispatchEvent(new Event('input', { bubbles: true }));
+          typeInput.focus();
+          return;
+        }
+
+        // 夜巡模式：night 固定夜間時段並循環晚霞至極深藍；day 恢復原日夜循環並退出 CLUB。
+        if (code === 'night') {
+          if (clubFireworksInterval) clearInterval(clubFireworksInterval);
+          clubFireworksInterval = null;
+          clubMode = false;
+          if (islandShieldDome) removeIslandShieldDome();
+          nightPatrolMode = true;
+          // 切入夜巡時安排較快的第一場雨，之後恢復正常隨機雨勢排程。
+          if (!isRaining) rainTimer = 12.0 + Math.random() * 18.0;
+          nightPatrolCycle = 0;
+          if (sound && typeof sound.scheduleNextAmbientShipHorn === 'function' && sound.ambientLargeShipSeen) sound.scheduleNextAmbientShipHorn();
+          timePhase = 3;
+          if (dayTimeBadge) dayTimeBadge.textContent = '夜巡模式';
+          showCheatNotice('🌙 夜巡模式已啟動：晚霞至深夜色彩開始循環！');
+          typeInput.value = '';
+          typeInput.dispatchEvent(new Event('input', { bubbles: true }));
+          typeInput.focus();
+          return;
+        }
+        if (code === 'day') {
+          if (clubFireworksInterval) clearInterval(clubFireworksInterval);
+          clubFireworksInterval = null;
+          clubMode = false;
+          if (islandShieldDome) removeIslandShieldDome();
+          nightPatrolMode = false;
+          if (sound && typeof sound.scheduleNextAmbientShipHorn === 'function' && sound.ambientLargeShipSeen) sound.scheduleNextAmbientShipHorn();
+          if (dayTimeBadge) dayTimeBadge.textContent = TIME_PHASE_NAMES[timePhase];
+          showCheatNotice('🌤️ 已退出夜巡模式：恢復正常日夜循環。');
+          typeInput.value = '';
+          typeInput.dispatchEvent(new Event('input', { bubbles: true }));
+          typeInput.focus();
           return;
         }
 
@@ -9254,7 +9584,8 @@
         if (lightningStrikeTimer) clearInterval(lightningStrikeTimer);
         lightningStormTimer = null;
         lightningStrikeTimer = null;
-        removeIslandShieldDome();
+        // CLUB 的光球防護罩是常駐效果；關閉閃電系統時不可將它移除。
+        if (!clubMode) removeIslandShieldDome();
         stopLightningThunderAudio();
         if (upgradeBanner && /閃電來襲|防護罩|雷暴/.test(upgradeBanner.textContent || '')) {
           upgradeBanner.classList.add('hidden');
