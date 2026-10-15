@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>我的夢想島：中文打字開拓記（SV.01 - 133）</title>
-  <!-- 版本：SV.01 - 133｜行動裝置右側可收合控制選單；所有答案須按 Enter 才送出；桌面版保留原布局 -->
+  <title>我的夢想島：中文打字開拓記（SV.01 - 134）</title>
+  <!-- 版本：SV.01 - 134｜只調整行動裝置輸入介面；桌面版樣式與功能沿用 SV.01-133 -->
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -400,6 +400,71 @@
       }
       #mobileControlDock.screensaver-hidden { display: none !important; }
     }
+
+    /* SV.01-135：行動裝置專用「題目在上、輸入貼近系統鍵盤」版。
+       所有規則均限制在 max-width:760px，桌面版不受影響。 */
+    @media (max-width: 760px) {
+      /* 不再顯示整組大型控制台外框及拖曳列；只留下題目字卡。 */
+      #movableQuestionPanel {
+        position: fixed !important;
+        left: 10px !important; right: 10px !important;
+        top: max(86px, calc(env(safe-area-inset-top) + 78px)) !important;
+        bottom: auto !important;
+        width: auto !important; max-width: none !important;
+        max-height: 26dvh !important;
+        padding: 0 !important; gap: 0 !important;
+        background: transparent !important; border: 0 !important;
+        box-shadow: none !important; border-radius: 0 !important;
+        overflow: visible !important;
+      }
+      #movableQuestionPanel > .panel-drag-toolbar,
+      #movableQuestionPanel > #upgradeBanner,
+      #movableQuestionPanel > #weihuaEntranceCard,
+      #movableQuestionPanel > .w-full:has(#vitalityBar) {
+        display: none !important;
+      }
+      #movableQuestionPanel .w-full.bg-slate-900\/80 {
+        display: block !important;
+        width: 100% !important;
+        max-height: 24dvh !important;
+        overflow-y: auto !important;
+        padding: 10px 12px !important;
+        border-radius: 18px !important;
+        background: rgba(15,23,42,.82) !important;
+        border: 1px solid rgba(255,255,255,.2) !important;
+        box-shadow: 0 8px 28px rgba(0,0,0,.24) !important;
+      }
+      #movableQuestionPanel .text-\[10px\].font-bold.tracking-widest,
+      #nextUpgradeHint { display: none !important; }
+      #charCardsContainer { min-height: 0 !important; gap: 3px !important; }
+      .main-hanzi { font-size: clamp(1.9rem, 8vw, 2.6rem) !important; }
+      .zhuyin-ruby { font-size: .82rem !important; }
+
+      /* 將輸入欄從題目區獨立停靠在可視畫面底端，手機鍵盤彈出時跟隨可視視窗。 */
+      #movableQuestionPanel > .relative.w-full.flex.items-center.gap-2 {
+        position: fixed !important;
+        left: 10px !important; right: 10px !important;
+        bottom: max(8px, env(safe-area-inset-bottom)) !important;
+        width: auto !important; z-index: 95 !important;
+        gap: 0 !important;
+        padding: 6px !important;
+        border-radius: 16px !important;
+        background: rgba(15,23,42,.94) !important;
+        border: 1px solid rgba(110,231,183,.45) !important;
+        box-shadow: 0 6px 24px rgba(0,0,0,.35) !important;
+      }
+      #typeInput {
+        min-height: 46px !important; height: 46px !important;
+        padding: 10px 12px !important; font-size: 17px !important;
+        border-radius: 12px !important;
+        -webkit-user-select: text !important; user-select: text !important;
+      }
+      #submitBtn { display: none !important; }
+      /* 隱藏輸入模式遮罩仍跟隨輸入欄，不改動原有判題程式。 */
+      #typeInputMask { left: 13px !important; }
+      #mobileControlDock.open { max-height: 62dvh !important; }
+    }
+
     @media (min-width: 761px) { #mobileVitalityBadge { display: none !important; } }
 
   </style>
@@ -553,7 +618,8 @@
           <div class="relative flex-1 min-w-0">
             <input 
               type="text" 
-              id="typeInput" 
+              id="typeInput"
+              enterkeyhint="send"
               placeholder="請在此輸入中文..." 
               autocomplete="off"
               spellcheck="false"
@@ -574,7 +640,7 @@
     <!-- 底部操作提示與左下角版本編號 -->
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
-      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-133)</span>
+      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-135)</span>
       <span>拖曳旋轉 360° 全景 ‧ 滑鼠滾輪或雙指縮放視角</span>
     </footer>
   </div>
@@ -9600,6 +9666,65 @@
     if (mq.addEventListener) mq.addEventListener('change', sync); else mq.addListener(sync);
     sync();
   })();
+  </script>
+
+
+  <style>
+    /* SV.01-135：依示意圖優化手機畫面；桌面版（761px 以上）完全不受影響。 */
+    @media (max-width: 760px) {
+      /* 手機畫面優先保留小島視野；題目卡保持精簡並位於上方。 */
+      #movableQuestionPanel {
+        top: max(86px, calc(env(safe-area-inset-top) + 78px)) !important;
+        max-height: 24dvh !important;
+      }
+      #movableQuestionPanel .w-full.bg-slate-900\/80 {
+        max-height: 22dvh !important;
+        padding: 9px 10px !important;
+      }
+      /* 輸入欄會由 visualViewport 更新鍵盤遮擋距離，停在系統鍵盤正上方。 */
+      #movableQuestionPanel > .relative.w-full.flex.items-center.gap-2 {
+        bottom: calc(var(--mobile-keyboard-inset, 0px) + max(5px, env(safe-area-inset-bottom))) !important;
+        left: 9px !important;
+        right: 9px !important;
+        padding: 5px !important;
+        border-radius: 15px !important;
+        background: rgba(15, 23, 42, .84) !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,.25) !important;
+      }
+      #typeInput {
+        min-height: 42px !important;
+        height: 42px !important;
+        padding: 8px 10px !important;
+        font-size: 16px !important;
+      }
+      /* 鍵盤開啟時隱藏非必要浮動控制，避免遮住題目與輸入欄；關閉鍵盤即恢復。 */
+      body.mobile-keyboard-open #mobileVitalityBadge,
+      body.mobile-keyboard-open #mobileControlDock { display: none !important; }
+    }
+  </style>
+  <script>
+    // SV.01-135：只處理行動裝置視覺視窗；不攔截鍵盤事件、不修改判題流程。
+    (() => {
+      const mq = window.matchMedia('(max-width: 760px)');
+      const vv = window.visualViewport;
+      if (!mq.matches || !vv) return;
+      const updateMobileKeyboardLayout = () => {
+        if (!mq.matches) {
+          document.documentElement.style.removeProperty('--mobile-keyboard-inset');
+          document.body.classList.remove('mobile-keyboard-open');
+          return;
+        }
+        const inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+        document.documentElement.style.setProperty('--mobile-keyboard-inset', `${Math.round(inset)}px`);
+        const keyboardOpen = inset > 120;
+        document.body.classList.toggle('mobile-keyboard-open', keyboardOpen);
+      };
+      vv.addEventListener('resize', updateMobileKeyboardLayout);
+      vv.addEventListener('scroll', updateMobileKeyboardLayout);
+      window.addEventListener('resize', updateMobileKeyboardLayout);
+      window.addEventListener('orientationchange', () => setTimeout(updateMobileKeyboardLayout, 150));
+      updateMobileKeyboardLayout();
+    })();
   </script>
 
 </body>
