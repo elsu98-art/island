@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>我的夢想島：中文打字開拓記（SV.01-158）</title>
+  <title>我的夢想島：中文打字開拓記（S.V01 - 173）</title>
   <!-- 版本：SV.01-158｜安平古堡防重疊並調至第35位 -->
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -558,6 +558,320 @@
     }
 
   </style>
+
+  <style>
+    /* S.V01 - 173：左側直式遠近拉桿，只在行動版顯示。 */
+    #mobileIslandZoomRail { display:none; }
+    @media (max-width:760px) {
+      body:not(.force-desktop-layout) #mobileIslandZoomRail { display:flex; }
+      body:not(.force-desktop-layout) #mobileVitalityBadge.eternal-oasis-label {
+        font-size:14px !important; font-style:normal !important;
+        white-space:nowrap; letter-spacing:1px; line-height:1.35;
+      }
+    }
+    body.force-mobile-layout #mobileIslandZoomRail { display:flex; }
+    body.force-mobile-layout #mobileVitalityBadge.eternal-oasis-label {
+      font-size:14px !important; font-style:normal !important;
+      white-space:nowrap; letter-spacing:1px; line-height:1.35;
+    }
+    body.force-desktop-layout #mobileIslandZoomRail { display:none !important; }
+    #mobileIslandZoomRail {
+      position:fixed; left:max(6px,env(safe-area-inset-left));
+      top:45%; transform:translateY(-50%); z-index:90;
+      flex-direction:column; align-items:center; gap:6px;
+      padding:9px 5px; width:38px;
+      border-radius:18px; color:#fff;
+      background:rgba(15,23,42,.76);
+      border:1px solid rgba(255,255,255,.25);
+      box-shadow:0 4px 15px rgba(0,0,0,.24);
+      pointer-events:auto; touch-action:none;
+    }
+    #mobileIslandZoomRail .zoom-rail-label { font-size:10px; font-weight:800; white-space:nowrap; }
+    #mobileIslandZoomSlider {
+      display:block; width:26px; height:min(29dvh,220px); min-height:110px;
+      writing-mode:vertical-lr; direction:rtl;
+      accent-color:#34d399; cursor:pointer;
+      touch-action:none; pointer-events:auto;
+    }
+  </style>
+<script>
+/* Taipei 101 miniature • original procedural model, no external model assets.
+ * Compatible API: Three.js r128+ (global THREE). The viewer bundles r159.
+ * Units: architectural silhouette is 50.8 units before scaling; default height 11.2.
+ * Artistic miniature, not a survey/BIM reconstruction.
+ */
+/* Taipei 101 miniature • original procedural model, no external model assets.
+ * Compatible API: Three.js r128+ (global THREE). The viewer bundles r159.
+ * Units: architectural silhouette is 50.8 units before scaling; default height 11.2.
+ * Artistic miniature, not a survey/BIM reconstruction.
+ */
+function createTaipei101(pos, options = {}) {
+  const T = THREE;
+  const root = new T.Group(); root.name = 'Taipei101_Refined';
+  const height = Number.isFinite(options.height) && options.height > 0 ? options.height : 11.2;
+  const detail = options.detail === 'low' ? 'low' : 'high';
+  const materials = {}, pools = new Map();
+  const material = (name, color, roughness=.4, metalness=.25) => {
+    const m = new T.MeshStandardMaterial({color, roughness, metalness});
+    m.name=name; materials[name]=m; return m;
+  };
+  const glass=material('glass_teal',0x4a8d92,.28,.18);
+  const glassDark=material('glass_shadow',0x306873,.32,.20);
+  const glassLight=material('glass_sky',0x619c9f,.25,.36);
+  const mullion=material('facade_mullions',0x719395,.43,.48);
+  const edge=material('silver_green_edges',0x91aba7,.35,.55);
+  const dark=material('recesses',0x223c46,.60,.18);
+  const stone=material('podium_stone',0x8f9d9b,.78,.08);
+  const paving=material('plaza',0xb8c4bb,.89,.02);
+  const windowLit=material('evening_windows',0x7eaaaa,.3,.18);
+  const nightWhite=material('night_white_windows',0xffffff,.8,0);
+  nightWhite.emissive.setHex(0xffffff);nightWhite.emissiveIntensity=1.35;
+  const nightBatches=[];
+  const adHeart=new T.MeshBasicMaterial({color:0xff294c,toneMapped:false});adHeart.name='ad_heart_red';materials.ad_heart_red=adHeart;
+  const adText=new T.MeshBasicMaterial({color:0xf5ffff,toneMapped:false});adText.name='ad_TW_white';materials.ad_TW_white=adText;
+
+  const beacon=material('beacon',0xd9e7dd,.25,.35);
+  const boxGeo=new T.BoxGeometry(1,1,1),dummy=new T.Object3D();
+  const record=(geo,mat,position=[0,0,0],scale=[1,1,1],rotation=[0,0,0])=>{
+    let byMat=pools.get(geo);if(!byMat){byMat=new Map();pools.set(geo,byMat);}
+    let matrices=byMat.get(mat);if(!matrices){matrices=[];byMat.set(mat,matrices);}
+    dummy.position.set(...position);dummy.scale.set(...scale);dummy.rotation.set(...rotation);dummy.updateMatrix();matrices.push(dummy.matrix.clone());
+  };
+  const box=(w,h,d,mat,x=0,y=0,z=0,rx=0,ry=0,rz=0)=>record(boxGeo,mat,[x,y,z],[w,h,d],[rx,ry,rz]);
+  const beam=(a,b,r,mat)=>{
+    const start=new T.Vector3(...a),end=new T.Vector3(...b),direction=end.clone().sub(start);
+    dummy.position.copy(start).add(end).multiplyScalar(.5);dummy.scale.set(r,direction.length(),r);
+    dummy.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),direction.normalize());dummy.updateMatrix();
+    let byMat=pools.get(boxGeo);if(!byMat){byMat=new Map();pools.set(boxGeo,byMat);}
+    if(!byMat.has(mat))byMat.set(mat,[]);byMat.get(mat).push(dummy.matrix.clone());
+  };
+  const octagon=(width,bevel=.13)=>{const s=width/2,b=width*bevel;return [[-s+b,-s],[s-b,-s],[s,-s+b],[s,s-b],[s-b,s],[-s+b,s],[-s,s-b],[-s,-s+b]];};
+  const frustum=(bottom,top,h,y,mat)=>{
+    const a=octagon(bottom),b=octagon(top),vertices=[];
+    const add=(p,q,r)=>vertices.push(...p,...q,...r);
+    for(let i=0;i<8;i++){const j=(i+1)%8,p=[a[i][0],0,a[i][1]],q=[a[j][0],0,a[j][1]],r=[b[j][0],h,b[j][1]],s=[b[i][0],h,b[i][1]];
+      add(p,s,q);add(q,s,r);add([0,h,0],r,s);add([0,0,0],p,q);}
+    const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(vertices,3));geo.computeVertexNormals();
+    record(geo,mat,[0,y,0]);return geo;
+  };
+  // Four identical facades follow the outward wall slope of each bamboo unit.
+  const facade=(bottom,top,h,y,rows,columns,trim=true)=>{
+    const tilt=Math.atan2((top-bottom)/2,h);
+    const place=(u,v,w,depth,mat,side)=>{
+      const span=bottom+(top-bottom)*v/h;
+      const distance=span/2+.013;
+      const q=new T.Vector3(u,y+v,distance).applyAxisAngle(new T.Vector3(0,1,0),side*Math.PI/2);
+      box(w,depth,.026,mat,q.x,q.y,q.z,0,side*Math.PI/2,0);
+    };
+    for(let side=0;side<4;side++){
+      for(let row=1;row<rows;row++){
+        const v=row*h/rows,span=bottom+(top-bottom)*v/h;
+        place(0,v,span*.74,.030,mullion,side);
+      }
+      const half=bottom*.34;
+      for(let col=0;col<=columns;col++){
+        const u=-half+col*half*2/columns;
+        const p=new T.Vector3(u,y,bottom/2+.028).applyAxisAngle(new T.Vector3(0,1,0),side*Math.PI/2);
+        const q=new T.Vector3(u*top/bottom,y+h,top/2+.028).applyAxisAngle(new T.Vector3(0,1,0),side*Math.PI/2);
+        beam(p.toArray(),q.toArray(),detail==='high'?.028:.04,mullion);
+      }
+      if(detail==='high')for(let row=0;row<rows;row++)for(let col=0;col<columns;col++){
+        const v=(row+.5)*h/rows,span=bottom+(top-bottom)*v/h;
+        const u=(-.34+(col+.5)*.68/columns)*span;
+        const hash=(row*17+col*31+side*23+Math.round(y*7))%29;
+        if(hash<6)place(u,v,span*.68/columns*.78,h/rows*.65,hash<2?windowLit:hash<4?glassLight:glassDark,side);
+      }
+      // Sparse deterministic office lights: moderate irregular distribution, about three times revision 02.
+      // Separate batch stays invisible during daytime; no timers or point lights.
+      for(let row=0;row<rows;row++)for(let col=0;col<columns;col++){
+        // Avalanche hash avoids repeated diagonal/row patterns from a linear modulo.
+        let seed=(Math.imul(row+1,73856093)^Math.imul(col+1,19349663)^Math.imul(side+1,83492791)^Math.imul(Math.round(y*100),2654435761))>>>0;
+        seed=Math.imul(seed^(seed>>>16),0x7feb352d)>>>0;
+        seed=Math.imul(seed^(seed>>>15),0x846ca68b)>>>0;
+        seed=(seed^(seed>>>16))>>>0;
+        if(seed/4294967296>=.072 || (side===0 && Math.abs(y-28.27)<.01))continue;
+        const v=(row+.5)*h/rows,span=bottom+(top-bottom)*v/h;
+        const u=(-.34+(col+.5)*.68/columns)*span;
+        const q=new T.Vector3(u,y+v,span/2+.045).applyAxisAngle(new T.Vector3(0,1,0),side*Math.PI/2);
+        dummy.position.copy(q);dummy.scale.set(span*.68/columns*.74,h/rows*.60,.018);
+        dummy.quaternion.setFromEuler(new T.Euler(tilt,0,0));
+        dummy.quaternion.premultiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),side*Math.PI/2));
+        dummy.updateMatrix();let byMat=pools.get(boxGeo);
+        if(!byMat){byMat=new Map();pools.set(boxGeo,byMat);}if(!byMat.has(nightWhite))byMat.set(nightWhite,[]);
+        byMat.get(nightWhite).push(dummy.matrix.clone());
+      }
+      if(trim){
+        const a=octagon(bottom),b=octagon(top);
+        for(const index of [side*2,side*2+1]){
+          beam([a[index][0],y,a[index][1]],[b[index][0],y+h,b[index][1]],.075,edge);
+        }
+      }
+    }
+  };
+  // Ground plane is intentionally excluded so the builder can sit on the game's island.
+  box(10.5,.16,8.6,paving,0,.08,0);
+  box(8.8,.45,6.9,stone,.5,.385,-.1);
+  box(8.3,1.7,6.35,glassDark,.5,1.46,-.1);
+  for(let level=0;level<4;level++)box(8.6-level*.36,.12,6.65-level*.28,edge,.5,2.35+level*.24,-.1);
+  for(let i=0;i<16;i++)box(.06,1.65,.06,mullion,-3.38+i*.50,1.48,3.09);
+  box(2.6,.12,.90,edge,0,1.22,3.55);box(2.4,1.0,.08,glassLight,0,.7,3.12);
+  for(let i=0;i<4;i++)box(3.5-i*.1,.10,.25,stone,0,.05+i*.10,4.03-i*.21);
+  // The lower shaft narrows upward before the eight outward-flaring units.
+  frustum(6.4,4.95,9.1,2.6,glass);facade(6.4,4.95,9.1,2.6,18,detail==='high'?14:8);
+  frustum(5.1,5.35,.65,11.7,edge);frustum(4.8,4.95,.20,12.35,dark);
+  const units=[];
+  for(let i=0;i<8;i++){
+    const y=12.55+i*3.93,h=3.70;
+    const bottom=4.93-i*.018,top=5.83-i*.018;
+    frustum(bottom,top,h,y,glass);facade(bottom,top,h,y,8,detail==='high'?14:7);
+    // Narrow silver ledges replace the old saturated gold horizontal slabs.
+    frustum(top+.05,top+.05,.105,y+h,edge);
+    frustum(bottom-.08,bottom-.08,.125,y+h+.105,dark);
+    const lower=octagon(bottom),upper=octagon(top);
+    for(let c=0;c<8;c+=2){
+      const a=lower[c],b=upper[c];
+      beam([a[0],y+.14,a[1]],[b[0]*1.025,y+h+.10,b[1]*1.025],.105,edge);
+    }
+    // Small folded corner ornaments echo the ruyi motifs; no oversized gold discs.
+    if(detail==='high')for(const sx of [-1,1])for(const sz of [-1,1]){
+      const r=top*.42;
+      beam([sx*r,y+h-.40,sz*r],[sx*(r+.19),y+h+.23,sz*(r+.19)],.13,edge);
+      beam([sx*(r+.19),y+h+.23,sz*(r+.19)],[sx*(r+.29),y+h+.16,sz*(r+.29)],.11,edge);
+    }
+    units.push({index:i+1,bottomY:y,topY:y+h});
+  }
+  // A single facade carries a window-sized LED message on the middle bamboo tier.
+  // Real instanced geometry: no emoji font, texture, canvas or external asset needed.
+  const heartRows=['0110110','1111111','1111111','1111111','0111110','0011100','0001000'];
+  const tRows=['11111','00100','00100','00100','00100','00100','00100'];
+  const wRows=['10001','10001','10001','10101','10101','10101','01010'];
+  const messageRows=heartRows.map((r,i)=>r+'0'+tRows[i]+'0'+wRows[i]);
+  const messageUnit=4,messageY=12.55+messageUnit*3.93;
+  const messageBottom=4.93-messageUnit*.018,messageTop=5.83-messageUnit*.018;
+  const messageTilt=Math.atan2((messageTop-messageBottom)/2,3.70);
+  messageRows.forEach((line,row)=>{for(let col=0;col<line.length;col++){
+    if(line[col]!=='1')continue;
+    const v=1.07+(6-row)*.25,span=messageBottom+(messageTop-messageBottom)*v/3.70;
+    const x=(col-9)*span*.70/19;
+    // Pixel panels follow the sloping facade; the dark gaps remain visible.
+    box(span*.70/19*.78,.20,.025,col<7?adHeart:adText,x,messageY+v,span/2+.16,messageTilt);
+  }});
+  // Stepped observation crown and architectural spire (total height 50.8).
+  frustum(4.55,3.95,1.65,44.0,glass);facade(4.55,3.95,1.65,44.0,4,12);
+  frustum(4.15,4.15,.14,45.65,edge);frustum(3.05,2.65,1.25,45.79,glass);
+  facade(3.05,2.65,1.25,45.79,4,8);
+  frustum(2.85,2.85,.12,47.04,edge);frustum(1.65,1.05,.98,47.16,glassDark);
+  frustum(1.10,.40,.65,48.14,edge);frustum(.45,.27,.66,48.79,glassDark);
+  record(new T.CylinderGeometry(.045,.14,1.28,12),edge,[0,50.09,0]);
+  record(new T.SphereGeometry(.07,10,8),beacon,[0,50.73,0]);
+  const coinGeo=new T.TorusGeometry(.49,.067,6,28);
+  for(let side=0;side<4;side++){
+    const angle=side*Math.PI/2,p=new T.Vector3(0,9.35,2.94).applyAxisAngle(new T.Vector3(0,1,0),angle);
+    record(coinGeo,edge,p.toArray(),[1,1,1],[0,angle,0]);
+    const q=new T.Vector3(0,9.35,2.95).applyAxisAngle(new T.Vector3(0,1,0),angle);
+    box(.33,.33,.07,edge,q.x,q.y,q.z,0,angle);
+  }
+  // One InstancedMesh per geometry/material pair: thousands of facade details, few draw calls.
+  const content=new T.Group();content.name="Taipei101_Geometry";content.scale.setScalar(height/50.8);root.add(content);
+  let instances=0;
+  for(const [geo,byMat] of pools)for(const [mat,matrices] of byMat){
+    const batch=new T.InstancedMesh(geo,mat,matrices.length);batch.name=mat.name;
+    matrices.forEach((matrix,i)=>batch.setMatrixAt(i,matrix));batch.instanceMatrix.needsUpdate=true;
+    batch.castShadow=options.shadows!==false;batch.receiveShadow=options.shadows!==false;
+    // r128 computes bounds from the untransformed source geometry; avoid incorrect culling.
+    if(mat===nightWhite || mat===adHeart || mat===adText){batch.visible=false;batch.castShadow=false;batch.receiveShadow=false;nightBatches.push(batch);}
+    batch.frustumCulled=false;content.add(batch);instances+=matrices.length;
+  }
+  if(pos)root.position.copy(pos);
+  root.userData.taipei101={height,detail,units,materials,instances,drawCalls:content.children.length};
+  root.userData.setNight=(enabled)=>{
+    glass.emissive.setHex(0x000000);glass.emissiveIntensity=0;
+    windowLit.color.setHex(enabled?0x306873:0x7eaaaa);windowLit.emissive.setHex(0x000000);windowLit.emissiveIntensity=0;
+    nightBatches.forEach(batch=>{batch.visible=!!enabled;});
+    root.userData.taipei101.night=!!enabled;
+    edge.emissive.setHex(0x000000);edge.emissiveIntensity=0;
+    beacon.emissive.setHex(enabled?0xe54b40:0x000000);beacon.emissiveIntensity=enabled?2:0;
+  };
+  root.userData.setNight(options.night===true);
+  root.userData.dispose=()=>{for(const geometry of pools.keys())geometry.dispose();Object.values(materials).forEach(m=>m.dispose());};
+  return root;
+}
+</script>
+<script>
+/* Dream Island landmark 21: simple colourful clock tower. Global THREE r128+. */
+function createBigBen(pos,options={}){
+ const T=THREE,root=new T.Group();root.name='BigBen_Cartoon';if(pos)root.position.copy(pos);
+ const height=Number.isFinite(options.height)&&options.height>0?options.height:4.8,body=new T.Group();body.name='BigBen_Geometry';root.add(body);
+ const mat=(name,color)=>{const m=new T.MeshStandardMaterial({color,roughness:.88,metalness:0,flatShading:true});m.name=name;return m;};
+ const gold=mat('golden_tower',0xc9ac79),cream=mat('stone_trim',0xe8d6af),blue=mat('blue_roof',0x40505c),glass=mat('blue_windows',0x25495c),face=mat('clock_face',0xfff3d1),ink=mat('clock_hands',0x253442);
+ const base=mat('base_stone',0x9e927d),clockRoom=mat('clock_room',0xb69765),tip=mat('spire_tip',0xd5ad61);
+ const materials={gold,cream,blue,glass,face,ink,base,clockRoom,tip};
+ const add=(geo,m,x=0,y=0,z=0)=>{const mesh=new T.Mesh(geo,m);mesh.position.set(x,y,z);mesh.castShadow=options.shadows!==false;mesh.receiveShadow=options.shadows!==false;body.add(mesh);return mesh;};
+ const box=(w,h,d,m,x=0,y=0,z=0)=>add(new T.BoxGeometry(w,h,d),m,x,y,z);
+ box(1.65,.20,1.65,base,0,.10,0);box(1.34,.15,1.34,gold,0,.275,0);
+ box(1.02,2.65,1.02,gold,0,1.675,0);
+ // Four broad corner posts; only two horizontal bands, not fine masonry.
+ for(const x of [-.46,.46])for(const z of [-.46,.46])box(.09,2.65,.09,cream,x,1.675,z);
+ for(const y of [1.17,2.03])box(1.10,.10,1.10,cream,0,y,0);
+ // One simple tall blue window on each face, below the clock room.
+ for(let side=0;side<4;side++){const g=new T.Group();g.rotation.y=side*Math.PI/2;const window=new T.Mesh(new T.BoxGeometry(.25,.66,.025),glass);window.position.set(0,2.48,.525);g.add(window);body.add(g);}
+ box(1.25,.87,1.25,clockRoom,0,3.39,0);box(1.41,.14,1.41,cream,0,2.97,0);box(1.42,.14,1.42,cream,0,3.87,0);
+ const hands=[];
+ // Four large clock faces: four simple hour marks and two hands each.
+ for(let side=0;side<4;side++){
+  const g=new T.Group();g.name='ClockFace_'+side;g.rotation.y=side*Math.PI/2;g.position.y=3.41;body.add(g);
+  const dial=new T.Mesh(new T.CylinderGeometry(.365,.365,.035,24),face);dial.rotation.x=Math.PI/2;dial.position.z=.65;g.add(dial);
+  for(let i=0;i<4;i++){const a=i*Math.PI/2,m=new T.Mesh(new T.BoxGeometry(.026,.065,.014),ink);m.position.set(Math.sin(a)*.29,Math.cos(a)*.29,.675);m.rotation.z=-a;g.add(m);}
+  const makeHand=(length,w)=>{const pivot=new T.Group(),mesh=new T.Mesh(new T.BoxGeometry(w,length,.018),ink);mesh.position.set(0,length*.37,.69);pivot.add(mesh);g.add(pivot);return pivot;};hands.push({hour:makeHand(.22,.032),minute:makeHand(.30,.025)});
+ }
+ // One bold pyramidal roof and four simple corner pinnacles.
+ const cap=add(new T.ConeGeometry(.91,.93,4),blue,0,4.40,0);cap.rotation.y=Math.PI/4;
+ for(const x of [-.57,.57])for(const z of [-.57,.57]){const top=add(new T.ConeGeometry(.13,.38,4),blue,x,4.12,z);top.rotation.y=Math.PI/4;}
+ add(new T.CylinderGeometry(.022,.055,.43,10),tip,0,5.08,0);
+ root.updateMatrixWorld(true);const bounds=new T.Box3().setFromObject(body);body.scale.setScalar(height/(bounds.max.y-bounds.min.y));
+ const setClockTime=(h=10,m=10)=>{const t=((h*60+m)%720+720)%720;for(const pair of hands){pair.hour.rotation.z=-t/720*Math.PI*2;pair.minute.rotation.z=-(t%60)/60*Math.PI*2;}};setClockTime();
+ root.userData.setClockTime=setClockTime;root.userData.update=()=>{};
+ root.userData.setNight=on=>{face.emissive.setHex(on?0xffe4a6:0);face.emissiveIntensity=on?.65:0;glass.emissive.setHex(on?0xffc879:0);glass.emissiveIntensity=on?.65:0;};
+ root.userData.bigBen={height,materials,clockFaces:4,index:21};
+ root.userData.dispose=()=>{const gs=new Set(),ms=new Set();root.traverse(m=>{if(m.geometry)gs.add(m.geometry);if(m.material)ms.add(m.material);});gs.forEach(g=>g.dispose());ms.forEach(m=>m.dispose());};return root;
+}
+
+</script>
+<script>
+/* Landmark 08: colourful cartoon rocket launch pad. Global THREE r128+. */
+function createRocketLaunchPad(pos,options={}){
+ const T=THREE,root=new T.Group();root.name='CartoonRocketLaunchPad';if(pos)root.position.copy(pos);
+ const height=Number.isFinite(options.height)&&options.height>0?options.height:4.2;
+ const body=new T.Group();body.name='Rocket_Geometry';root.add(body);
+ const mat=(name,color)=>{const m=new T.MeshStandardMaterial({color,roughness:.82,metalness:0,flatShading:true});m.name=name;return m;};
+ const white=mat('rocket_white',0xffffff),red=mat('rocket_red',0xef4444),blue=mat('pad_blue',0x0284c7),grey=mat('support_grey',0x64748b),dark=mat('engine_dark',0x1e293b),glass=mat('porthole_blue',0x38bdf8),yellow=mat('safety_yellow',0xfacc15);
+ const materials={white,red,blue,grey,dark,glass,yellow};
+ const add=(geometry,m,x=0,y=0,z=0)=>{const mesh=new T.Mesh(geometry,m);mesh.position.set(x,y,z);mesh.castShadow=options.shadows!==false;mesh.receiveShadow=options.shadows!==false;body.add(mesh);return mesh;};
+ const box=(w,h,d,m,x=0,y=0,z=0)=>add(new T.BoxGeometry(w,h,d),m,x,y,z);
+ const cyl=(r1,r2,h,m,x=0,y=0,z=0)=>add(new T.CylinderGeometry(r1,r2,h,20),m,x,y,z);
+ const rod=(a,b,r,m)=>{const p=new T.Vector3(...a),q=new T.Vector3(...b),d=q.clone().sub(p),mesh=cyl(r,r,d.length(),m);mesh.position.copy(p).add(q).multiplyScalar(.5);mesh.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.normalize());return mesh;};
+ // A few bold shapes: platform, launch circle, rocket, two boosters and support frame.
+ box(2.85,.24,2.45,blue,0,.12,0);cyl(.83,.83,.045,yellow,0,.263,0);
+ cyl(.35,.40,2.52,white,0,1.88,0);cyl(.355,.39,.16,red,0,.76,0);cyl(.355,.36,.13,red,0,2.83,0);
+ add(new T.ConeGeometry(.35,.88,20),red,0,3.58,0);cyl(.16,.27,.27,dark,0,.49,0);
+ for(const x of [-.55,.55]){cyl(.16,.20,1.67,white,x,1.37,0);add(new T.ConeGeometry(.16,.35,16),red,x,2.38,0);cyl(.14,.19,.19,dark,x,.44,0);}
+ const porthole=cyl(.145,.145,.045,glass,0,2.34,.357);porthole.rotation.x=Math.PI/2;
+ const rim=add(new T.TorusGeometry(.15,.027,6,24),yellow,0,2.34,.387);
+ // Three broad triangular fins, without tiny panel lines or lettering.
+ const finShape=new T.Shape();finShape.moveTo(0,0);finShape.lineTo(.48,-.47);finShape.lineTo(.48,-.78);finShape.lineTo(0,-.60);finShape.closePath();
+ const finGeo=new T.ExtrudeGeometry(finShape,{depth:.07,bevelEnabled:false});
+ for(let i=0;i<3;i++){const g=new T.Group();g.rotation.y=i*Math.PI*2/3;const fin=new T.Mesh(finGeo,red);fin.position.set(.29,1.23,-.035);fin.castShadow=options.shadows!==false;g.add(fin);body.add(g);}
+ // Compact, open support tower; five crossbars only.
+ for(const x of [-1.12,-.76])rod([x,.24,-.57],[x,3.15,-.57],.035,grey);
+ for(let i=0;i<5;i++){const y=.40+i*.63;box(.49,.07,.38,grey,-.94,y,-.57);if(i<4)rod([-1.12,y,-.58],[-.76,y+.63,-.58],.018,yellow);}
+ box(.67,.08,.25,grey,-.50,2.85,-.40);
+ root.updateMatrixWorld(true);const bounds=new T.Box3().setFromObject(body);body.scale.setScalar(height/(bounds.max.y-bounds.min.y));
+ root.userData.setNight=on=>{glass.emissive.setHex(on?0x38bdf8:0);glass.emissiveIntensity=on?1.1:0;yellow.emissive.setHex(on?0xffc931:0);yellow.emissiveIntensity=on?.3:0;};
+ root.userData.update=()=>{};root.userData.rocket={height,materials,index:8};
+ root.userData.dispose=()=>{const gs=new Set(),ms=new Set();root.traverse(m=>{if(m.geometry)gs.add(m.geometry);if(m.material)ms.add(m.material);});gs.forEach(g=>g.dispose());ms.forEach(m=>m.dispose());};return root;
+}
+
+</script>
 </head>
 <body class="relative w-full h-full overflow-hidden">
 
@@ -735,7 +1049,15 @@
     <!-- 底部操作提示與左下角版本編號 -->
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
-      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(SV.01-158)</span>
+      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(S.V01 - 173)</span>
+      <script>
+        // 左下角版本標籤自動與網頁標題同步，避免後續改版忘記更新。
+        (() => {
+          const match = document.title.match(/SV\.\d+-\d+/);
+          const badge = document.getElementById('gameVersionBadge');
+          if (match && badge) badge.textContent = `(${match[0]})`;
+        })();
+      </script>
       <span>拖曳旋轉 360° 全景 ‧ 滑鼠滾輪或雙指縮放視角</span>
     </footer>
   </div>
@@ -827,19 +1149,19 @@
           </h3>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div class="p-2 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
-              <span class="text-slate-300">多啦A夢 (小叮噹)</span>
+              <span class="text-slate-300">機器高</span>
               <span class="font-mono font-bold text-sky-400 bg-slate-950 px-2 py-0.5 rounded">A</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
-              <span class="text-slate-300">蠟筆小新</span>
+              <span class="text-slate-300">小男孩</span>
               <span class="font-mono font-bold text-rose-400 bg-slate-950 px-2 py-0.5 rounded">j</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
-              <span class="text-slate-300">櫻桃小丸子</span>
+              <span class="text-slate-300">小女孩</span>
               <span class="font-mono font-bold text-amber-400 bg-slate-950 px-2 py-0.5 rounded">g</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
-              <span class="text-slate-300">米老鼠</span>
+              <span class="text-slate-300">可愛鼠</span>
               <span class="font-mono font-bold text-red-400 bg-slate-950 px-2 py-0.5 rounded">m</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
@@ -847,19 +1169,19 @@
               <span class="font-mono font-bold text-emerald-400 bg-slate-950 px-2 py-0.5 rounded">d</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
-              <span class="text-slate-300">巴斯光年</span>
+              <span class="text-slate-300">太空人</span>
               <span class="font-mono font-bold text-purple-400 bg-slate-950 px-2 py-0.5 rounded">buzz</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
-              <span class="text-slate-300">翼手龍 (飛龍)</span>
+              <span class="text-slate-300">大飛龍</span>
               <span class="font-mono font-bold text-teal-400 bg-slate-950 px-2 py-0.5 rounded">f</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
-              <span class="text-slate-300">史奴比</span>
+              <span class="text-slate-300">小白狗</span>
               <span class="font-mono font-bold text-slate-300 bg-slate-950 px-2 py-0.5 rounded">s</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
-              <span class="text-slate-300">小熊維尼</span>
+              <span class="text-slate-300">紅衣小熊</span>
               <span class="font-mono font-bold text-yellow-400 bg-slate-950 px-2 py-0.5 rounded">p</span>
             </div>
           </div>
@@ -1288,15 +1610,15 @@
 
     // 專屬里程碑試煉題（達到指定題數時必定出現，輸入成功召喚專屬人物）
     const MILESTONE_SPECIAL_TRIALS = {
-      10: { word: "小叮噹", ruby: ["ㄒㄧㄠˇ", "ㄉㄧㄥ", "ㄉㄤ"], charName: "多啦A夢", announceName: "小叮噹" },
-      15: { word: "蠟筆小新", ruby: ["ㄌㄚˋ", "ㄅㄧˇ", "ㄒㄧㄠˇ", "ㄒㄧㄣ"], charName: "蠟筆小新", announceName: "蠟筆小新" },
-      20: { word: "小丸子", ruby: ["ㄒㄧㄠˇ", "ㄨㄢˊ", "ㄗˇ"], charName: "櫻桃小丸子", announceName: "櫻桃小丸子" },
-      25: { word: "米老鼠", ruby: ["ㄇㄧˇ", "ㄌㄠˇ", "ㄕㄨˇ"], charName: "米老鼠", announceName: "米老鼠" },
+      10: { word: "機器貓", ruby: ["ㄐㄧ", "ㄑㄧˋ", "ㄇㄠ"], charName: "多啦A夢", announceName: "機器高" },
+      15: { word: "小男孩", ruby: ["ㄒㄧㄠˇ", "ㄋㄢˊ", "ㄏㄞˊ"], charName: "蠟筆小新", announceName: "小男孩" },
+      20: { word: "小女孩", ruby: ["ㄒㄧㄠˇ", "ㄋㄩˇ", "ㄏㄞˊ"], charName: "櫻桃小丸子", announceName: "小女孩" },
+      25: { word: "可愛鼠", ruby: ["ㄎㄜˇ", "ㄞˋ", "ㄕㄨˇ"], charName: "米老鼠", announceName: "可愛鼠" },
       30: { word: "小恐龍", ruby: ["ㄒㄧㄠˇ", "ㄎㄨㄥˇ", "ㄌㄨㄥˊ"], charName: "小恐龍", announceName: "小恐龍" },
-      35: { word: "太空人", ruby: ["ㄊㄞˋ", "ㄎㄨㄥ", "ㄖㄣˊ"], charName: "巴斯光年", announceName: "巴斯光年" },
-      40: { word: "大飛龍", ruby: ["ㄉㄚˋ", "ㄈㄟ", "ㄌㄨㄥˊ"], charName: "翼手龍", announceName: "翼手龍" },
-      45: { word: "史奴比", ruby: ["ㄕˇ", "ㄋㄨˊ", "ㄅㄧˇ"], charName: "史奴比", announceName: "史奴比" },
-      50: { word: "小熊", ruby: ["ㄒㄧㄠˇ", "ㄒㄩㄥˊ"], charName: "小熊維尼", announceName: "小熊維尼" }
+      35: { word: "太空人", ruby: ["ㄊㄞˋ", "ㄎㄨㄥ", "ㄖㄣˊ"], charName: "巴斯光年", announceName: "太空人" },
+      40: { word: "大飛龍", ruby: ["ㄉㄚˋ", "ㄈㄟ", "ㄌㄨㄥˊ"], charName: "翼手龍", announceName: "大飛龍" },
+      45: { word: "小白狗", ruby: ["ㄒㄧㄠˇ", "ㄅㄞˊ", "ㄍㄡˇ"], charName: "史奴比", announceName: "小白狗" },
+      50: { word: "紅衣小熊", ruby: ["ㄏㄨㄥˊ", "ㄧ", "ㄒㄧㄠˇ", "ㄒㄩㄥˊ"], charName: "小熊維尼", announceName: "紅衣小熊" }
     };
 
     let activeTrial = null; // 當前是否處於人物試煉題
@@ -1416,6 +1738,196 @@
     ];
 
     // 整整 50 種精緻紀念地標（熱氣球已改為台北101，所有地標全面高精度重構）
+/* Danjiang Bridge • original procedural miniature, Three.js r128+.
+ * Visual interpretation from ZHA photographs and public project descriptions.
+ * Not a survey, BIM, load-bearing design or as-built reconstruction.
+ * The viewer's river, lighting, vehicles and camera are NOT part of this model.
+ */
+function createDanjiangBridge(pos, options = {}) {
+ const T=THREE,root=new T.Group();root.name='DanjiangBridge_Refined';
+ const length=Number.isFinite(options.length)&&options.length>0?options.length:22;
+ const detail=options.detail==='low'?'low':'high',nightState={enabled:false,mode:'color',fixedColor:null};
+ const content=new T.Group();content.name='DanjiangBridge_Geometry';content.scale.setScalar(length/46);root.add(content);if(pos)root.position.copy(pos);
+ const materials={},pools=new Map(),dummy=new T.Object3D();
+ const material=(name,color,roughness=.55,metalness=.12)=>{const m=new T.MeshStandardMaterial({color,roughness,metalness});m.name=name;materials[name]=m;return m;};
+ const white=material('sculpted_pylon',0xe5e9e3,.52,.10),concrete=material('pier_concrete',0xb5c2bf,.80,.04);
+ const edge=material('deck_edge',0xd5ded7,.46,.30),underside=material('steel_box_girder',0x748d8b,.60,.32);
+ const asphalt=material('asphalt',0x475857,.95,.02),walk=material('walkways',0xaebcb1,.92,.02);
+ const lane=material('road_markings',0xe7e4cc,.85,.01),rail=material('railing',0x9db4b0,.38,.46);
+ const cable=material('stay_cables',0x819b9c,.4,.25),socket=material('cable_anchor_sleeves',0xa9bcb7,.42,.40);
+ const light=material('edge_lighting',0xf9e6bb,.36,.1),red=material('navigation_beacon',0xb85444,.4,.1);
+ const boxGeo=new T.BoxGeometry(1,1,1),cylGeo=new T.CylinderGeometry(1,1,1,detail==='high'?8:5);
+ const putMatrix=(geo,mat,matrix)=>{if(!pools.has(geo))pools.set(geo,new Map());const byMat=pools.get(geo);if(!byMat.has(mat))byMat.set(mat,[]);byMat.get(mat).push(matrix.clone());};
+ const record=(geo,mat,p=[0,0,0],s=[1,1,1],r=[0,0,0])=>{dummy.position.set(...p);dummy.scale.set(...s);dummy.rotation.set(...r);dummy.updateMatrix();putMatrix(geo,mat,dummy.matrix);};
+ const box=(w,h,d,mat,x=0,y=0,z=0)=>record(boxGeo,mat,[x,y,z],[w,h,d]);
+ const rod=(a,b,r,mat)=>{const p=new T.Vector3(...a),q=new T.Vector3(...b),v=q.clone().sub(p);dummy.position.copy(p).add(q).multiplyScalar(.5);dummy.scale.set(r,v.length(),r);dummy.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),v.normalize());dummy.updateMatrix();putMatrix(cylGeo,mat,dummy.matrix);};
+ const oct=(wx,wz)=>{const a=wx/2,b=wz/2,c=Math.min(wx,wz)*.20;return [[-a+c,-b],[a-c,-b],[a,-b+c],[a,b-c],[a-c,b],[-a+c,b],[-a,b-c],[-a,-b+c]];};
+ function loft(sections,mat){
+  const arr=[],normals=[];const add=(a,b,c)=>arr.push(...a,...b,...c);
+  const rings=sections.map(s=>oct(s.w,s.d).map(([x,z])=>[x+s.x,s.y,z+(s.z||0)]));
+  for(let k=0;k<rings.length-1;k++)for(let i=0;i<8;i++){const j=(i+1)%8;add(rings[k][i],rings[k+1][i],rings[k][j]);add(rings[k][j],rings[k+1][i],rings[k+1][j]);}
+  for(let i=0;i<8;i++){const j=(i+1)%8,first=sections[0],last=sections[sections.length-1];add([first.x,first.y,first.z||0],rings[0][i],rings[0][j]);add([last.x,last.y,last.z||0],rings.at(-1)[j],rings.at(-1)[i]);}
+  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(arr,3));geometry.computeVertexNormals();record(geometry,mat);return geometry;
+ }
+ const deckY=1.72,towerX=6.5;
+ // Revision 02: two separate lower legs, a real open fork through and above the deck,
+ // and one almost-vertical upper mast, matching the user's supplied photograph.
+ function smoothLoft(controls,mat){
+  const rings=[];
+  for(let i=0;i<controls.length-1;i++){
+   const a=controls[i],b=controls[i+1],prev=controls[Math.max(0,i-1)],next=controls[Math.min(controls.length-1,i+2)];
+   for(let j=0;j<6;j++){
+    const t=j/6,t2=t*t,t3=t2*t;
+    const interpolate=key=>.5*((2*a[key])+(-prev[key]+b[key])*t+(2*prev[key]-5*a[key]+4*b[key]-next[key])*t2+(-prev[key]+3*a[key]-3*b[key]+next[key])*t3);
+    rings.push({y:a.y+(b.y-a.y)*t,x:interpolate('x'),w:interpolate('w'),d:interpolate('d')});
+   }
+  }
+  rings.push(controls.at(-1));return loft(rings,mat);
+ }
+ const legProfiles=[];
+ for(const side of [-1,1]){
+  const controls=[
+   {y:0,x:6.5+side*.67,w:.58,d:1.40},
+   {y:.65,x:6.5+side*.63,w:.52,d:1.33},
+   {y:1.72,x:6.5+side*.52,w:.43,d:1.17},
+   {y:2.25,x:6.47+side*.40,w:.36,d:.97},
+   {y:2.8,x:6.44+side*.30,w:.32,d:.82},
+   {y:3.25,x:6.42+side*.19,w:.34,d:.72},
+   {y:3.70,x:6.42+side*.09,w:.34,d:.63}
+  ];
+  smoothLoft(controls,white);legProfiles.push({side,controls});
+ }
+ const mastControls=[
+  {y:3.28,x:6.42,w:.71,d:.72},{y:3.8,x:6.42,w:.55,d:.64},
+  {y:4.6,x:6.43,w:.44,d:.58},{y:5.5,x:6.46,w:.40,d:.54},
+  {y:7.3,x:6.52,w:.36,d:.49},{y:9.4,x:6.59,w:.31,d:.44},
+  {y:10,x:6.61,w:.29,d:.42}
+ ];
+ smoothLoft(mastControls,white);
+ const mastAt=y=>{
+  let a=mastControls[0],b=mastControls[1];
+  for(let i=0;i<mastControls.length-1;i++)if(y>=mastControls[i].y){a=mastControls[i];b=mastControls[i+1];}
+  const t=Math.max(0,Math.min(1,(y-a.y)/(b.y-a.y)));
+  return {x:a.x+(b.x-a.x)*t,w:a.w+(b.w-a.w)*t,d:a.d+(b.d-a.d)*t};
+ };
+ const seamPoints=[3.5,4,4.8,6,8,9.85].map(y=>{const m=mastAt(y);return new T.Vector3(m.x-.04,y,m.d/2+.008);});
+ record(new T.TubeGeometry(new T.CatmullRomCurve3(seamPoints),40,.008,4,false),rail);
+ // Fine horizontal concrete joints, kept subtle instead of decorative bands.
+ if(detail==='high')for(let y=3.8;y<9.8;y+=.32){const m=mastAt(y);box(m.w*.65,.006,.008,concrete,m.x,y,m.d/2+.003);}
+ // Hollow-looking streamlined steel deck; top walkway and parapets sit on the box girder.
+ box(46,.18,2.28,underside,0,deckY-.13);box(46,.08,2.45,edge,0,deckY+.005);
+ box(46,.025,1.56,asphalt,0,deckY+.059);
+ for(const z of [-.985,.985])box(46,.03,.35,walk,0,deckY+.06,z);
+ box(46,.065,.065,edge,0,deckY+.08,0);
+ for(const z of [-.76,.76])box(46,.008,.018,lane,0,deckY+.08,z);
+ for(let x=-22.8;x<22.8;x+=.47)for(const z of [-.4,.4])box(.24,.009,.014,lane,x,deckY+.08,z);
+ for(const z of [-1.19,1.19]){
+  box(46,.13,.08,edge,0,deckY+.12,z);box(46,.027,.035,rail,0,deckY+.35,z);
+  box(46,.018,.028,rail,0,deckY+.24,z);
+  const count=detail==='high'?116:58;for(let i=0;i<=count;i++)box(.022,.25,.022,rail,-22.989+i*45.978/count,deckY+.225,z);
+  box(46,.018,.025,light,0,deckY+.29,z+.015*Math.sign(z));
+ }
+ // Approach piers are outside the 450 m main navigation span and the 175 m back span.
+ const pierPositions=[-22.3,-19.2,-16,15.25,19,22.3];
+ for(const x of pierPositions){
+  loft([{y:0,x,w:.65,d:1.4},{y:.55,x,w:.58,d:1.2},{y:.95,x,w:.5,d:.86}],concrete);
+  for(const side of [-1,1])loft([{y:.65,x,w:.40,d:.43,z:side*.21},{y:1.18,x,w:.43,d:.44,z:side*.50},{y:deckY-.21,x,w:.56,d:.48,z:side*.86}],concrete);
+  box(.85,.10,2.24,edge,x,deckY-.24);
+ }
+ const cableEnds=[],cableCount=detail==='high'?24:14;
+ // Main-span fan reaches 22.5 units (450 m); back-span reaches 8.75 (175 m).
+ for(const direction of [-1,1]){
+  const count=direction<0?cableCount:Math.round(cableCount*.67),reach=direction<0?22.5:8.75;
+  for(let i=0;i<count;i++){
+   const t=(i+1)/count,endX=towerX+direction*(1.22+t*(reach-1.22)),anchorY=4.15+t*5.52;
+   const shaft=mastAt(anchorY),anchorX=shaft.x;
+   for(const side of [-1,1]){
+    const a=[anchorX+direction*shaft.w*.30,anchorY,side*shaft.d*.42],b=[endX,deckY+.21,side*.94];
+    rod(a,b,detail==='high'?.019:.024,cable);
+    const v=new T.Vector3(...a).sub(new T.Vector3(...b)).normalize();rod(b,new T.Vector3(...b).addScaledVector(v,.33).toArray(),.037,socket);
+    cableEnds.push({tower:a,deck:b,span:direction<0?'main':'back'});
+   }
+  }
+ }
+ // Low swept lamp standards and compact aviation warning lights.
+ for(let x=-22;x<=22;x+=2.75)for(const side of [-1,1]){
+  const z=side*1.08;rod([x,deckY+.09,z],[x+.10,deckY+.67,z],.017,rail);rod([x+.10,deckY+.67,z],[x+.40,deckY+.73,z],.017,rail);box(.20,.026,.07,light,x+.36,deckY+.715,z);
+ }
+ const beaconLocations=[];
+ for(const y of [3.95,6.65,9.91]){const m=mastAt(y);for(const side of [-1,1]){const p=[m.x,y,side*(m.d/2+.025)];record(new T.SphereGeometry(.047,10,8),red,p);beaconLocations.push(p);}}
+ let instances=0,cableBatch=null;
+ for(const [geometry,byMat] of pools)for(const [mat,matrices] of byMat){
+  const batch=new T.InstancedMesh(geometry,mat,matrices.length);batch.name=mat.name;matrices.forEach((m,i)=>batch.setMatrixAt(i,m));batch.instanceMatrix.needsUpdate=true;batch.frustumCulled=false;
+  batch.castShadow=options.shadows!==false&&mat!==cable;batch.receiveShadow=options.shadows!==false;
+  content.add(batch);instances+=matrices.length;if(mat===cable)cableBatch=batch;
+ }
+ if(cableBatch){const initialColor=new T.Color(0xffffff);for(let i=0;i<cableBatch.count;i++)cableBatch.setColorAt(i,initialColor);cableBatch.instanceColor.needsUpdate=true;}
+ // Self-contained glow sprites and cable halos: no post-processing dependency.
+ const fx=new T.Group();fx.name='NightLightShow';fx.visible=false;content.add(fx);
+ const glowCanvas=typeof document!=='undefined'?document.createElement('canvas'):null;
+ let glowTexture=null;
+ if(glowCanvas){glowCanvas.width=glowCanvas.height=128;const c=glowCanvas.getContext('2d'),g=c.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,255,255,0.7)');g.addColorStop(.15,'rgba(255,255,255,0.30)');g.addColorStop(.42,'rgba(255,255,255,0.08)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(0,0,128,128);glowTexture=new T.CanvasTexture(glowCanvas);}
+ const towerGlow=new T.SpriteMaterial({map:glowTexture,color:0x288aff,transparent:true,opacity:.32,blending:T.AdditiveBlending,depthWrite:false,depthTest:false,toneMapped:false});
+ const redGlow=new T.SpriteMaterial({map:glowTexture,color:0xff172d,transparent:true,opacity:.85,blending:T.AdditiveBlending,depthWrite:false,depthTest:false,toneMapped:false});
+ const sprite=(mat,p,size)=>{if(!glowTexture)return;const m=new T.Sprite(mat);m.position.set(...p);m.scale.set(size,size,1);fx.add(m);};
+ for(let y=.4;y<9.8;y+=.35){const m=mastAt(Math.max(3.3,y));if(y<3.1){for(const side of [-1,1])sprite(towerGlow,[6.48+side*(.65-y*.14),y,.02],1.65);}else sprite(towerGlow,[m.x,y,0],2.2);}
+ for(const p of beaconLocations)sprite(redGlow,p,1.05);
+ const cableHaloMaterial=new T.MeshBasicMaterial({color:0xd9edff,transparent:true,opacity:.09,blending:T.AdditiveBlending,depthWrite:false,depthTest:false,toneMapped:false});
+ let cableHalo=null;
+ if(cableBatch){cableHalo=new T.InstancedMesh(cylGeo,cableHaloMaterial,cableBatch.count);cableHalo.name='CableSoftGlow';cableHalo.frustumCulled=false;const m=new T.Matrix4(),scale=new T.Matrix4().makeScale(2.7,1,2.7);for(let i=0;i<cableBatch.count;i++){cableBatch.getMatrixAt(i,m);cableHalo.setMatrixAt(i,m.clone().multiply(scale));cableHalo.setColorAt(i,new T.Color(0xffffff));}fx.add(cableHalo);}
+ // Instance colour must also modulate emissive light, rather than only diffuse colour.
+ cable.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('vec3 totalEmissiveRadiance = emissive;','vec3 totalEmissiveRadiance = emissive;\n#if defined(USE_COLOR) || defined(USE_INSTANCING_COLOR)\n totalEmissiveRadiance *= vColor;\n#endif');};
+ cable.customProgramCacheKey=()=> 'danjiang-cable-emissive-v3';
+ const paletteColors=[0x166bff,0xff208f,0xff7625].map(c=>new T.Color(c));
+ const towerColor=new T.Color(),cableColor=new T.Color(),whiteCable=new T.Color(0xeaf5ff),blueCable=new T.Color(0x268dff);
+ // S.V01 - 173: 72 seconds of static blue/white lighting, followed by a 21-second show.
+ const WAIT_SECONDS=72,SHOW_SECONDS=21;
+ let lastSeconds=0, phaseSeconds=0, lastTick=null, showActive=false;
+ const sampleTower=seconds=>{const phase=Math.min(2.999999,seconds/SHOW_SECONDS*3),k=Math.floor(phase),t=phase-k,e=t*t*(3-2*t);return towerColor.copy(paletteColors[k]).lerp(paletteColors[(k+1)%3],e);};
+ const update=seconds=>{
+  if(!Number.isFinite(seconds))return;
+  lastSeconds=seconds;
+  if(!nightState.enabled)return;
+  if(lastTick!==null){const dt=Math.max(0,Math.min(seconds-lastTick,0.25));phaseSeconds+=dt;}
+  lastTick=seconds;
+  if(!showActive && phaseSeconds>=WAIT_SECONDS){showActive=true;phaseSeconds=0;}
+  else if(showActive && phaseSeconds>=SHOW_SECONDS){showActive=false;phaseSeconds=0;}
+  const show=showActive && nightState.mode==='color';
+  const c=show?(nightState.fixedColor===null?sampleTower(phaseSeconds):towerColor.copy(paletteColors[nightState.fixedColor])):towerColor.setHex(0x166bff);
+  white.emissive.copy(c);white.emissiveIntensity=show?1.10:.85;
+  towerGlow.color.copy(c);towerGlow.opacity=show?.52:.38;
+  const waveBase=show?phaseSeconds:0;
+  cable.emissive.copy(whiteCable).lerp(blueCable,show?.5-.5*Math.cos(waveBase*.9):0);
+  cable.emissiveIntensity=show?1.25:.90;
+  cableHaloMaterial.color.copy(cable.emissive);
+  cableHaloMaterial.opacity=show?.09:.045;
+  for(let i=0;i<cableBatch.count;i++){
+   const wave=show?.5-.5*Math.cos(waveBase*.9-i/cableBatch.count*3):0;
+   cableColor.copy(whiteCable).lerp(blueCable,wave);
+   cableBatch.setColorAt(i,cableColor);
+   if(cableHalo)cableHalo.setColorAt(i,cableColor);
+  }
+  cableBatch.instanceColor.needsUpdate=true;
+  if(cableHalo)cableHalo.instanceColor.needsUpdate=true;
+  red.emissiveIntensity=3.3+Math.sin(seconds*1.7)*.35;
+ };
+ const setNight=enabled=>{
+  const entering=!!enabled&&!nightState.enabled;
+  nightState.enabled=!!enabled;fx.visible=!!enabled;
+  if(entering||!enabled){phaseSeconds=0;showActive=false;lastTick=null;}
+  light.emissive.setHex(enabled?0xffb56e:0x000000);light.emissiveIntensity=enabled?2.4:0;
+  white.color.setHex(enabled?0x374454:0xe5e9e3);white.emissive.setHex(0);white.emissiveIntensity=0;
+  cable.color.setHex(enabled?0xffffff:0x819b9c);cable.emissive.setHex(enabled?0xffffff:0);cable.emissiveIntensity=enabled?1.25:0;
+  red.color.setHex(enabled?0xff2a32:0xb85444);red.emissive.setHex(enabled?0xff071c:0);red.emissiveIntensity=enabled?3.5:0;
+  if(!enabled){const c=new T.Color(0xffffff);for(let i=0;i<cableBatch.count;i++)cableBatch.setColorAt(i,c);cableBatch.instanceColor.needsUpdate=true;}
+  else update(lastSeconds);
+ };
+ root.userData.danjiang={length,detail,materials,instances,drawCalls:content.children.filter(c=>c.isMesh).length,cables:cableEnds,towerX:towerX*length/46,deckY:deckY*length/46,height:10*length/46,mainSpan:22.5*length/46,backSpan:8.75*length/46,forkOpeningTop:3.28*length/46,legProfiles,pierPositions:pierPositions.map(x=>x*length/46)};
+ root.userData.setNight=setNight;root.userData.setLightMode=mode=>{nightState.mode=mode==='color'?'color':'white';setNight(nightState.enabled);};root.userData.update=update;root.userData.setShowColor=name=>{nightState.fixedColor=({blue:0,pink:1,orange:2})[name]??null;update(lastSeconds);};
+ root.userData.dispose=()=>{for(const geometry of pools.keys())geometry.dispose();Object.values(materials).forEach(m=>m.dispose());towerGlow.dispose();redGlow.dispose();cableHaloMaterial.dispose();if(glowTexture)glowTexture.dispose();};
+ return root;
+}
+
     const SPECIAL_MONUMENTS = [
       {
         name: "童話紅磚學校",
@@ -1702,14 +2214,7 @@
       {
         name: "航天火箭發射台",
         build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const body = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 3.2, 10), new THREE.MeshStandardMaterial({ color: 0xf8fafc }));
-          body.position.y = 1.8;
-          const nose = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.9, 10), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
-          nose.position.y = 3.85;
-          const pad = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.3, 2.0), new THREE.MeshStandardMaterial({ color: 0x475569 }));
-          pad.position.y = 0.15;
-          g.add(pad, body, nose); return g;
+          return createRocketLaunchPad(pos, { height: 4.2 });
         }
       },
       {
@@ -2133,89 +2638,7 @@
       },
       {
         name: "淡江大橋",
-        build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const concrete = new THREE.MeshStandardMaterial({ color: 0xd7e0e8, roughness: 0.58, metalness: 0.12 });
-          const pylonMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.42, metalness: 0.15 });
-          const deck = new THREE.Mesh(new THREE.BoxGeometry(22, 0.22, 0.58), concrete); deck.position.y=1.15; g.add(deck);
-          // 淡江大橋主塔：橋面以下由兩根斜向塔柱自海面升起，穿過橋面後逐漸合併為單一高塔。
-          // 以多段長方柱形成「下部分岔、上方合一」的剪影，避免看起來像單根直柱。
-          const lowerPylonMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.48, metalness: 0.12 });
-          function addPylonSegment(x1,y1,x2,y2,width,depth,mat) {
-            const a = new THREE.Vector3(x1,y1,0), b = new THREE.Vector3(x2,y2,0);
-            const d = new THREE.Vector3().subVectors(b,a);
-            const mesh = new THREE.Mesh(new THREE.BoxGeometry(width,d.length(),depth),mat);
-            mesh.position.copy(a).add(b).multiplyScalar(0.5);
-            mesh.rotation.z = -Math.atan2(d.x,d.y);
-            g.add(mesh);
-          }
-          // 海面到橋面：兩根分開的塔柱；橋面以上：向中央收攏並合併成單塔。
-          for (const side of [-1,1]) {
-            addPylonSegment(side*0.72,0.02,side*0.60,1.15,0.34,0.40,lowerPylonMat);
-            addPylonSegment(side*0.60,1.15,side*0.40,2.35,0.30,0.38,lowerPylonMat);
-            addPylonSegment(side*0.40,2.35,side*0.18,3.15,0.28,0.36,pylonMat);
-          }
-          const upperPylon = new THREE.Mesh(new THREE.BoxGeometry(0.34,6.0,0.38),pylonMat);
-          upperPylon.position.set(0,5.25,0); g.add(upperPylon);
-          // 夜間斜張鋼索燈：白光 → 藍光 → 粉紅光 → 紫光 → 白光，持續循環。
-          // 每條鋼索使用獨立材質並稍微錯開相位，呈現沿橋身流動的燈色變化。
-          const cableTopY = 8.05;
-          const cableBottomY = 1.30;
-          const cableColors = [
-            new THREE.Color(0xffffff), // 白
-            new THREE.Color(0x55aaff), // 藍
-            new THREE.Color(0xff82d7), // 粉紅
-            new THREE.Color(0x9b6cff), // 紫
-            new THREE.Color(0xffffff)  // 回到白
-          ];
-          function sampleCableColor(progress) {
-            const scaled = progress * (cableColors.length - 1);
-            const idx = Math.min(cableColors.length - 2, Math.floor(scaled));
-            return cableColors[idx].clone().lerp(cableColors[idx + 1], scaled - idx);
-          }
-          // 左右兩側各 14 條鋼索，從塔頂附近向外逐步拉開，形成雙側扇形。
-          let cableIndex = 0;
-          for (const side of [-1, 1]) {
-            for (let i=0; i<14; i++) {
-              const t = (i + 1) / 14;
-              const x = side * (0.45 + t * 8.25);
-              const start = new THREE.Vector3(side * 0.08, cableTopY - t * 0.18, 0);
-              const end = new THREE.Vector3(x, cableBottomY, 0);
-              const d = new THREE.Vector3().subVectors(end, start);
-              const cableMat = new THREE.MeshStandardMaterial({
-                color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1.25,
-                roughness: 0.35, metalness: 0.12
-              });
-              const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.018,0.018,d.length(),5), cableMat);
-              cable.position.copy(start).add(end).multiplyScalar(0.5);
-              cable.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), d.normalize());
-              const phaseOffset = cableIndex / 28;
-              cable.onBeforeRender = () => {
-                const cycle = ((performance.now() / 1000 / 8) + phaseOffset * 0.22) % 1;
-                const color = sampleCableColor(cycle);
-                cableMat.color.copy(color);
-                cableMat.emissive.copy(color);
-              };
-              g.add(cable);
-              cableIndex++;
-            }
-          }
-          // 主塔上的紅色航空警示燈：塔頂、上段與中段皆有紅色發光燈點。
-          const redBeaconMat = new THREE.MeshStandardMaterial({
-            color: 0xff2525, emissive: 0xff1010, emissiveIntensity: 3.2,
-            roughness: 0.25, metalness: 0.0
-          });
-          for (const beaconY of [8.35, 6.25, 3.95]) {
-            const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.095, 12, 10), redBeaconMat);
-            beacon.position.set(0, beaconY, 0.23);
-            g.add(beacon);
-          }
-          // 橋面支柱與兩端引橋
-          for(let i=0;i<13;i++){ const rail=new THREE.Mesh(new THREE.BoxGeometry(0.045,0.18,0.045),pylonMat); rail.position.set(-8.2+i*1.35,1.34,0.31); g.add(rail); }
-          const pierMat=new THREE.MeshStandardMaterial({color:0x94a3b8,roughness:0.8});
-          for(const x of [-6,-3,3,6]){const pier=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.95,0.22),pierMat);pier.position.set(x,0.62,0);g.add(pier);}
-          return g;
-        }
+        build: (pos) => createDanjiangBridge(pos, { length: 22, detail: 'high' })
       },
       {
         name: "復古蒸氣小火車",
@@ -2318,12 +2741,7 @@
       {
         name: "英國大笨鐘",
         build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const t = new THREE.Mesh(new THREE.BoxGeometry(1.0, 3.8, 1.0), new THREE.MeshStandardMaterial({ color: 0xca8a04 }));
-          t.position.y = 1.9;
-          const spire = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.4, 4), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
-          spire.rotation.y = Math.PI / 4; spire.position.y = 4.4;
-          g.add(t, spire); return g;
+          return createBigBen(pos, { height: 4.8 });
         }
       },
       {
@@ -2431,59 +2849,9 @@
       {
         name: "台北一零一摩天大樓",
         build: (pos) => {
-          const g = new THREE.Group(); g.name = "台北一零一摩天大樓"; g.userData.isTaipei101 = true; g.position.copy(pos);
-          const glassMat = new THREE.MeshStandardMaterial({
-            color: 0x7dd3fc,
-            metalness: 0.25,
-            roughness: 0.2,
-            transparent: true,
-            opacity: 0.92,
-            emissive: 0x38bdf8,
-            emissiveIntensity: 0.3
-          });
-          const frameMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, metalness: 0.5, roughness: 0.3 });
-          const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85, roughness: 0.25 });
-          const beaconMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x38bdf8, emissiveIntensity: 1.2 });
-
-          const podiumBase = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.5, 3.6), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-          podiumBase.position.y = 0.25;
-          const podiumMall = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.9, 2.8), frameMat);
-          podiumMall.position.y = 0.95;
-
-          const lowerCore = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.0, 2.0), glassMat);
-          lowerCore.position.y = 1.85;
-
-          const moduleGroup = new THREE.Group();
-          for (let i = 0; i < 8; i++) {
-            const h = 0.72;
-            const baseY = 2.35 + i * h;
-            const modGeo = new THREE.CylinderGeometry(0.85, 0.68, h, 4);
-            modGeo.rotateY(Math.PI / 4);
-            const moduleMesh = new THREE.Mesh(modGeo, glassMat);
-            moduleMesh.position.y = baseY + h / 2;
-            moduleGroup.add(moduleMesh);
-
-            [-0.75, 0.75].forEach(dx => {
-              const ruyi = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.05, 8), goldMat);
-              ruyi.rotation.z = Math.PI / 2; ruyi.position.set(dx, baseY + h / 2, 0);
-              moduleGroup.add(ruyi);
-            });
-            const ringBeam = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.06, 1.5), goldMat);
-            ringBeam.position.y = baseY + h;
-            moduleGroup.add(ringBeam);
-          }
-
-          const topDeck = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.65, 1.2), frameMat);
-          topDeck.position.y = 8.4;
-          const topDome = new THREE.Mesh(new THREE.ConeGeometry(0.7, 0.8, 4), frameMat);
-          topDome.rotation.y = Math.PI / 4; topDome.position.y = 9.1;
-
-          const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.12, 1.8, 6), goldMat);
-          spire.position.y = 10.3;
-          const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), beaconMat);
-          beacon.position.y = 11.2;
-
-          g.add(podiumBase, podiumMall, lowerCore, moduleGroup, topDeck, topDome, spire, beacon);
+          const g = createTaipei101(pos, { height: 9, detail: 'high' });
+          g.name = "台北一零一摩天大樓";
+          g.userData.isTaipei101 = true;
           return g;
         }
       },
@@ -3418,10 +3786,18 @@
 
           const jetpack = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.55, 0.22), whiteMat);
           jetpack.position.set(0, 0.9, -0.3);
-          const wingMat = new THREE.MeshStandardMaterial({ color: 0x22c55e });
-          const wingL = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.18, 0.04), wingMat);
-          wingL.position.set(-0.5, 1.02, -0.3);
-          const wingR = wingL.clone(); wingR.position.x = 0.5;
+          const wingMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.36 });
+          const wingL = new THREE.Group(); wingL.position.set(-0.28, 1.05, -0.36);
+          const wingR = new THREE.Group(); wingR.position.set(0.28, 1.05, -0.36);
+          for (const [wing, side] of [[wingL, -1], [wingR, 1]]) {
+            const blade = new THREE.Mesh(new THREE.BoxGeometry(0.74, 0.13, 0.055), wingMat);
+            blade.position.x = side * 0.37; wing.add(blade);
+            const redStripe = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.138, 0.064), redMat);
+            redStripe.position.set(side * 0.49, 0, 0.005); wing.add(redStripe);
+            const tip = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.2, 0.065), greenMat);
+            tip.position.x = side * 0.76; wing.add(tip);
+          }
+          wingL.scale.x = 0.08; wingR.scale.x = 0.08;
           g.add(jetpack, wingL, wingR);
 
           const headGroup = new THREE.Group();
@@ -3431,6 +3807,24 @@
           const face = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 10), skinMat);
           face.position.set(0, 0.02, 0.14);
           headGroup.add(headHood, face);
+          const eyeWhite = new THREE.MeshStandardMaterial({color:0xffffff});
+          const pupilMat = new THREE.MeshStandardMaterial({color:0x1e293b});
+          for (const x of [-0.105, 0.105]) {
+            const eye = new THREE.Mesh(new THREE.SphereGeometry(0.053, 10, 8), eyeWhite);
+            eye.position.set(x, 0.065, 0.389); eye.scale.z=0.55;
+            const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.027, 10, 8), pupilMat);
+            pupil.position.set(x, 0.06, 0.422); pupil.scale.z=0.6;
+            const brow = new THREE.Mesh(new THREE.BoxGeometry(0.115,0.022,0.025), purpleMat);
+            brow.position.set(x,0.152,0.382); brow.rotation.z=x<0?-0.15:0.15;
+            headGroup.add(eye,pupil,brow);
+          }
+          const nose = new THREE.Mesh(new THREE.SphereGeometry(0.035,8,8),skinMat);
+          nose.position.set(0,-0.016,0.42); headGroup.add(nose);
+          const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.12,0.018,0.014),pupilMat);
+          mouth.position.set(0,-0.125,0.386); headGroup.add(mouth);
+          const helmetMat = new THREE.MeshPhysicalMaterial({color:0xdbeafe,transparent:true,opacity:0.14,roughness:0.08,metalness:0,depthWrite:false,side:THREE.FrontSide});
+          const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.395,20,14),helmetMat);
+          helmet.position.y=0.025; headGroup.add(helmet);
 
           const armL = new THREE.Group(); armL.position.set(-0.46, 0.95, 0);
           const armMeshL = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.42, 6), whiteMat);
@@ -3453,9 +3847,31 @@
           const legMeshR = legMeshL.clone(); const kneeR = kneeL.clone(); const bootR = bootL.clone();
           legR.add(legMeshR, kneeR, bootR);
 
+          const armorDark = new THREE.MeshStandardMaterial({color:0x25314b,metalness:0.25,roughness:0.35});
+          const armorGold = new THREE.MeshStandardMaterial({color:0xfacc15,metalness:0.45,roughness:0.3});
+          const thrusterGlow = new THREE.MeshStandardMaterial({color:0x67e8f9,emissive:0x22d3ee,emissiveIntensity:0.7});
+          const belt = new THREE.Mesh(new THREE.BoxGeometry(0.73,0.12,0.48),armorDark);
+          belt.position.set(0,0.54,0);
+          const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.16,0.1,0.055),armorGold);
+          buckle.position.set(0,0.54,0.26);
+          const badge = new THREE.Mesh(new THREE.OctahedronGeometry(0.105,0),armorGold);
+          badge.position.set(-0.19,1.02,0.286);
+          for(const side of [-1,1]) {
+            const shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.175,12,8),greenMat);
+            shoulder.scale.set(1.15,0.72,1.12);
+            shoulder.position.set(side*0.44,1.07,0);
+            const thruster = new THREE.Mesh(new THREE.CylinderGeometry(0.095,0.12,0.23,10),armorDark);
+            thruster.rotation.x=Math.PI/2;
+            thruster.position.set(side*0.17,0.74,-0.47);
+            const light = new THREE.Mesh(new THREE.SphereGeometry(0.075,10,8),thrusterGlow);
+            light.position.set(side*0.17,0.74,-0.60);
+            g.add(shoulder,thruster,light);
+          }
+          g.add(belt,buckle,badge);
           g.add(torso, chestPlate, headGroup, armL, armR, legL, legR);
           walkingCelebrities.push({
             group: g, head: headGroup, armL, armR, legL, legR,
+            buzzFlight: { phase:"walk", timer:12+Math.random()*12, angle:0, turns:0, wingL, wingR },
             baseX: pos.x, baseZ: pos.z, baseY: pos.y,
             radiusX: 2.8, radiusZ: 2.2, speed: 0.92, offset: Math.random() * Math.PI * 2
           });
@@ -3999,12 +4415,51 @@
 
     const TIME_PHASE_NAMES = ["清晨", "中午", "晚霞", "夜晚"];
 
+    const ClubMusic173 = (() => {
+
+const melody=[76,79,72,76,72,76,81,76,69,72,65,69,71,74,67,62,79,76,74,72,71,67,76,71,69,72,74,76,74,71,67,62];
+const roots=[48,57,53,55,48,52,53,55];
+const step=.31, length=32*step;
+function compose(ctx, start, cycles, dest){
+ const master=ctx.createGain(); master.gain.value=.68; const hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=100;hp.Q.value=.65;const comp=ctx.createDynamicsCompressor();comp.threshold.value=-16;comp.knee.value=12;comp.ratio.value=2.5;comp.attack.value=.008;comp.release.value=.12;master.connect(hp);hp.connect(comp);comp.connect(dest);
+ const delay=ctx.createDelay();delay.delayTime.value=step*1.5;
+ const feedback=ctx.createGain();feedback.gain.value=.43;
+ const wet=ctx.createGain();wet.gain.value=.34;delay.connect(feedback);feedback.connect(delay);delay.connect(wet);wet.connect(master);
+ function tone(m,t,d,v,type='triangle',cut=2400,echo=false){
+ const o=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();
+ o.type=type;o.frequency.value=440*2**((m-69)/12);f.type='lowpass';f.frequency.value=cut;
+ g.gain.setValueAtTime(.00001,t);g.gain.exponentialRampToValueAtTime(v,t+.018);g.gain.exponentialRampToValueAtTime(.00001,t+d);
+ o.connect(f);f.connect(g);g.connect(master);if(echo)g.connect(delay);o.start(t);o.stop(t+d+.02);
+ }
+ function bass(m,t){const o=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();o.type='sawtooth';o.frequency.value=440*2**((m-69)/12);f.type='lowpass';f.frequency.setValueAtTime(700,t);f.frequency.exponentialRampToValueAtTime(130,t+.26*.75);f.Q.value=3.5;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.065,t+.015);g.gain.exponentialRampToValueAtTime(.0001,t+.26);o.connect(f);f.connect(g);g.connect(master);o.start(t);o.stop(t+.26);}
+ let seed=169;const noise=ctx.createBuffer(1,ctx.sampleRate*.25,ctx.sampleRate),a=noise.getChannelData(0);
+ for(let i=0;i<a.length;i++){seed=(seed*16807)%2147483647;a[i]=(seed/2147483647*2-1);}
+ function hit(t,v,hat){let s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();s.buffer=noise;f.type=hat?'highpass':'bandpass';f.frequency.value=hat?6500:1800;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.00001,t+(hat?.045:.14));s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+.2);}
+ function kick(t){let o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(145,t);o.frequency.exponentialRampToValueAtTime(42,t+.08);g.gain.setValueAtTime(.075,t);g.gain.exponentialRampToValueAtTime(.0001,t+.12);o.connect(g);g.connect(master);o.start(t);o.stop(t+.12);}
+ for(let c=0;c<cycles;c++)for(let i=0;i<32;i++){
+ const t=start+(c*32+i)*step, root=roots[Math.floor(i/4)];
+ tone(melody[i],t,.43,.105,'triangle',2600,true);
+ tone(melody[i]+12,t+.006,.31,.013,'sine',3800,true);
+ if(i%4===0){bass(root+12,t);const minor=[1,2,5,6].includes(Math.floor(i/4));[root+12,root+(minor?15:16),root+19,root+23].forEach(n=>tone(n,t+.025,1.22,.022,'triangle',1050,true));}
+ if(i%8===0||i%8===3||i%8===6)kick(t);
+ if(i%8===4){hit(t+.018,.20,false);tone(62,t+.018,.09,.025,'triangle',900);}
+ hit(t+(i%2?.022:0),i%2?.035:.046,true);
+ if(i%4===3)bass(root+12,t+.018);
+ }
+}
+
+return {compose, length};
+})();
+
     class SoundEngine {
       constructor() {
         this.ctx = null;
         this.sfxMasterGain = null;
         this.sfxGainMultiplier = 1.80; // SV.01-125：所有非環境遊戲音效與背景音樂總輸出提高至 180%
         this.muted = false;
+        this.clubMusicOn = true;
+        this.clubMusicTimer = null;
+        this.clubMusicGain = null;
         this.bgmMode = 1; // 1: 音樂1, 2: 音樂2, 3: 音樂3, 0: 音樂關
         this.nightTimer = null;
         this.bgmTimer = null;
@@ -4778,6 +5233,30 @@
         } catch (e) {}
       }
 
+      // SV.01-173: CLUB 專用音樂，與一般三首背景音樂完全分離。
+      stopClubMusic() {
+        if (this.clubMusicTimer !== null) { clearInterval(this.clubMusicTimer); this.clubMusicTimer = null; }
+        if (this.clubMusicGain) {
+          try { this.clubMusicGain.gain.cancelScheduledValues(this.ctx.currentTime); this.clubMusicGain.gain.setValueAtTime(0, this.ctx.currentTime); } catch(e) {}
+          this.clubMusicGain = null;
+        }
+      }
+      startClubMusic() {
+        this.stopClubMusic();
+        if (!this.clubMusicOn || !clubMode || gameState !== 'RUNNING') return;
+        this.init();
+        if (!this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+        const gain = this.ctx.createGain(); gain.gain.value = .62;
+        gain.connect(this.getSfxOutput());
+        this.clubMusicGain = gain;
+        const play = () => {
+          if (!clubMode || !this.clubMusicOn || this.clubMusicGain !== gain) return;
+          ClubMusic173.compose(this.ctx, this.ctx.currentTime + .045, 1, gain);
+        };
+        play();
+        this.clubMusicTimer = setInterval(play, ClubMusic173.length * 1000);
+      }
       // 停止當前背景音樂
       stopBGM() {
         if (this.bgmTimer) {
@@ -5060,6 +5539,7 @@
     let fireworksShowTimer = null;
     // SV.01-158：CLUB 模式每 30 秒自動播放一輪台北101煙火。
     let clubFireworksInterval = null;
+    let nightPatrolFireworksElapsed = 0; // S.V01 - 173：夜巡每 40 秒一輪
     const movingPeople = [];
     const walkingCelebrities = [];
     const flyingCreatures = [];
@@ -7489,7 +7969,7 @@
         const palette = [0xff477e, 0x38bdf8, 0xfacc15, 0xc084fc, 0x34d399, 0xfb923c, 0xffffff];
         const color = palette[burstCount % palette.length];
         const origin = tower.getWorldPosition(new THREE.Vector3());
-        origin.y += 10.8 + Math.random() * 2.8;
+        origin.y += 8.6 + Math.random() * 2.8;
         const count = 28 + Math.floor(Math.random() * 12);
         for (let i = 0; i < count; i++) {
           const angle = Math.random() * Math.PI * 2;
@@ -7563,6 +8043,13 @@
       let starOpacity = 0.0;
       let isNight = false;
 
+      if (nightPatrolMode && !clubMode) {
+        nightPatrolFireworksElapsed += dt;
+        if (nightPatrolFireworksElapsed >= 40) {
+          nightPatrolFireworksElapsed %= 40;
+          startTaipei101FireworksShow(true);
+        }
+      }
       if (nightPatrolMode) {
         // 夜巡色票：橘紅（艷而不刺眼）→桃紅→紫→深紫→藍紫→深藍→極深藍，再反向返回。
         // 循環速度沿用原日夜週期速度；每段以 lerp 平滑過渡。
@@ -7618,6 +8105,25 @@
       if (sunLight) sunLight.intensity = sunIntensity;
       if (starsParticleSystem && starsParticleSystem.material) {
         starsParticleSystem.material.opacity = starOpacity;
+      }
+      // 同步台北101夜間窗燈與❤️TW；其餘地標照明邏輯不變。
+      for (const obj of spawnedIslandObjects) {
+        if (obj && obj.userData && obj.userData.isTaipei101 && typeof obj.userData.setNight === 'function') {
+          if (obj.userData._taipei101Night !== isNight) {
+            obj.userData._taipei101Night = isNight;
+            obj.userData.setNight(isNight);
+          }
+        }
+      }
+      // S.V01 - 173：只同步淡江大橋的夜間光雕，不影響其他地標與日夜規則。
+      for (const obj of spawnedIslandObjects) {
+        if (obj.userData && obj.userData.danjiang) {
+          if (obj.userData._danjiangNight !== isNight) {
+            obj.userData._danjiangNight = isNight;
+            obj.userData.setNight(isNight);
+          }
+          if (isNight) obj.userData.update(performance.now() / 1000);
+        }
       }
       islandNightLights.forEach(item => {
         if (isNight) {
@@ -8010,7 +8516,7 @@
       
       // 大小錯落有致：為不同紀念地標賦予微型、精巧、中型或威嚴等多樣化比例 (0.65 ~ 1.25)
       const scaleVariation = 0.72 + (Math.random() * 0.45);
-      monumentObj.userData.targetScale = scaleVariation;
+      monumentObj.userData.targetScale = monument.name === '台北一零一摩天大樓' ? 1.0 : scaleVariation;
       monumentObj.scale.set(0.01, 0.01, 0.01);
 
       // 朝向微調：大商船自然順著切線側身或隨機微調
@@ -8177,6 +8683,11 @@
         }, 4000);
 
         sound.characterEntrance();
+        if (!isTrialSpawn) {
+          upgradeBanner.textContent = "恭喜你，神秘角色登場囉✨～";
+          upgradeBanner.classList.remove("hidden");
+          setTimeout(() => upgradeBanner.classList.add("hidden"), 4200);
+        }
       }
       typeInput.value = '';
     }
@@ -8826,7 +9337,7 @@
         summonSpecificCharacter(trialFinished.charName, 1.35, true);
 
         // 專屬系統提示語音橫幅：「XXX來到你的島上啦～ ✨」
-        upgradeBanner.textContent = `${trialFinished.announceName}來到你的島上啦～ ✨`;
+        upgradeBanner.textContent = "恭喜你，神秘角色登場囉✨～";
         upgradeBanner.className = "text-xs sm:text-sm font-black px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-pink-400 to-emerald-300 text-slate-950 shadow-2xl tracking-wider transition-all duration-300 animate-bounce";
         upgradeBanner.classList.remove('hidden');
         setTimeout(() => upgradeBanner.classList.remove('animate-bounce'), 1200);
@@ -8933,6 +9444,59 @@
       }, 320);
     }
 
+
+    // S.V01 - 173：full 直接沿用 99999 的島嶼自然配置函式，不使用方格展示。
+    let fullModeTimer = null;
+    function startFullIslandCheat() {
+      if (gameState !== 'RUNNING') return;
+      if (fullModeTimer !== null) return;
+      if (renderModeActive) stopRenderMode('切換至 FULL 全島生成。');
+      if (typeInput) typeInput.value = '';
+      upgradeBanner.textContent = 'FULL：正在自然配置 250 個物件、50 座地標與所有人物…';
+      upgradeBanner.classList.remove('hidden');
+      let failed = false;
+      fullModeTimer = setInterval(() => {
+        try {
+          // 分批建構避免一次大量生成造成瀏覽器長時間無回應。
+          for (let n = 0; n < 6; n++) {
+            if (specialMonumentsSpawned < 50) {
+              // 每 5 個普通物件加入 1 座地標，使用既有位置避讓及海上配置。
+              if (currentCreationIndex < 250 && (currentCreationIndex + specialMonumentsSpawned) % 5 !== 4) {
+                const blueprint = REPEATABLE_PROTOTYPES[currentCreationIndex % REPEATABLE_PROTOTYPES.length];
+                spawnOrUpgradeIslandCreation(blueprint);
+                currentCreationIndex++;
+              } else {
+                spawnSpecialMonument();
+              }
+            } else if (currentCreationIndex < 250) {
+              const blueprint = REPEATABLE_PROTOTYPES[currentCreationIndex % REPEATABLE_PROTOTYPES.length];
+              spawnOrUpgradeIslandCreation(blueprint);
+              currentCreationIndex++;
+            } else break;
+          }
+          if (specialMonumentsSpawned >= 50 && currentCreationIndex >= 250) {
+            clearInterval(fullModeTimer);
+            fullModeTimer = null;
+            // 沿用既有 marshmallow 人物生成及動畫登場流程。
+            triggerAllMilestonesCheat();
+            checkEternalVitality();
+            if (milestoneCounter) milestoneCounter.textContent = '50 / 50';
+            upgradeBanner.textContent = 'FULL 完成：250 個一般物件、50 座地標與全部人物已自然登場！';
+            upgradeBanner.classList.remove('hidden');
+            setTimeout(() => upgradeBanner.classList.add('hidden'), 5000);
+            if (typeInput) typeInput.focus();
+          }
+        } catch (err) {
+          failed = true;
+          clearInterval(fullModeTimer);
+          fullModeTimer = null;
+          console.error('FULL 生成失敗', err);
+          upgradeBanner.textContent = 'FULL 生成中斷，請查看瀏覽器主控台。';
+          upgradeBanner.classList.remove('hidden');
+        }
+      }, 45);
+    }
+
     function checkTypingMatch(isExplicitSubmit = false) {
       if (gameState !== 'RUNNING') return;
       const target = activeTrial
@@ -8989,6 +9553,12 @@
           return;
         }
 
+        if (code === 'full') {
+          startFullIslandCheat();
+          typeInput.value = '';
+          return;
+        }
+
         // SV.01-83 算圖模式：輸入 99999 啟動自動答題與物件生成。
         if (code === '99999') {
           startRenderMode();
@@ -9001,6 +9571,10 @@
           if (clubFireworksInterval) clearInterval(clubFireworksInterval);
           clubFireworksInterval = null;
           clubMode = true;
+          sound.stopBGM();
+          sound.clubMusicOn = true;
+          sound.startClubMusic();
+          updateClubMusicButton173();
           nightPatrolMode = true;
           // SV.01-158：進入 CLUB 時預設關閉閃電系統，避免閃電流程移除常駐光球防護罩。
           if (typeof setLightningSystemEnabled === 'function') setLightningSystemEnabled(false);
@@ -9029,15 +9603,19 @@
           if (clubFireworksInterval) clearInterval(clubFireworksInterval);
           clubFireworksInterval = null;
           clubMode = false;
+          sound.stopClubMusic();
+          sound.startBGM(sound.bgmMode);
+          updateClubMusicButton173();
           if (islandShieldDome) removeIslandShieldDome();
           nightPatrolMode = true;
+          nightPatrolFireworksElapsed = 0;
           // 切入夜巡時安排較快的第一場雨，之後恢復正常隨機雨勢排程。
           if (!isRaining) rainTimer = 12.0 + Math.random() * 18.0;
           nightPatrolCycle = 0;
           if (sound && typeof sound.scheduleNextAmbientShipHorn === 'function' && sound.ambientLargeShipSeen) sound.scheduleNextAmbientShipHorn();
           timePhase = 3;
           if (dayTimeBadge) dayTimeBadge.textContent = '夜巡模式';
-          showCheatNotice('🌙 夜巡模式已啟動：晚霞至深夜色彩開始循環！');
+          showCheatNotice('🌙 夜巡模式已啟動：晚霞至深夜色彩循環，台北101每40秒施放煙火！');
           typeInput.value = '';
           typeInput.dispatchEvent(new Event('input', { bubbles: true }));
           typeInput.focus();
@@ -9047,8 +9625,12 @@
           if (clubFireworksInterval) clearInterval(clubFireworksInterval);
           clubFireworksInterval = null;
           clubMode = false;
+          sound.stopClubMusic();
+          sound.startBGM(sound.bgmMode);
+          updateClubMusicButton173();
           if (islandShieldDome) removeIslandShieldDome();
           nightPatrolMode = false;
+          nightPatrolFireworksElapsed = 0;
           if (sound && typeof sound.scheduleNextAmbientShipHorn === 'function' && sound.ambientLargeShipSeen) sound.scheduleNextAmbientShipHorn();
           if (dayTimeBadge) dayTimeBadge.textContent = TIME_PHASE_NAMES[timePhase];
           showCheatNotice('🌤️ 已退出夜巡模式：恢復正常日夜循環。');
@@ -9435,6 +10017,7 @@
       if (gameOverOverlay) gameOverOverlay.classList.remove('hidden');
 
       sound.stopBGM();
+      sound.stopClubMusic();
       sound.stopNightAmbient();
     }
 
@@ -9682,8 +10265,27 @@
         : "glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95";
     });
 
+    function updateClubMusicButton173() {
+      if (!bgmBtn) return;
+      if (clubMode) {
+        bgmBtn.textContent = sound.clubMusicOn ? '音樂開' : '音樂關';
+        bgmBtn.className = 'glass-hud px-3 py-2 rounded-2xl text-xs font-bold ' + (sound.clubMusicOn ? 'text-emerald-300' : 'text-slate-400') + ' hover:text-white hover:bg-slate-700/60 transition active:scale-95';
+      } else {
+        const names = ['音樂關','音樂1','音樂2','音樂3'];
+        bgmBtn.textContent = names[sound.bgmMode];
+        const colors = ['text-slate-400','text-emerald-300','text-amber-300','text-cyan-300'];
+        bgmBtn.className = 'glass-hud px-3 py-2 rounded-2xl text-xs font-bold ' + colors[sound.bgmMode] + ' hover:text-white hover:bg-slate-700/60 transition active:scale-95';
+      }
+    }
+
     // 背景音樂按鈕：依序四段循環切換（音樂1 → 音樂2 → 音樂3 → 音樂關 → 音樂1）
     bgmBtn.addEventListener('click', () => {
+      if (clubMode) {
+        sound.clubMusicOn = !sound.clubMusicOn;
+        if (sound.clubMusicOn) sound.startClubMusic(); else sound.stopClubMusic();
+        updateClubMusicButton173();
+        return;
+      }
       const mode = sound.cycleBGM();
       if (mode === 1) {
         bgmBtn.textContent = '音樂1';
@@ -10022,6 +10624,58 @@
           c.group.rotation.y = Math.atan2(dx, dz);
         }
 
+        // 巴斯光年：隨機散步後展翼、升至巴黎鐵塔約 4.5 單位的高度、繞島三圈再降落。
+        if (c.buzzFlight) {
+          const f = c.buzzFlight;
+          const delta = Math.min(Math.max(dt || 0, 0), 0.06);
+          f.timer -= delta;
+          if (f.phase === 'walk' && f.timer <= 0) {
+            f.phase = 'takeoff'; f.timer = 2.5;
+            f.angle = Math.atan2(c.group.position.z, c.group.position.x);
+            f.turns = 0;
+          }
+          if (f.phase === 'takeoff') {
+            const progress = 1 - Math.max(0,f.timer)/2.5;
+            c.group.position.y = c.baseY + 4.5 * (progress*progress*(3-2*progress));
+            if (f.timer <= 0) { f.phase='orbit'; f.timer=0; }
+          } else if (f.phase === 'orbit') {
+            const step = delta * 0.7;
+            f.angle += step; f.turns += step;
+            c.group.position.x = Math.cos(f.angle)*13.5;
+            c.group.position.z = Math.sin(f.angle)*13.5;
+            c.group.position.y = c.baseY+4.5+Math.sin(t*2)*0.12;
+            c.group.rotation.y = -f.angle;
+            if (f.turns >= Math.PI*6) { f.phase='landing'; f.timer=2.5; f.landX=c.group.position.x; f.landZ=c.group.position.z; f.landYaw=c.group.rotation.y; }
+          } else if (f.phase === 'landing') {
+            const progress = Math.max(0, Math.min(1,f.timer/2.5));
+            const eased = progress*progress*(3-2*progress);
+            // 固定降落水平座標及朝向，避免每幀散步路徑重設導致瞬移。
+            c.group.position.x = f.landX;
+            c.group.position.z = f.landZ;
+            c.group.rotation.y = f.landYaw;
+            c.group.position.y = c.baseY + 4.5*eased;
+            if (f.timer <= 0) {
+              f.phase='walk'; f.timer=20+Math.random()*15;
+              // 反算散步曲線原點，銜接落地位置，避免下一幀跳動。
+              c.baseX = f.landX - Math.sin(animTime)*rx;
+              c.baseZ = f.landZ - Math.cos(animTime)*rz;
+              c.group.position.y = c.baseY;
+            }
+          }
+          const open = f.phase === 'walk' ? 0.08 : Math.min(1, (f.phase==='takeoff' ? 1-f.timer/2.5 : f.phase==='landing' ? f.timer/2.5 : 1)*2);
+          f.wingL.scale.x = open; f.wingR.scale.x = open;
+          const flightTilt = f.phase === 'orbit' ? 1 : f.phase === 'takeoff' ? Math.min(1,Math.max(0,1-f.timer/2.5)) : f.phase === 'landing' ? Math.min(1,Math.max(0,f.timer/2.5)) : 0;
+          c.group.rotation.x = -Math.PI/2 * flightTilt;
+          c.group.rotation.z = 0;
+          if (f.phase !== 'walk') {
+            if(c.legL)c.legL.rotation.x=0.18;
+            if(c.legR)c.legR.rotation.x=-0.18;
+            if(c.armL)c.armL.rotation.x=-0.35;
+            if(c.armR)c.armR.rotation.x=-0.35;
+            return;
+          }
+        }
+
         // 偉樺老師採用較快的步頻與極小的身體起伏，避免看起來像漂浮；其他角色沿用原動畫。
         const walkPhase = c.islandPerimeter ? (t * 10.5 + c.offset) : (animTime * 6.5);
         c.group.position.y = c.baseY + Math.abs(Math.sin(walkPhase)) * (c.islandPerimeter ? 0.018 : 0.06);
@@ -10115,6 +10769,41 @@
         mobileVitalityBadge.textContent = vitalitySource.textContent || '';
       }).observe(vitalitySource, { childList: true, characterData: true, subtree: true });
     }
+    // S.V01 - 173：行動裝置左側獨立鏡頭遠近滑桿，不改動桌面版滾輪與雙指縮放。
+    const zoomRail = document.createElement('div');
+    zoomRail.id = 'mobileIslandZoomRail';
+    zoomRail.setAttribute('aria-label', '島嶼遠近調整');
+    zoomRail.innerHTML = `<span class="zoom-rail-label">遠景</span><input id="mobileIslandZoomSlider" type="range" min="16" max="95" step="1" value="52" aria-label="島嶼鏡頭遠近，向上拉為遠景，向下拉為近景"><span class="zoom-rail-label">近景</span>`;
+    document.body.appendChild(zoomRail);
+    const zoomSlider = zoomRail.querySelector('#mobileIslandZoomSlider');
+    let zoomSliderDragging = false;
+    zoomRail.addEventListener('pointerdown', e => { zoomSliderDragging = true; e.stopPropagation(); });
+    zoomRail.addEventListener('pointermove', e => e.stopPropagation());
+    zoomRail.addEventListener('pointerup', e => { zoomSliderDragging = false; e.stopPropagation(); });
+    zoomRail.addEventListener('pointercancel', () => { zoomSliderDragging = false; });
+    zoomRail.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+    zoomRail.addEventListener('touchmove', e => e.stopPropagation(), { passive: true });
+    zoomRail.addEventListener('touchend', e => e.stopPropagation(), { passive: true });
+    zoomRail.addEventListener('mousedown', e => e.stopPropagation());
+    zoomRail.addEventListener('mousemove', e => e.stopPropagation());
+    zoomSlider.addEventListener('input', () => { targetCamDist = Number(zoomSlider.value); });
+    // 滾輪、雙指縮放或秘技改變鏡頭距離時，滑桿也同步位置。
+    setInterval(() => {
+      if (!zoomSliderDragging && document.activeElement !== zoomSlider) {
+        zoomSlider.value = String(Math.round(targetCamDist));
+      }
+    }, 150);
+    // 行動版專用：縮小「永恆綠洲」，移除星號；不修改桌面版原始文字。
+    function updateMobileVitalityLabel() {
+      const source = vitalitySource?.textContent || '';
+      const eternal = source.includes('永恆綠洲');
+      mobileVitalityBadge.textContent = eternal ? '永恆綠洲' : source;
+      mobileVitalityBadge.classList.toggle('eternal-oasis-label', eternal);
+    }
+    if (vitalitySource && typeof MutationObserver !== 'undefined') {
+      new MutationObserver(updateMobileVitalityLabel).observe(vitalitySource, {childList:true,characterData:true,subtree:true});
+    }
+    updateMobileVitalityLabel();
     const rail = dock.querySelector('#mobileDockRail');
     const openBtn = dock.querySelector('#mobileDockOpen');
     const closeBtn = dock.querySelector('#mobileDockClose');
@@ -10280,15 +10969,16 @@
   </script>
 
 
-  <!-- SV.01-160: 行動版題目與輸入框整組拖曳，取消輸入框獨立固定於底部的定位。 -->
+  <!-- SV.01-160: 行動版保留迷你字卡尺寸，題目與輸入框整組拖曳。 -->
   <style id="mobileUnifiedQuestionPanel160">
     @media (max-width:760px) {
       body:not(.force-desktop-layout) #movableQuestionPanel {
         display:flex !important;
         flex-direction:column !important;
         gap:5px !important;
-        width:calc(100vw - 20px) !important;
-        max-width:calc(100vw - 20px) !important;
+        width:min(260px, calc(100vw - 20px)) !important;
+        max-width:min(260px, calc(100vw - 20px)) !important;
+        right:auto !important;
         max-height:none !important;
         height:auto !important;
         overflow:visible !important;
@@ -10329,5 +11019,29 @@
       }
     }
   </style>
+
+  <style id="mobileMiniCard161">
+    @media (max-width:760px) {
+      body:not(.force-desktop-layout) #movableQuestionPanel .w-full.bg-slate-900\/80 {
+        padding:6px 8px !important;
+        border-radius:12px !important;
+        max-height:24dvh !important;
+      }
+      body:not(.force-desktop-layout) #movableQuestionPanel .main-hanzi {font-size:clamp(1.4rem,5.5vw,1.8rem) !important;}
+      body:not(.force-desktop-layout) #movableQuestionPanel .zhuyin-ruby {font-size:.7rem !important;}
+      body:not(.force-desktop-layout) #movableQuestionPanel #charCardsContainer {gap:0 !important;}
+      body:not(.force-desktop-layout) #movableQuestionPanel > .relative.w-full.flex.items-center.gap-2 {padding:4px !important;border-radius:12px !important;}
+      body:not(.force-desktop-layout) #typeInput {height:36px !important;min-height:36px !important;font-size:14px !important;padding:6px 8px !important;}
+    }
+    @media (min-width:761px) {
+      body.force-mobile-layout #movableQuestionPanel {width:260px !important;max-width:260px !important;right:auto !important;}
+      body.force-mobile-layout #movableQuestionPanel .main-hanzi {font-size:1.7rem !important;}
+      body.force-mobile-layout #typeInput {height:36px !important;min-height:36px !important;font-size:14px !important;}
+    }
+  </style>
+<style id="mobileCardTransparentCornerFix161">
+@media (max-width:760px) {body:not(.force-desktop-layout) #movableQuestionPanel {background:transparent !important;border:0 !important;box-shadow:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;}body:not(.force-desktop-layout) #movableQuestionPanel > .w-full.bg-slate-900\/80 {border-radius:12px !important;overflow:hidden !important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}}
+@media (min-width:761px) {body.force-mobile-layout #movableQuestionPanel {background:transparent !important;border:0 !important;box-shadow:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;}body.force-mobile-layout #movableQuestionPanel > .w-full.bg-slate-900\/80 {border-radius:12px !important;overflow:hidden !important;}}
+</style>
 </body>
 </html>
