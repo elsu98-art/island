@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>我的夢想島：中文打字開拓記（S.V01 - 173）</title>
+  <title>我的夢想島：中文打字開拓記（S.V01 - 178）</title>
   <!-- 版本：SV.01-158｜安平古堡防重疊並調至第35位 -->
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,6 +13,239 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
   <!-- Three.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+/* 夢想島卡通翼手龍 — original procedural miniature, Three.js r128+.
+ * Facing +Z, wings spread along ±X, shoulder flap around local Z.
+ * No timers, external textures/models, scene lights or flight-route changes.
+ */
+function createCartoonPterosaur(pos, options = {}) {
+ const T=THREE, root=new T.Group();root.name='DreamIsland_CartoonPterosaur';
+ if(pos)root.position.copy(pos);
+ const span=Number.isFinite(options.wingspan)&&options.wingspan>0?options.wingspan:4.8;
+ const body=new T.Group();body.name='Pterosaur_Model';body.scale.setScalar(span/5.6);root.add(body);
+ const mats={
+  blue:new T.MeshStandardMaterial({color:0x188ebc,roughness:.85,flatShading:true}),
+  cream:new T.MeshStandardMaterial({color:0xffedc5,roughness:.9,flatShading:true}),
+  beak:new T.MeshStandardMaterial({color:0xffb545,roughness:.85,flatShading:true}),
+  white:new T.MeshStandardMaterial({color:0xffffff,roughness:.85}),
+  ink:new T.MeshStandardMaterial({color:0x183a56,roughness:.9}),
+  membrane:new T.MeshStandardMaterial({vertexColors:true,roughness:.9,flatShading:true,side:T.DoubleSide}),
+  rib:new T.MeshStandardMaterial({color:0x237ea2,roughness:.9,flatShading:true})
+ };
+ const geometries=new Set(),pools=new Map();
+ function addGeometry(parent,geo,mat,p=[0,0,0],scale=[1,1,1],rot=[0,0,0]){
+  const temp=new T.Object3D();temp.position.set(...p);temp.scale.set(...scale);temp.rotation.set(...rot);temp.updateMatrix();
+  const g=geo.index?geo.toNonIndexed():geo.clone();geo.dispose();g.applyMatrix4(temp.matrix);
+  const key=parent.uuid+':'+Object.keys(mats).find(k=>mats[k]===mat);
+  if(!pools.has(key))pools.set(key,{parent,mat,list:[]});pools.get(key).list.push(g);
+ }
+ const ball=(parent,mat,p,scale,segments=12)=>addGeometry(parent,new T.SphereGeometry(1,segments,8),mat,p,scale);
+ function rod(parent,mat,a,b,r){const start=new T.Vector3(...a),end=new T.Vector3(...b),delta=end.clone().sub(start),g=new T.CylinderGeometry(r,r*.85,delta.length(),6);g.applyMatrix4(new T.Matrix4().makeRotationFromQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),delta.normalize())));const p=start.add(end).multiplyScalar(.5);addGeometry(parent,g,mat,p.toArray());}
+ // One continuous loft joins the torso, curved neck and head without ball seams.
+ function torsoGeometry(){
+  // z, centre height, half-width, half-height: a gentle rising neck into the head.
+  const profile=[[-.79,-.02,.012,.012],[-.52,0,.235,.22],[-.12,0,.32,.30],
+   [.22,.055,.29,.30],[.46,.20,.225,.285],[.65,.385,.205,.265],
+   [.84,.535,.255,.275],[1.02,.59,.28,.255],[1.19,.59,.205,.19],[1.28,.58,.015,.025]];
+  const centre=new T.CatmullRomCurve3(profile.map(p=>new T.Vector3(p[0],p[1],p[2])),false,'catmullrom',.35);
+  const heights=new T.CatmullRomCurve3(profile.map(p=>new T.Vector3(p[3],0,0)),false,'catmullrom',.35);
+  const vertices=[],indices=[],rows=28,sides=12;
+  for(let j=0;j<=rows;j++){
+   const c=centre.getPoint(j/rows),ry=heights.getPoint(j/rows).x;
+   for(let k=0;k<sides;k++){const a=k/sides*Math.PI*2;vertices.push(Math.cos(a)*c.z,c.y+Math.sin(a)*ry,c.x);}
+  }
+  for(let j=0;j<rows;j++)for(let k=0;k<sides;k++){
+   const a=j*sides+k,b=j*sides+(k+1)%sides,c=a+sides,d=b+sides;
+   indices.push(a,b,c,b,d,c);
+  }
+  for(let k=1;k<sides-1;k++){indices.push(0,k+1,k);const o=rows*sides;indices.push(o,o+k,o+k+1);}
+  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();return g;
+ }
+ addGeometry(body,torsoGeometry(),mats.blue);
+ ball(body,mats.cream,[0,-.15,.02],[.235,.155,.43]);
+ // Back-swept head crest: a broad, tapered rock-like wedge, not a horn.
+ const crestVertices=[
+  -.10,.74,.90, .10,.74,.90, .008,1.24,-.17,
+  -.10,.74,.90, .008,1.24,-.17, -.07,.69,.49,
+  .10,.74,.90, .07,.69,.49, .008,1.24,-.17,
+  -.07,.69,.49, .008,1.24,-.17, .07,.69,.49,
+  -.10,.74,.90, -.07,.69,.49, .07,.69,.49,
+  -.10,.74,.90, .07,.69,.49, .10,.74,.90
+ ];
+ const crest=new T.BufferGeometry();crest.setAttribute('position',new T.Float32BufferAttribute(crestVertices,3));crest.computeVertexNormals();addGeometry(body,crest,mats.blue);
+ // Long, slender wedge beak, with a tiny cream underside rather than teeth.
+ function beakGeometry(){const v=[],idx=[],rings=[[1.09,.57,.215,.11],[1.52,.57,.12,.065],[2.04,.56,.006,.005]];
+  for(const [z,y,rx,ry] of rings)for(let i=0;i<6;i++){const a=i/6*Math.PI*2;v.push(Math.cos(a)*rx,y+Math.sin(a)*ry,z);}
+  for(let j=0;j<2;j++)for(let i=0;i<6;i++){const a=j*6+i,b=j*6+(i+1)%6,c=a+6,d=b+6;idx.push(a,b,c,b,d,c);}
+  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setIndex(idx);g.computeVertexNormals();return g;
+ }
+ addGeometry(body,beakGeometry(),mats.beak);
+ // Slightly large toy eyes, without eyelashes, scales or a realistic skin texture.
+ for(const side of [-1,1]){
+  ball(body,mats.white,[side*.255,.68,1.04],[.105,.112,.105],10);
+  ball(body,mats.ink,[side*.334,.685,1.065],[.038,.060,.054],10);
+  ball(body,mats.white,[side*.36,.712,1.09],[.016,.020,.019],8);
+ }
+ // Two slim swept-back legs with gently bent ankles and three tiny toes.
+ // Same blue material as the body, avoiding dark boot-like blocks.
+ for(const side of [-1,1]){
+  const leg=new T.CatmullRomCurve3([
+   new T.Vector3(side*.17,-.13,-.36),
+   new T.Vector3(side*.25,-.245,-.56),
+   new T.Vector3(side*.34,-.27,-.78),
+   new T.Vector3(side*.37,-.22,-.96)
+  ]);
+  const g=new T.TubeGeometry(leg,8,.048,6,false);
+  // Taper the leg toward the ankle, retaining a rounded cartoon silhouette.
+  const ps=g.attributes.position;
+  for(let j=0;j<=8;j++){
+   const c=leg.getPointAt(j/8),factor=1-j/8*.48;
+   for(let k=0;k<=6;k++){const i=j*7+k;ps.setXYZ(i,c.x+(ps.getX(i)-c.x)*factor,c.y+(ps.getY(i)-c.y)*factor,c.z+(ps.getZ(i)-c.z)*factor);}
+  }
+  g.computeVertexNormals();addGeometry(body,g,mats.blue);
+  for(const toe of [-1,0,1]){
+   const start=new T.Vector3(side*.37,-.22,-.94);
+   const end=new T.Vector3(side*(.37+toe*.055),-.235,-1.115+(toe===0?-.025:.01));
+   const curve=new T.QuadraticBezierCurve3(start,new T.Vector3((start.x+end.x)/2,-.205,-1.045),end);
+   addGeometry(body,new T.TubeGeometry(curve,4,.014,5,false),mats.blue);
+  }
+ }
+ ball(body,mats.blue,[0,-.03,-.70],[.12,.11,.28],10);
+ const wingL=new T.Group(),wingR=new T.Group();wingL.name='Pterosaur_LeftShoulder';wingR.name='Pterosaur_RightShoulder';
+ wingL.position.set(-.25,.075,.06);wingR.position.set(.25,.075,.06);body.add(wingL,wingR);
+ function wing(parent,side){
+  const shape=new T.Shape();shape.moveTo(0,.32);
+  shape.quadraticCurveTo(.53,.64,1.02,.49);
+  shape.quadraticCurveTo(1.77,.42,2.55,.07);
+  shape.quadraticCurveTo(2.27,-.02,1.94,-.31);
+  shape.quadraticCurveTo(1.64,-.33,1.48,-.69);
+  shape.quadraticCurveTo(1.14,-.46,.86,-.80);
+  shape.quadraticCurveTo(.49,-.48,0,-.42);shape.closePath();
+  const g=new T.ShapeGeometry(shape,6);g.rotateX(Math.PI/2);g.scale(side,1,1);
+  // A shallow bowed surface and turquoise facets give the wing membrane volume.
+  const ps=g.attributes.position,colors=[],outer=new T.Color(0x48bcd4),inner=new T.Color(0x92e4df);
+  for(let i=0;i<ps.count;i++){const x=ps.getX(i),z=ps.getZ(i);ps.setY(i,.07*Math.sin(Math.abs(x)/2.55*Math.PI)+.04*(z+.3));const c=inner.clone().lerp(outer,Math.min(1,Math.abs(x)/2.55));colors.push(c.r,c.g,c.b);}
+  g.setAttribute('color',new T.Float32BufferAttribute(colors,3));g.computeVertexNormals();
+  addGeometry(parent,g,mats.membrane);
+  // Only two thin support lines per wing: keep the island-scale model uncluttered.
+  rod(parent,mats.rib,[0,.025,.31],[side*1.02,.10,.49],.035);
+  rod(parent,mats.rib,[side*1.02,.10,.49],[side*2.55,.005,.07],.028);
+ }
+ wing(wingL,-1);wing(wingR,1);
+ // Merge all fixed parts per parent/material, avoiding one draw call per eye/limb.
+ for(const {parent,mat,list} of pools.values()){
+  const keys=['position','normal'];if(list.every(g=>g.attributes.color))keys.push('color');const result=new T.BufferGeometry();
+  for(const key of keys){const size=list[0].attributes[key].itemSize,total=list.reduce((n,g)=>n+g.attributes[key].array.length,0),array=new Float32Array(total);let offset=0;
+   for(const g of list){array.set(g.attributes[key].array,offset);offset+=g.attributes[key].array.length;}result.setAttribute(key,new T.BufferAttribute(array,size));
+  }
+  const mesh=new T.Mesh(result,mat);mesh.castShadow=options.shadows===true;mesh.receiveShadow=options.shadows===true;parent.add(mesh);geometries.add(result);list.forEach(g=>g.dispose());
+ }
+ root.userData.pterosaur={wingL,wingR,wingspan:span,forward:'+Z'};
+ root.userData.update=function(seconds){if(!Number.isFinite(seconds))return;const flap=Math.sin(seconds*7.5)*.45;wingL.rotation.z=flap;wingR.rotation.z=-flap;};
+ root.userData.dispose=function(){geometries.forEach(g=>g.dispose());Object.values(mats).forEach(m=>m.dispose());};
+ return root;
+}
+
+  </script>
+<script>
+/* SV.01-174: independent river and widened estuary, built on supplied 173. */
+/* 夢想島溪流設計 — 僅河道與河口地形，Three.js r128+（全域 THREE）。
+ * 不含選址系統、全島配置、獎勵分配、人物或相機修改。
+ * 初始化：cutDreamRiverNotch(shape)，以及 buildDreamRiver(terrainGroup)。
+ * 每幀：riverWaterMesh.userData.update(seconds)。移除：userData.dispose()。
+ * 預設河道與岸線座標配合學生版173；地形不同時請先調整資料。
+ */
+// Flat, variable-width river with a real coastal notch. No texture dependencies.
+function dreamRiverSamples(){
+ const c=new THREE.CatmullRomCurve3([[-3.2,-5.2],[-1.8,-3.2],[-.2,-1.8],[1.6,-1.2],[2.8,.2],[4.8,2.2],[7.4,3.8],[10.3,5.7],[13.2,7.2],[17.5,10.5]].map(p=>new THREE.Vector3(p[0],0,p[1])));
+ return Array.from({length:161},(_,i)=>{const t=i/160,p=c.getPoint(t),d=c.getTangent(t).normalize(),w=.47+.13*Math.sin(t*Math.PI)+.055*Math.sin(t*11);const bell=(c,r)=>Math.exp(-Math.pow((t-c)/r,2));const wl=.35+.11*Math.sin(t*18)+.63*bell(.46,.09)+.27*bell(.72,.07);const wr=.43+.12*Math.sin(t*15+1.1)+.40*bell(.60,.12)-.14*bell(.30,.055);const mouth=Math.max(0,Math.min(1,(t-.66)/.34));const flare=mouth*mouth*(3-2*mouth)*1.12;return {x:p.x,z:p.z,nx:-d.z,nz:d.x,w,wl:wl+flare,wr:wr+flare*.92,t};});
+}
+function cutDreamRiverNotch(shape){
+ const poly=shape.getPoints().map(p=>({x:p.x,z:-p.y}));if(Math.hypot(poly[0].x-poly[poly.length-1].x,poly[0].z-poly[poly.length-1].z)<1e-7)poly.pop();
+ const rows=dreamRiverSamples(),cross=(a,b)=>a.x*b.z-a.z*b.x;
+ function side(sign){const path=rows.map(p=>({x:p.x+p.nx*((sign===1?p.wl:p.wr)+.24)*sign,z:p.z+p.nz*((sign===1?p.wl:p.wr)+.24)*sign}));
+ for(let i=0;i<path.length-1;i++)for(let j=0;j<poly.length;j++){
+ const a=path[i],b=path[i+1],c=poly[j],d=poly[(j+1)%poly.length],r={x:b.x-a.x,z:b.z-a.z},s={x:d.x-c.x,z:d.z-c.z},q={x:c.x-a.x,z:c.z-a.z},den=cross(r,s);if(Math.abs(den)<1e-9)continue;
+ const t=cross(q,s)/den,u=cross(q,r)/den;if(t>=0&&t<=1&&u>=0&&u<=1){const hit={x:a.x+t*r.x,z:a.z+t*r.z};return {edge:j,path:path.slice(0,i+1).concat([hit]),hit};}
+ }return null;}
+ const L=side(1),R=side(-1);if(!L||!R)return shape;
+ function coast(step){let pts=[L.hit],j=step===1?(L.edge+1)%poly.length:L.edge;
+ for(let k=0;k<=poly.length;k++){pts.push(poly[j]);if(j===(step===1?R.edge:(R.edge+1)%poly.length))break;j=(j+step+poly.length)%poly.length;}pts.push(R.hit);return pts;}
+ const length=a=>a.slice(1).reduce((s,p,i)=>s+Math.hypot(p.x-a[i].x,p.z-a[i].z),0),a=coast(1),b=coast(-1),coastline=length(a)>length(b)?a:b;
+ const pts=coastline.concat(R.path.slice(0,-1).reverse(),L.path);
+ const out=new THREE.Shape();pts.forEach((p,i)=>i?out.lineTo(p.x,-p.z):out.moveTo(p.x,-p.z));out.closePath();return out;
+}
+function buildDreamRiver(terrainGroup, options = {}){
+ const samples=dreamRiverSamples();
+ // Match the actual 48-vertex outlines, including the terrain's rotated Z direction.
+ const shorePolygon=(radius,a,b,c)=>Array.from({length:48},(_,i)=>{
+  const t=i/48*Math.PI*2,r=radius+Math.sin(t*2)*a+Math.cos(t*3)*b+Math.sin(t*5)*c;
+  return {x:Math.cos(t)*r,z:-Math.sin(t)*r};
+ });
+ const grassPolygon=shorePolygon(16.5,3,2.2,1),sandPolygon=shorePolygon(18,3.3,2.5,1.2);
+ function inside(p,poly){let yes=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+  const u=poly[i],v=poly[j];
+  if((u.z>p.z)!==(v.z>p.z)&&p.x<(v.x-u.x)*(p.z-u.z)/(v.z-u.z)+u.x)yes=!yes;
+ }return yes;}
+ let grassEnd=samples.findIndex(p=>!inside(p,grassPolygon));if(grassEnd<0)grassEnd=samples.length-10;
+ let sandEnd=samples.findIndex(p=>!inside(p,sandPolygon));if(sandEnd<grassEnd)sandEnd=grassEnd+8;
+ const end=Math.min(samples.length-1,sandEnd+5),group=new THREE.Group();group.name='DreamRiver_Refined';terrainGroup.add(group);
+ function level(i){const t=THREE.MathUtils.clamp((i-grassEnd)/Math.max(1,end-grassEnd),0,1);return 1.385-1.355*(t*t*(3-2*t));}
+ function ribbon(inner,outer,side,mat,name){const v=[],idx=[],colors=[];for(let i=0;i<=end;i++){const p=samples[i],y=level(i);for(const f of [inner,outer]){const w=(side===1?p.wl:p.wr)+f;v.push(p.x+p.nx*w*side,y+(f>0?.07*(f/.24):0),p.z+p.nz*w*side);const c=new THREE.Color(i<grassEnd?(f>0?0xceb87b:0x55d3d7):0x73dce2);colors.push(c.r,c.g,c.b);}}for(let i=0;i<end;i++){let a=i*2,b=a+1,c=a+2,d=a+3;idx.push(a,c,b,b,c,d);}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setIndex(idx);g.computeVertexNormals();const mesh=new THREE.Mesh(g,mat);mesh.name=name;mesh.receiveShadow=true;group.add(mesh);return mesh;}
+ const waterMat=new THREE.MeshStandardMaterial({color:0x2abed6,roughness:.24,metalness:.07,side:THREE.DoubleSide});
+ // One broad horizontal surface, with banks as separate sloping strips.
+ const verts=[],idx=[];for(let i=0;i<=end;i++){const p=samples[i];for(const sign of [-1,1])verts.push(p.x+p.nx*(sign===1?p.wl:p.wr)*sign,level(i),p.z+p.nz*(sign===1?p.wl:p.wr)*sign);}for(let i=0;i<end;i++){const a=i*2;idx.push(a,a+2,a+1,a+1,a+2,a+3);}const wg=new THREE.BufferGeometry();wg.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));wg.setIndex(idx);wg.computeVertexNormals();const water=new THREE.Mesh(wg,waterMat);water.name='River_FlatWater';water.receiveShadow=true;group.add(water);
+ const bankMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.95,side:THREE.DoubleSide});ribbon(0,.24,1,bankMat,'River_LeftBank');ribbon(0,.24,-1,bankMat,'River_RightBank');
+ // Twelve water highlights share one geometry, one material and one draw call.
+ // No setInterval/requestAnimationFrame is created by the river module.
+ const flowCount=Number.isFinite(options.flowCount)?Math.max(0,Math.min(24,Math.floor(options.flowCount))):12;
+ const flowSpeed=Number.isFinite(options.flowSpeed)?Math.max(0,options.flowSpeed):.045;
+ const flowMaterial=new THREE.MeshBasicMaterial({color:0xc7f6f6,transparent:true,opacity:.23,depthWrite:false,side:THREE.DoubleSide});
+ const flows=new THREE.InstancedMesh(new THREE.PlaneGeometry(.025,.22),flowMaterial,flowCount);
+ flows.name='River_InstancedFlowHighlights';flows.frustumCulled=false;
+ flows.instanceMatrix.setUsage(THREE.DynamicDrawUsage);group.add(flows);
+ const flowDummy=new THREE.Object3D();
+ water.userData.update=function(seconds){
+  if(!Number.isFinite(seconds))return;
+  for(let k=0;k<flowCount;k++){
+   const u=((seconds*flowSpeed+k/Math.max(1,flowCount))%1)*(end-5)+3;
+   const i=Math.floor(u),f=u-i,a=samples[i],b=samples[Math.min(i+1,end)];
+   const lane=Math.sin(k*4.13)*.65,offset=lane*(lane>0?a.wl:a.wr);
+   const fade=Math.max(0,Math.min(1,u/8,(end-u)/8));
+   flowDummy.position.set(THREE.MathUtils.lerp(a.x,b.x,f)+a.nx*offset,
+    THREE.MathUtils.lerp(level(i),level(Math.min(i+1,end)),f)+.016,
+    THREE.MathUtils.lerp(a.z,b.z,f)+a.nz*offset);
+   flowDummy.rotation.set(-Math.PI/2,0,Math.atan2(a.nx,a.nz));
+   flowDummy.scale.set(fade,fade*(.85+(k%3)*.15),1);flowDummy.updateMatrix();
+   flows.setMatrixAt(k,flowDummy.matrix);
+  }
+  flows.instanceMatrix.needsUpdate=true;
+ };
+ // Four small bank stones also share one draw call. They add no shadow pass.
+ const stoneIndices=[18,36,52,70].filter(i=>i<grassEnd-2);
+ const stoneMaterial=new THREE.MeshStandardMaterial({color:0x9aa28a,roughness:1,flatShading:true});
+ const stones=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(.16,0),stoneMaterial,stoneIndices.length);
+ stones.name='River_BankStones';stones.frustumCulled=false;
+ const stoneDummy=new THREE.Object3D();
+ stoneIndices.forEach((i,k)=>{const p=samples[i],sign=i%4?1:-1;
+  stoneDummy.scale.set(1.25,.6,.9);stoneDummy.position.set(p.x+p.nx*((sign===1?p.wl:p.wr)+.16)*sign,
+   level(i)+.055,p.z+p.nz*((sign===1?p.wl:p.wr)+.16)*sign);
+  stoneDummy.updateMatrix();stones.setMatrixAt(k,stoneDummy.matrix);
+ });group.add(stones);
+ water.userData.riverGroup=group;
+ water.userData.dispose=function(){
+  const geometries=new Set(),materials=new Set();
+  group.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material){
+   for(const material of Array.isArray(o.material)?o.material:[o.material])materials.add(material);
+  }});
+  geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());
+  if(group.parent)group.parent.remove(group);
+ };
+ water.userData.update(0);
+ group.userData={grassEnd,sandEnd,end};return water;
+}
+
+</script>
 
   <style>
     * {
@@ -608,7 +841,7 @@
 function createTaipei101(pos, options = {}) {
   const T = THREE;
   const root = new T.Group(); root.name = 'Taipei101_Refined';
-  const height = Number.isFinite(options.height) && options.height > 0 ? options.height : 11.2;
+  const height = Number.isFinite(options.height) && options.height > 0 ? options.height : 12.0;
   const detail = options.detail === 'low' ? 'low' : 'high';
   const materials = {}, pools = new Map();
   const material = (name, color, roughness=.4, metalness=.25) => {
@@ -872,6 +1105,92 @@ function createRocketLaunchPad(pos,options={}){
 }
 
 </script>
+<script>
+/* 夢想島卡通藍鯨：Three.js r128+，朝+X；不建立計時器或修改巡游路線。 */
+function createCartoonWhale(options={}) {
+ const T=THREE,root=new T.Group(),skin=new T.MeshStandardMaterial({vertexColors:true,roughness:1}),blue=new T.MeshStandardMaterial({color:0x12516a,roughness:1}),ink=new T.MeshStandardMaterial({color:0x173653,roughness:.6}),white=new T.MeshStandardMaterial({color:0xffffff,roughness:.8});
+ root.name='DreamIsland_CartoonWhale';const owned=new Set(),materials=[skin,blue,ink,white];
+ function mesh(g,m,parent=root){owned.add(g);const o=new T.Mesh(g,m);o.castShadow=options.shadows===true;parent.add(o);return o;}
+ // A single continuous silhouette: rounded forehead, broad back, tapered tail stock.
+ const p=[[-4.45,.55,.07,.08],[-3.7,.35,.20,.22],[-2.65,.23,.45,.39],[-1.45,.24,.75,.63],[0,.37,1.0,.87],[1.4,.76,1.02,.91],[2.5,1.10,.84,.74],[3.22,1.39,.43,.44],[3.48,1.46,.015,.025]];
+ const c=new T.CatmullRomCurve3(p.map(a=>new T.Vector3(a[0],a[1],a[2])),false,'catmullrom',.3),h=new T.CatmullRomCurve3(p.map(a=>new T.Vector3(a[3],0,0)),false,'catmullrom',.3);
+ const v=[],col=[],idx=[],rows=36,sides=20,back=new T.Color(0x12516a),belly=new T.Color(0xa6d4df);
+ for(let j=0;j<=rows;j++){const a=c.getPoint(j/rows),r=h.getPoint(j/rows).x;for(let k=0;k<=sides;k++){const t=k/sides*Math.PI*2,s=Math.sin(t);v.push(a.x,a.y+r*s,a.z*Math.cos(t));const w=T.MathUtils.smoothstep(-s,.02,.35),color=back.clone().lerp(belly,w);col.push(color.r,color.g,color.b);}}
+ for(let j=0;j<rows;j++)for(let k=0;k<sides;k++){const a=j*(sides+1)+k,b=a+1,d=a+sides+1;idx.push(a,d,b,b,d,d+1);}
+ const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(v,3));geo.setAttribute('color',new T.Float32BufferAttribute(col,3));geo.setIndex(idx);geo.computeVertexNormals();mesh(geo,skin);
+ function ball(pos,scale,mat){const o=mesh(new T.SphereGeometry(1,10,8),mat);o.position.set(...pos);o.scale.set(...scale);return o;}
+ for(const s of [-1,1]){ball([2.36,1.23,s*.865],[.075,.085,.04],ink);ball([2.38,1.26,s*.901],[.021,.024,.012],white);}
+ // Thin mouth edge and flowing throat pleats follow the actual curved body surface.
+ const lineMat=new T.MeshStandardMaterial({color:0x75aabd,roughness:1});materials.push(lineMat);
+ function surface(x,angle,offset=.014){let lo=0,hi=1;for(let k=0;k<20;k++){const m=(lo+hi)/2;if(c.getPoint(m).x<x)lo=m;else hi=m;}const t=(lo+hi)/2,a=c.getPoint(t),ry=h.getPoint(t).x;return new T.Vector3(a.x,a.y+(ry+offset)*Math.sin(angle),(a.z+offset)*Math.cos(angle));}
+ for(const angle of [3.49,3.83,4.17,4.71,5.25,5.59,5.93]){
+  const points=[];for(let j=0;j<=20;j++)points.push(surface(-.38+j/20*3.72,angle));
+  mesh(new T.TubeGeometry(new T.CatmullRomCurve3(points),24,.011,4,false),lineMat);
+ }
+ const mouthMat=new T.MeshStandardMaterial({color:0x133e51,roughness:1});materials.push(mouthMat);
+ for(const angle of [3.27,6.15]){const points=[];for(let j=0;j<=20;j++)points.push(surface(1.05+j/20*2.36,angle,.018));mesh(new T.TubeGeometry(new T.CatmullRomCurve3(points),24,.016,4,false),mouthMat);}
+ // Merge decorative curves by material; throat pleats stay one draw call.
+ for(const mat of [lineMat,mouthMat]){
+  const parts=root.children.filter(o=>o.isMesh&&o.material===mat),g=new T.BufferGeometry();
+  for(const key of ['position','normal']){const arrays=parts.map(o=>{const v=o.geometry.index?o.geometry.toNonIndexed():o.geometry.clone();const a=v.attributes[key].array.slice();v.dispose();return a;}),data=new Float32Array(arrays.reduce((n,a)=>n+a.length,0));let offset=0;for(const a of arrays){data.set(a,offset);offset+=a.length;}g.setAttribute(key,new T.BufferAttribute(data,3));}
+  for(const o of parts){root.remove(o);owned.delete(o.geometry);o.geometry.dispose();}mesh(g,mat);
+ }
+ function fin(shape,parent){const g=new T.ExtrudeGeometry(shape,{depth:.09,bevelEnabled:true,bevelSegments:1,steps:1,bevelSize:.04,bevelThickness:.035,curveSegments:8});g.rotateX(Math.PI/2);return mesh(g,blue,parent);}
+ const flipperL=new T.Group(),flipperR=new T.Group();root.add(flipperL,flipperR);
+ for(const [s,g] of [[1,flipperL],[-1,flipperR]]){g.position.set(.02,-.14,s*.85);g.rotation.x=s*.32;g.scale.z=-s;const sh=new T.Shape();sh.moveTo(.48,0);sh.bezierCurveTo(-.12,-.65,-1.0,-1.85,-1.85,-2.0);sh.bezierCurveTo(-2.0,-1.9,-.98,-.52,-.28,0);sh.quadraticCurveTo(.1,.12,.48,0);fin(sh,g);}
+ const tail=new T.Group();tail.position.set(-4.25,.55,0);root.add(tail);
+ const ts=new T.Shape();ts.moveTo(.15,0);ts.bezierCurveTo(-.12,-.60,-.25,-1.38,-1.05,-1.9);ts.bezierCurveTo(-1.17,-1.75,-.94,-.65,-.57,0);ts.bezierCurveTo(-.94,.65,-1.17,1.75,-1.05,1.9);ts.bezierCurveTo(-.25,1.38,-.12,.60,.15,0);fin(ts,tail);
+ // Small swept dorsal fin, with a curved leading edge.
+ const ds=new T.Shape();ds.moveTo(-2.3,.75);ds.quadraticCurveTo(-2.12,1.03,-2.04,1.36);ds.quadraticCurveTo(-1.62,1.29,-1.34,.95);ds.closePath();const dg=new T.ExtrudeGeometry(ds,{depth:.09,bevelEnabled:false,curveSegments:7});dg.translate(0,0,-.045);mesh(dg,blue);
+ const spout=new T.Group();spout.position.set(1.65,1.77,0);root.add(spout);
+ // Soft spray particles replace all solid water tubes and polygonal droplets.
+ // Each point is an analytic feathered disc: no downloaded textures or postprocessing.
+ const count=320,positions=new Float32Array(count*3),sizes=new Float32Array(count),alphas=new Float32Array(count);
+ const sprayGeo=new T.BufferGeometry();owned.add(sprayGeo);
+ sprayGeo.setAttribute('position',new T.BufferAttribute(positions,3).setUsage(T.DynamicDrawUsage));
+ sprayGeo.setAttribute('size',new T.BufferAttribute(sizes,1).setUsage(T.DynamicDrawUsage));
+ sprayGeo.setAttribute('alpha',new T.BufferAttribute(alphas,1).setUsage(T.DynamicDrawUsage));
+ const mistMat=new T.ShaderMaterial({transparent:true,depthWrite:false,depthTest:true,
+  uniforms:{tint:{value:new T.Color(0xf4fdff)}},
+  vertexShader:`attribute float size;attribute float alpha;varying float vAlpha;
+   void main(){vAlpha=alpha;vec4 p=modelViewMatrix*vec4(position,1.0);gl_Position=projectionMatrix*p;gl_PointSize=clamp(size*950.0/max(1.0,-p.z),1.0,70.0);}`,
+  fragmentShader:`uniform vec3 tint;varying float vAlpha;
+   void main(){vec2 q=(gl_PointCoord-.5)*2.0;q.x*=1.35;float r=length(q);float feather=1.0-smoothstep(.50,1.0,r);float a=vAlpha*feather;if(a<.002)discard;gl_FragColor=vec4(tint,a);}`
+ });materials.push(mistMat);const spray=new T.Points(sprayGeo,mistMat);spray.frustumCulled=false;spout.add(spray);
+ function smooth(a,b,x){return T.MathUtils.smoothstep(x,a,b);}
+ function updateWater(seconds){
+  const t=((seconds%9)+9)%9;spout.visible=t<6.3;if(!spout.visible)return;
+  for(let i=0;i<count;i++){
+   const mist=i>=288,j=mist?i-288:i,n=mist?32:288;
+   const launch=j/n*2.65+(mist?.13:0),age=t-launch,life=mist?2.6:2.45;
+   if(age<=0||age>=life){alphas[i]=0;sizes[i]=0;continue;}
+   const u=age/life,angle=i*2.399963,variation=(i*37%101)/101;
+   let y,spread,size,alpha;
+   if(mist){
+    // Expanding aerosol rises, loses momentum, and drifts gently downwind.
+    y=4.35*(1-Math.exp(-age*2.1))-.10*age*age;
+    spread=.08+Math.pow(u,1.4)*(.65+variation*.4);
+    size=.28+u*.52;
+    alpha=Math.sin(Math.PI*u)*.19*(1-smooth(.65,1,u));
+   }else{
+    // Narrow, energetic plume at the blowhole, softening rapidly toward the crown.
+    y=(6.1+variation*.7)*age-2.8*age*age;
+    spread=.02+age*age*(.16+variation*.16);
+    size=.075+variation*.035+u*.018;
+    alpha=smooth(0,.035,u)*(1-smooth(.72,1,u))*.90;
+   }
+   positions[i*3]=Math.cos(angle)*spread-age*.18;
+   positions[i*3+1]=Math.max(-.5,y);
+   positions[i*3+2]=Math.sin(angle)*spread;
+   sizes[i]=size;alphas[i]=alpha;
+  }
+  sprayGeo.attributes.position.needsUpdate=true;sprayGeo.attributes.size.needsUpdate=true;sprayGeo.attributes.alpha.needsUpdate=true;
+ }
+ function update(seconds,pose=true){if(!Number.isFinite(seconds))return;if(pose){tail.rotation.z=Math.sin(seconds*2.4)*.15;flipperL.rotation.x=Math.sin(seconds*1.8)*.12;flipperR.rotation.x=-Math.sin(seconds*1.8)*.12;}updateWater(seconds);}
+ root.userData.whale={tail,flipperL,flipperR,spout,updateWater};root.userData.update=update;root.userData.dispose=()=>{owned.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());};update(0);return root;
+}
+
+</script>
 </head>
 <body class="relative w-full h-full overflow-hidden">
 
@@ -1049,7 +1368,7 @@ function createRocketLaunchPad(pos,options={}){
     <!-- 底部操作提示與左下角版本編號 -->
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
-      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(S.V01 - 173)</span>
+      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(S.V01 - 178)</span>
       <script>
         // 左下角版本標籤自動與網頁標題同步，避免後續改版忘記更新。
         (() => {
@@ -1661,9 +1980,9 @@ function createRocketLaunchPad(pos,options={}){
         camDist: 14, camAngle: 2.0, camLookAt: new THREE.Vector3(6.5, 1.5, -2.8)
       },
       "翼手龍": {
-        pos: new THREE.Vector3(0, 15.0, 0),
+        pos: new THREE.Vector3(0, 20.0, 0),
         isFlyer: true,
-        camDist: 34, camAngle: 0, camLookAt: new THREE.Vector3(0, 15.0, 0)
+        camDist: 34, camAngle: 0, camLookAt: new THREE.Vector3(0, 20.0, 0)
       },
       "史奴比": {
         pos: new THREE.Vector3(7.2, 1.35, 3.2),
@@ -2849,9 +3168,13 @@ function createDanjiangBridge(pos, options = {}) {
       {
         name: "台北一零一摩天大樓",
         build: (pos) => {
-          const g = createTaipei101(pos, { height: 9, detail: 'high' });
+          // S.V01-178：模型自身已按 height/50.8 縮放。不要再以 Box3
+          // 測量 InstancedMesh 的包圍盒後二次放大，否則會變成巨塔。
+          // 巴黎鐵塔在原始模型 scale=0.41 時約 4.54 單位；101 固定 5.10 單位。
+          const g = createTaipei101(pos, { height: 5.10, detail: 'high' });
           g.name = "台北一零一摩天大樓";
           g.userData.isTaipei101 = true;
+          g.userData.canonicalScale = 1.0;
           return g;
         }
       },
@@ -3881,41 +4204,15 @@ function createDanjiangBridge(pos, options = {}) {
       {
         name: "翼手龍（空中翱翔振翅）",
         build: (pos) => {
-          const g = new THREE.Group();
-          const dinoMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 });
-          const wingMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.4, side: THREE.DoubleSide });
-          const beakMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
-
-          const body = new THREE.Mesh(new THREE.ConeGeometry(0.32, 1.6, 8), dinoMat);
-          body.rotation.x = Math.PI / 2; body.position.set(0, 0, 0);
-
-          const head = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.8, 6), dinoMat);
-          head.rotation.x = -Math.PI / 2.5; head.position.set(0, 0.25, 0.7);
-          const crest = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.9, 4), dinoMat);
-          crest.rotation.x = Math.PI / 2.8; crest.position.set(0, 0.52, 0.35);
-          const beak = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.7, 5), beakMat);
-          beak.rotation.x = -Math.PI / 2.2; beak.position.set(0, 0.1, 1.2);
-          g.add(body, head, crest, beak);
-
-          const wingL = new THREE.Group(); wingL.position.set(-0.25, 0.1, 0.1);
-          const wingShapeL = new THREE.Shape();
-          wingShapeL.moveTo(0, 0); wingShapeL.lineTo(-1.8, -0.4); wingShapeL.lineTo(-1.2, 0.6); wingShapeL.closePath();
-          const wingMeshL = new THREE.Mesh(new THREE.ShapeGeometry(wingShapeL), wingMat);
-          wingMeshL.rotation.x = Math.PI / 2; wingL.add(wingMeshL);
-
-          const wingR = new THREE.Group(); wingR.position.set(0.25, 0.1, 0.1);
-          const wingShapeR = new THREE.Shape();
-          wingShapeR.moveTo(0, 0); wingShapeR.lineTo(1.8, -0.4); wingShapeR.lineTo(1.2, 0.6); wingShapeR.closePath();
-          const wingMeshR = new THREE.Mesh(new THREE.ShapeGeometry(wingShapeR), wingMat);
-          wingMeshR.rotation.x = Math.PI / 2; wingR.add(wingMeshR);
-
-          g.add(wingL, wingR);
-
-          const flightRad = 19.5; const flightH = 15.0;
+          // S.V01 - 176：使用獨立卡通模型，沿用遊戲原有的飛行生物動畫系統。
+          const g = createCartoonPterosaur(pos, { wingspan: 4.8, shadows: false });
+          const flightRad = 19.5;
+          const flightH = 20.0; // 與原有雲朵的 18–24 高度相近。
           g.position.set(pos.x, flightH, pos.z);
           flyingCreatures.push({
-            group: g, wingL, wingR, radius: flightRad, height: flightH,
-            speed: 0.0032, angle: Math.random() * Math.PI * 2, flapSpeed: 7.5
+            group: g, radius: flightRad, height: flightH,
+            speed: 0.0032, angle: Math.random() * Math.PI * 2,
+            flapSpeed: 7.5
           });
           return g;
         }
@@ -5501,6 +5798,7 @@ return {compose, length};
     let lightningNextAt = 7 + Math.floor(Math.random() * 4);
     let lightningStormActive = false;
     let lightningShieldActive = false;
+    let numpadLifeShieldMode = false; // 右側數字鍵盤10鍵解鎖：生命全滿、永久防雷罩
     let lightningChallengeSolved = false; // 只有答對本次閃電加強題才可啟動防護罩
     let activeStormChallenge = null;
     const activeImpactFires = [];
@@ -6161,7 +6459,7 @@ return {compose, length};
       terrainGroup = new THREE.Group();
 
       // 1. 金黃沙灘裙邊
-      const sandShape = new THREE.Shape();
+      let sandShape = new THREE.Shape();
       const numPts = 48;
       const baseRadius = 18.0;
 
@@ -6177,13 +6475,14 @@ return {compose, length};
         else sandShape.lineTo(px, pz);
       }
       sandShape.closePath();
+      sandShape = cutDreamRiverNotch(sandShape);
 
       const sandGeo = new THREE.ExtrudeGeometry(sandShape, {
         depth: 0.85,
         bevelEnabled: true,
         bevelSegments: 3,
         steps: 1,
-        bevelSize: 0.7,
+        bevelSize: 0.12,
         bevelThickness: 0.35
       });
       sandGeo.rotateX(-Math.PI / 2);
@@ -6194,7 +6493,7 @@ return {compose, length};
       terrainGroup.add(sandMesh);
 
       // 2. 指定色碼 #009944 之自然大地深綠草地表層
-      const grassShape = new THREE.Shape();
+      let grassShape = new THREE.Shape();
       const grassRadius = 16.5;
       for (let i = 0; i < numPts; i++) {
         const angle = (i / numPts) * Math.PI * 2;
@@ -6208,13 +6507,14 @@ return {compose, length};
         else grassShape.lineTo(px, pz);
       }
       grassShape.closePath();
+      grassShape = cutDreamRiverNotch(grassShape);
 
       const grassGeo = new THREE.ExtrudeGeometry(grassShape, {
         depth: 0.75,
         bevelEnabled: true,
         bevelSegments: 3,
         steps: 1,
-        bevelSize: 0.55,
+        bevelSize: 0.12,
         bevelThickness: 0.25
       });
       grassGeo.rotateX(-Math.PI / 2);
@@ -6310,30 +6610,9 @@ return {compose, length};
       });
       terrainGroup.add(lakeGroup);
 
-      // 6. S 曲線蜿蜒小河
-      const riverPts = [
-        new THREE.Vector3(-3.2, 1.38, -5.2),
-        new THREE.Vector3(-1.8, 1.38, -3.2),
-        new THREE.Vector3(-0.2, 1.37, -1.8),
-        new THREE.Vector3(1.6, 1.37, -1.2),
-        new THREE.Vector3(2.8, 1.36, 0.2),
-        new THREE.Vector3(4.2, 1.36, 1.6),
-        new THREE.Vector3(6.8, 1.35, 3.4),
-        new THREE.Vector3(9.8, 1.33, 4.8),
-        new THREE.Vector3(13.2, 1.30, 7.2),
-        new THREE.Vector3(16.5, 1.25, 9.8)
-      ];
-      const riverCurve = new THREE.CatmullRomCurve3(riverPts);
-      const riverGeo = new THREE.TubeGeometry(riverCurve, 80, 0.55, 8, false);
-      const riverMat = new THREE.MeshStandardMaterial({
-        color: 0x38bdf8,
-        roughness: 0.18,
-        metalness: 0.32,
-        transparent: true,
-        opacity: 0.9
-      });
-      riverWaterMesh = new THREE.Mesh(riverGeo, riverMat);
-      terrainGroup.add(riverWaterMesh);
+      // 6. SV.01-174: variable-width flat stream with carved banks and broad sea outlet.
+      if (riverWaterMesh && riverWaterMesh.userData.dispose) riverWaterMesh.userData.dispose();
+      riverWaterMesh = buildDreamRiver(terrainGroup, { flowCount: 16, flowSpeed: 0.065 });
 
       scene.add(terrainGroup);
     }
@@ -6799,155 +7078,13 @@ return {compose, length};
       if (whaleUnlocked) return;
       whaleUnlocked = true;
 
-      const whaleGroup = new THREE.Group();
-
-      const whaleSkinMat = new THREE.MeshStandardMaterial({ 
-        color: 0x1d4ed8, 
-        roughness: 0.45,
-        metalness: 0.1
-      });
-      const whaleBellyMat = new THREE.MeshStandardMaterial({ 
-        color: 0xf1f5f9, 
-        roughness: 0.6 
-      });
-      const darkEyeMat = new THREE.MeshStandardMaterial({ 
-        color: 0x0f172a, 
-        roughness: 0.2 
-      });
-      const finMat = new THREE.MeshStandardMaterial({ 
-        color: 0x1e40af, 
-        roughness: 0.5 
-      });
-
-      const mainTorso = new THREE.Mesh(new THREE.SphereGeometry(1.6, 16, 12), whaleSkinMat);
-      mainTorso.scale.set(1.9, 0.95, 1.05);
-      mainTorso.position.set(0.6, 0.45, 0);
-      mainTorso.castShadow = true;
-
-      const whaleHead = new THREE.Mesh(new THREE.SphereGeometry(1.4, 14, 10), whaleSkinMat);
-      whaleHead.scale.set(1.4, 0.9, 0.98);
-      whaleHead.position.set(2.0, 0.4, 0);
-
-      const whaleBelly = new THREE.Mesh(new THREE.SphereGeometry(1.45, 14, 10), whaleBellyMat);
-      whaleBelly.scale.set(2.0, 0.65, 0.96);
-      whaleBelly.position.set(0.8, 0.1, 0);
-
-      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), darkEyeMat);
-      eyeL.position.set(2.4, 0.55, 0.92);
-      const eyeR = eyeL.clone();
-      eyeR.position.z = -0.92;
-
-      const flipperL = new THREE.Group();
-      flipperL.position.set(0.9, 0.15, 0.95);
-      const finMeshL = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.12, 0.45), finMat);
-      finMeshL.rotation.y = -0.35;
-      finMeshL.rotation.z = -0.3;
-      finMeshL.position.set(0.3, 0, 0.25);
-      flipperL.add(finMeshL);
-
-      const flipperR = new THREE.Group();
-      flipperR.position.set(0.9, 0.15, -0.95);
-      const finMeshR = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.12, 0.45), finMat);
-      finMeshR.rotation.y = 0.35;
-      finMeshR.rotation.z = -0.3;
-      finMeshR.position.set(0.3, 0, -0.25);
-      flipperR.add(finMeshR);
-
-      const dorsalFin = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.7, 5), finMat);
-      dorsalFin.rotation.z = -0.65;
-      dorsalFin.position.set(-0.8, 1.35, 0);
-
-      const tailJoint = new THREE.Group();
-      tailJoint.position.set(-1.2, 0.45, 0);
-
-      const tailPeduncle = new THREE.Mesh(new THREE.ConeGeometry(0.72, 2.2, 8), whaleSkinMat);
-      tailPeduncle.rotation.z = Math.PI / 2;
-      tailPeduncle.position.set(-1.1, 0, 0);
-
-      const flukeLeft = new THREE.Mesh(new THREE.ConeGeometry(0.65, 1.45, 5), finMat);
-      flukeLeft.rotation.x = Math.PI / 2;
-      flukeLeft.rotation.z = 0.65;
-      flukeLeft.position.set(-2.2, 0, 0.75);
-
-      const flukeRight = new THREE.Mesh(new THREE.ConeGeometry(0.65, 1.45, 5), finMat);
-      flukeRight.rotation.x = -Math.PI / 2;
-      flukeRight.rotation.z = 0.65;
-      flukeRight.position.set(-2.2, 0, -0.75);
-
-      tailJoint.add(tailPeduncle, flukeLeft, flukeRight);
-
-      // ===== 精緻擬真水霧噴泉系統 =====
-      const spoutGroup = new THREE.Group();
-      spoutGroup.position.set(1.9, 1.35, 0);
-
-      // 1. 通透柔和水柱主幹（微微向後上方傾斜）
-      const jetMat = new THREE.MeshStandardMaterial({
-        color: 0xbae6fd,
-        transparent: true,
-        opacity: 0.0,
-        roughness: 0.15,
-        depthWrite: false
-      });
-      const jetColumn = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.08, 2.6, 12), jetMat);
-      jetColumn.position.set(-0.15, 1.3, 0);
-      jetColumn.rotation.z = 0.1; // 隨游動微向後傾
-      spoutGroup.add(jetColumn);
-
-      // 2. 26 顆飄散水霧與傘狀花冠微粒
-      const mistDrops = [];
-      const mistMat = new THREE.MeshStandardMaterial({
-        color: 0xf0f9ff,
-        transparent: true,
-        opacity: 0.0,
-        roughness: 0.3,
-        depthWrite: false
-      });
-      const dropGeo = new THREE.SphereGeometry(0.18, 8, 8);
-
-      for (let i = 0; i < 26; i++) {
-        const drop = new THREE.Mesh(dropGeo, mistMat.clone());
-        const spreadAngle = (i / 26) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-        const spreadRad = 0.35 + Math.random() * 0.75;
-        const dropData = {
-          mesh: drop,
-          stagger: (i / 26) * 0.65, // 錯開噴射時間
-          maxH: 2.2 + Math.random() * 1.5,
-          targetX: -0.4 - Math.random() * 0.8 + Math.cos(spreadAngle) * spreadRad * 0.7,
-          targetZ: Math.sin(spreadAngle) * spreadRad,
-          scaleBase: 0.7 + Math.random() * 0.9
-        };
-        spoutGroup.add(drop);
-        mistDrops.push(dropData);
-      }
-
-      spoutGroup.userData.jet = jetColumn;
-      spoutGroup.userData.jetMat = jetMat;
-      spoutGroup.userData.drops = mistDrops;
-      spoutGroup.visible = false;
-
-      whaleGroup.add(
-        mainTorso, 
-        whaleHead, 
-        whaleBelly, 
-        eyeL, 
-        eyeR, 
-        flipperL, 
-        flipperR, 
-        dorsalFin, 
-        tailJoint, 
-        spoutGroup
-      );
-
-      whaleGroup.position.set(33, -0.15, 0);
+      // S.V01 - 176：僅替換藍鯨模型，沿用原本的解鎖、海上巡遊與登場流程。
+      const whaleGroup = createCartoonWhale();
+      whaleGroup.position.set(33, -0.55, 0);
       whaleGroup.scale.set(0.01, 0.01, 0.01);
       scene.add(whaleGroup);
-
       aquaticCreatures.push({
         group: whaleGroup,
-        tail: tailJoint,
-        flipperL: flipperL,
-        flipperR: flipperR,
-        spout: spoutGroup,
         type: 'whale',
         dist: 33,
         angle: 0,
@@ -8391,7 +8528,7 @@ return {compose, length};
       // 極端擁擠時使用已知不在山體內的島面位置，避免掉到山上。
       if (!safeSpot) safeSpot = { x: 12.0, z: 4.0 };
       const obj = definition.build(new THREE.Vector3(safeSpot.x, 1.35, safeSpot.z));
-      obj.userData = { ...(obj.userData || {}), isTaipei101: true, targetScale: 1.0, cheatSpawned: true };
+      obj.userData = { ...(obj.userData || {}), isTaipei101: true, targetScale: obj.userData.canonicalScale, cheatSpawned: true };
       obj.scale.set(0.01, 0.01, 0.01);
       scene.add(obj);
       spawnedIslandObjects.push(obj);
@@ -8399,8 +8536,8 @@ return {compose, length};
       const timer = setInterval(() => {
         progress += 0.05;
         const scale = Math.sin(Math.min(progress, 1) * Math.PI / 2);
-        obj.scale.setScalar(scale);
-        if (progress >= 1) { obj.scale.setScalar(1); clearInterval(timer); }
+        obj.scale.setScalar(scale * obj.userData.canonicalScale);
+        if (progress >= 1) { obj.scale.setScalar(obj.userData.canonicalScale); clearInterval(timer); }
       }, 16);
       sound.upgradeFanfare();
       showCheatNotice('召喚台北101成功！');
@@ -8516,7 +8653,9 @@ return {compose, length};
       
       // 大小錯落有致：為不同紀念地標賦予微型、精巧、中型或威嚴等多樣化比例 (0.65 ~ 1.25)
       const scaleVariation = 0.72 + (Math.random() * 0.45);
-      monumentObj.userData.targetScale = monument.name === '台北一零一摩天大樓' ? 1.0 : scaleVariation;
+      // 101 與巴黎鐵塔固定比例，避免不同模式或隨機縮放造成高度反轉。
+      const finalMonumentScale = (monumentObj.userData.isTaipei101 || monument.name === '巴黎鐵塔') ? 1.0 : scaleVariation;
+      monumentObj.userData.targetScale = finalMonumentScale;
       monumentObj.scale.set(0.01, 0.01, 0.01);
 
       // 朝向微調：大商船自然順著切線側身或隨機微調
@@ -8542,9 +8681,9 @@ return {compose, length};
       let progress = 0;
       const animTimer = setInterval(() => {
         progress += 0.08;
-        const s = Math.sin(progress * Math.PI * 0.75) * scaleVariation * 1.2;
+        const s = Math.sin(progress * Math.PI * 0.75) * finalMonumentScale * 1.2;
         if (progress >= 1.0) {
-          monumentObj.scale.set(scaleVariation, scaleVariation, scaleVariation);
+          monumentObj.scale.setScalar(finalMonumentScale);
           clearInterval(animTimer);
         } else {
           monumentObj.scale.set(s, s, s);
@@ -8617,11 +8756,11 @@ return {compose, length};
         let spotKey = Object.keys(CHARACTER_SPOTS).find(k => charDef.name.includes(k) || k.includes(charDef.name));
         const spot = spotKey ? CHARACTER_SPOTS[spotKey] : null;
         const isFlyer = charDef.name.includes("翼手龍");
-        const pos = spot ? spot.pos.clone() : (isFlyer ? new THREE.Vector3(0, 15, 0) : new THREE.Vector3(0, 1.35, 3.8));
+        const pos = spot ? spot.pos.clone() : (isFlyer ? new THREE.Vector3(0, 20, 0) : new THREE.Vector3(0, 1.35, 3.8));
 
         const charObj = charDef.build(pos);
         const scaleVal = charDef.name.includes("小恐龍") ? 2.0 : (charDef.name.includes("巴斯光年") ? 1.4 : 1.35);
-        charObj.userData = { targetScale: scaleVal, characterName: charDef.name };
+        Object.assign(charObj.userData, { targetScale: scaleVal, characterName: charDef.name });
         charObj.scale.set(scaleVal, scaleVal, scaleVal);
 
         scene.add(charObj);
@@ -8648,10 +8787,10 @@ return {compose, length};
         
         let spotKey = Object.keys(CHARACTER_SPOTS).find(k => charName.includes(k) || k.includes(charName));
         const spot = spotKey ? CHARACTER_SPOTS[spotKey] : null;
-        const pos = spot ? spot.pos.clone() : (isFlyer ? new THREE.Vector3(0, 15, 0) : new THREE.Vector3(0, 1.35, 3.8));
+        const pos = spot ? spot.pos.clone() : (isFlyer ? new THREE.Vector3(0, 20, 0) : new THREE.Vector3(0, 1.35, 3.8));
 
         const obj = monument.build(pos);
-        obj.userData = { targetScale: customScale };
+        Object.assign(obj.userData, { targetScale: customScale });
         obj.scale.set(customScale, customScale, customScale);
 
         scene.add(obj);
@@ -8745,7 +8884,9 @@ return {compose, length};
       if (whaleUnlocked) {
         const whaleIdx = aquaticCreatures.findIndex(a => a.type === 'whale');
         if (whaleIdx !== -1) {
-          scene.remove(aquaticCreatures[whaleIdx].group);
+          const oldWhale = aquaticCreatures[whaleIdx].group;
+          scene.remove(oldWhale);
+          if (oldWhale.userData.dispose) oldWhale.userData.dispose();
           aquaticCreatures.splice(whaleIdx, 1);
         }
         whaleUnlocked = false;
@@ -8757,6 +8898,7 @@ return {compose, length};
       score = 0;
       vitality = 100;
       isEternalVitality = false;
+      numpadLifeShieldMode = false;
       if (milestoneCounter) milestoneCounter.textContent = '0 / 50';
       if (scoreEl) scoreEl.textContent = '0';
       if (vitalityBar) {
@@ -9078,7 +9220,7 @@ return {compose, length};
     function removeIslandShieldDome() {
       // CLUB 模式下禁止移除防護罩。注意：此處不可呼叫 createIslandShieldDome，
       // 因為 createIslandShieldDome 本身會先呼叫 removeIslandShieldDome，否則會無限遞迴。
-      if (clubMode) return;
+      if (clubMode || numpadLifeShieldMode) return;
       // 防護罩退場採 1.8 秒柔和淡出，避免突然消失。
       [islandShieldDome, islandShieldRim, islandShieldMagicGroup].forEach(root => {
         if (!root || !scene) return;
@@ -9122,7 +9264,7 @@ return {compose, length};
     function startLightningStorm() {
       if (!lightningSystemEnabled || lightningStormActive || gameState !== 'RUNNING' || isIslandPaused) return;
       lightningStormActive = true;
-      lightningShieldActive = false;
+      lightningShieldActive = numpadLifeShieldMode;
       lightningChallengeSolved = false;
       activeStormChallenge = null;
       removeIslandShieldDome();
@@ -9222,7 +9364,7 @@ return {compose, length};
           }
         }
         activeStormChallenge = null;
-        lightningShieldActive = false;
+        lightningShieldActive = numpadLifeShieldMode;
         lightningChallengeSolved = false;
         lightningNextAt = correctCount + 7 + Math.floor(Math.random() * 4);
         displayCurrentWord();
@@ -9232,7 +9374,7 @@ return {compose, length};
     function updateLightningBolts(dt) {
       updateFadingShieldRoots(dt);
       // CLUB 模式防護罩常駐保險：若其他流程意外清空參照，下一幀立即補回。
-      if (clubMode && (!islandShieldDome || !islandShieldRim || !islandShieldMagicGroup)) createIslandShieldDome();
+      if ((clubMode || numpadLifeShieldMode) && (!islandShieldDome || !islandShieldRim || !islandShieldMagicGroup)) createIslandShieldDome();
       if (lightningFlashLight && lightningFlashTimer > 0) {
         lightningFlashTimer -= dt;
         lightningFlashLight.intensity = 0;
@@ -9477,6 +9619,10 @@ return {compose, length};
           if (specialMonumentsSpawned >= 50 && currentCreationIndex >= 250) {
             clearInterval(fullModeTimer);
             fullModeTimer = null;
+            // S.V01 - 176 修補：FULL 略過一般答題里程碑，補觸發第10座地標的候鳥群。
+            if (specialMonumentsSpawned >= 10 && !migratoryFlockUnlocked) {
+              spawnMigratoryFlock();
+            }
             // 沿用既有 marshmallow 人物生成及動畫登場流程。
             triggerAllMilestonesCheat();
             checkEternalVitality();
@@ -9813,6 +9959,7 @@ return {compose, length};
     });
 
     typeInput.addEventListener('input', () => {
+      if (!hideTypingMode && numpadSecretCount === 0) typeInput.style.color = '';
       refreshTypingMask();
     });
 
@@ -9859,6 +10006,58 @@ return {compose, length};
         }
       }, 0);
     }
+
+    // S.V01-178：專用右側小鍵盤祕技。只接受 KeyboardEvent.code 的 Numpad 鍵，
+    // 不會將上方數字列或一般打字誤判為暗號；按十下直接解鎖，無須 Enter。
+    let numpadSecretCount = 0;
+    const numpadSecretCodes = new Set([
+      'Numpad0','Numpad1','Numpad2','Numpad3','Numpad4',
+      'Numpad5','Numpad6','Numpad7','Numpad8','Numpad9',
+      'NumpadDecimal','NumpadAdd','NumpadSubtract','NumpadMultiply','NumpadDivide'
+    ]);
+    typeInput.addEventListener('keydown', (e) => {
+      if (gameState !== 'RUNNING' || e.isComposing || e.repeat || !numpadSecretCodes.has(e.code)) {
+        if (!numpadSecretCodes.has(e.code) && e.key !== 'Shift' && e.key !== 'Control' && e.key !== 'Alt') {
+          numpadSecretCount = 0;
+        }
+        return;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      // 切換到小鍵盤輸入時隱藏既有答題文字，避免密碼以明碼顯示。
+      if (numpadSecretCount === 0) typeInput.value = '';
+      numpadSecretCount++;
+      typeInput.value = '*'.repeat(numpadSecretCount);
+      typeInput.style.color = 'transparent';
+      if (typeInputMask) {
+        typeInputMask.textContent = '*'.repeat(numpadSecretCount);
+        typeInputMask.classList.remove('hidden');
+      }
+      if (numpadSecretCount < 10) return;
+      numpadSecretCount = 0;
+      typeInput.value = '';
+      refreshTypingMask();
+      numpadLifeShieldMode = true;
+      isEternalVitality = true;
+      vitality = 100;
+      lightningShieldActive = true;
+      if (vitalityBar) {
+        vitalityBar.style.width = '100%';
+        vitalityBar.className = 'h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-cyan-400 rounded-full transition-all duration-300 shadow-[0_0_16px_rgba(250,204,21,0.8)]';
+      }
+      if (vitalityPercent) {
+        vitalityPercent.textContent = '✨ 永恆綠洲';
+        vitalityPercent.className = 'text-amber-300 font-black';
+      }
+      if (!islandShieldDome || !islandShieldRim || !islandShieldMagicGroup) createIslandShieldDome();
+      upgradeBanner.textContent = '★ 隱藏祕技啟動：生命全滿、永不扣血、防雷護罩常駐！';
+      upgradeBanner.className = 'text-xs sm:text-sm font-black px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-300 text-slate-950 shadow-2xl tracking-wider transition-all duration-300';
+      upgradeBanner.classList.remove('hidden');
+      setTimeout(() => upgradeBanner.classList.add('hidden'), 3500);
+      sound.init();
+      sound.upgradeFanfare();
+      typeInput.focus();
+    }, true);
 
     typeInput.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter') return;
@@ -9971,6 +10170,7 @@ return {compose, length};
       specialMonumentsSpawned = 0;
       currentCreationIndex = 0;
       isEternalVitality = false;
+      numpadLifeShieldMode = false;
       activeTrial = null;
       pendingTrialMilestone = null;
 
@@ -10092,8 +10292,9 @@ return {compose, length};
       if (!existingObj) {
         const pos = new THREE.Vector3(0, 1.35, 4.0);
         existingObj = monument.build(pos);
-        Object.assign(existingObj.userData, { targetScale: 1.2, monumentIndex: idx });
-        existingObj.scale.set(1.2, 1.2, 1.2);
+        const inspectionScale = existingObj.userData.isTaipei101 ? existingObj.userData.canonicalScale : 1.2;
+        Object.assign(existingObj.userData, { targetScale: inspectionScale, monumentIndex: idx });
+        existingObj.scale.setScalar(inspectionScale);
         scene.add(existingObj);
         spawnedIslandObjects.push(existingObj);
       }
@@ -10137,8 +10338,9 @@ return {compose, length};
 
         const pos = new THREE.Vector3(posX, 1.35, posZ);
         const obj = monument.build(pos);
-        Object.assign(obj.userData, { targetScale: 0.75, monumentIndex: idx });
-        obj.scale.set(0.75, 0.75, 0.75);
+        const gridScale = obj.userData.isTaipei101 ? obj.userData.canonicalScale : 0.75;
+        Object.assign(obj.userData, { targetScale: gridScale, monumentIndex: idx });
+        obj.scale.setScalar(gridScale);
         scene.add(obj);
         spawnedIslandObjects.push(obj);
       });
@@ -10200,7 +10402,7 @@ return {compose, length};
       }
       if (!lightningSystemEnabled) {
         lightningStormActive = false;
-        lightningShieldActive = false;
+        lightningShieldActive = numpadLifeShieldMode;
         lightningChallengeSolved = false;
         activeStormChallenge = null;
         if (lightningStormTimer) clearTimeout(lightningStormTimer);
@@ -10310,6 +10512,10 @@ return {compose, length};
       const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
       lastTime = currentTime;
 
+      if (!isIslandPaused && riverWaterMesh && riverWaterMesh.userData.update) {
+        riverWaterMesh.userData.update(currentTime * 0.001);
+      }
+
       if (!isIslandPaused) {
         updateDayNightCycle(dt);
         updateFireworkParticles(dt);
@@ -10407,9 +10613,13 @@ return {compose, length};
         fc.group.rotation.y = -fc.angle - Math.PI / 2;
         fc.group.rotation.z = Math.sin(currentTime * 0.0015 + idx) * 0.08;
 
-        const flap = Math.sin(currentTime * 0.001 * fc.flapSpeed) * 0.55;
-        if (fc.wingL) fc.wingL.rotation.z = flap;
-        if (fc.wingR) fc.wingR.rotation.z = -flap;
+        if (fc.group.userData && typeof fc.group.userData.update === 'function') {
+          fc.group.userData.update(currentTime * 0.001);
+        } else {
+          const flap = Math.sin(currentTime * 0.001 * fc.flapSpeed) * 0.55;
+          if (fc.wingL) fc.wingL.rotation.z = flap;
+          if (fc.wingR) fc.wingR.rotation.z = -flap;
+        }
       });
 
       if (migratoryFlockGroup) {
@@ -10456,63 +10666,12 @@ return {compose, length};
           aq.group.rotation.y = -aq.angle - Math.PI / 2;
           
           const swimWave = Math.sin(currentTime * 0.0018);
-          aq.group.position.y = -0.15 + swimWave * 0.28;
+          aq.group.position.y = -0.55 + swimWave * 0.30;
           aq.group.rotation.z = Math.cos(currentTime * 0.0018) * 0.08;
 
-          if (aq.tail) {
-            aq.tail.rotation.z = Math.sin(currentTime * 0.0028) * 0.28;
-          }
-          if (aq.flipperL && aq.flipperR) {
-            const finFlap = Math.sin(currentTime * 0.002) * 0.15;
-            aq.flipperL.rotation.z = finFlap;
-            aq.flipperR.rotation.z = -finFlap;
-          }
-          if (aq.spout && aq.spout.userData && aq.spout.userData.drops) {
-            // 放慢噴水週期：約 11.2 秒長循環 (0.00056)，其中約 3.8 秒為悠緩換氣噴水，其餘為深海平靜巡游
-            const cycleTime = (currentTime * 0.00056) % (Math.PI * 2);
-            const spoutDuration = 2.1; // 噴水活躍區段 (約 3.8 秒)
-
-            if (cycleTime < spoutDuration) {
-              aq.spout.visible = true;
-              const p = cycleTime / spoutDuration; // 噴水進度 0.0 ~ 1.0
-
-              // 水柱主幹：平滑湧出、懸空、柔順回落
-              const jetPower = Math.sin(p * Math.PI);
-              const jet = aq.spout.userData.jet;
-              const jetMat = aq.spout.userData.jetMat;
-              jet.scale.set(0.6 + jetPower * 0.6, Math.max(0.1, jetPower * 1.15), 0.6 + jetPower * 0.6);
-              jet.position.y = 0.2 + (jetPower * 1.3);
-              jetMat.opacity = jetPower * 0.68;
-
-              // 傘狀水花粒子：由噴氣孔湧出，緩慢拋物線上浮、如水霧花冠向外撐開、漸淡落下
-              aq.spout.userData.drops.forEach(d => {
-                // 每顆微粒依 stagger 延遲噴出
-                const dp = Math.max(0, Math.min(1, (p - d.stagger) / (1.0 - d.stagger)));
-                if (dp <= 0) {
-                  d.mesh.visible = false;
-                  d.mesh.material.opacity = 0;
-                } else {
-                  d.mesh.visible = true;
-                  // 拋物線上升下降 (重力感)
-                  const curveY = Math.sin(dp * Math.PI * 0.85);
-                  d.mesh.position.y = curveY * d.maxH;
-                  // 向後向外擴散
-                  d.mesh.position.x = d.targetX * dp;
-                  d.mesh.position.z = d.targetZ * dp;
-                  // 隨高度膨脹水霧直徑，末段淡出消散
-                  const s = d.scaleBase * (0.5 + dp * 1.3);
-                  d.mesh.scale.set(s, s, s);
-                  const fade = Math.sin(dp * Math.PI);
-                  d.mesh.material.opacity = fade * 0.55;
-                }
-              });
-            } else {
-              aq.spout.visible = false;
-              aq.spout.userData.drops.forEach(d => {
-                d.mesh.visible = false;
-                d.mesh.material.opacity = 0;
-              });
-            }
+          // 模型自身處理尾鰭、胸鰭與柔和噴水；原巡遊軌道與速度不變。
+          if (aq.group.userData.update) {
+            aq.group.userData.update(currentTime * 0.001);
           }
         }
       });
