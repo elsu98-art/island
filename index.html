@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>我的夢想島：中文打字開拓記（S.V01 - 178）</title>
+  <title>我的夢想島：中文打字開拓記（S.V01 - 183）</title>
+  <script data-goatcounter="https://elsu.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
   <!-- 版本：SV.01-158｜安平古堡防重疊並調至第35位 -->
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -458,7 +459,7 @@ function buildDreamRiver(terrainGroup, options = {}){
       .hud-layer > header > div:nth-child(3) > button {
         min-height: 40px;
       }
-      #bgmBtn, #muteBtn, #ambientSoundBtn, #screensaverBtn, #inspectorBtn {
+      #bgmBtn, #muteBtn, #ambientSoundBtn, #graphicsQualityBtn, #screensaverBtn, #inspectorBtn {
         min-height: 42px;
         padding: 9px 11px;
         touch-action: manipulation;
@@ -1191,6 +1192,217 @@ function createCartoonWhale(options={}) {
 }
 
 </script>
+<script>
+/* 高雄85大樓：依參考照片簡化的夢想島地標，Three.js r128+。 */
+function createKaohsiung85(pos,options={}){
+ const T=THREE,root=new T.Group();root.name='DreamIsland_Kaohsiung85';if(pos)root.position.copy(pos);
+ const mats={glass:new T.MeshStandardMaterial({color:0x126b78,roughness:.65,metalness:.12}),edge:new T.MeshStandardMaterial({color:0x28515e,roughness:.85}),trim:new T.MeshStandardMaterial({color:0xa99a92,roughness:.85}),base:new T.MeshStandardMaterial({color:0xd5c0a8,roughness:.9}),dark:new T.MeshStandardMaterial({color:0x173940,roughness:1}),window:new T.MeshStandardMaterial({color:0x5b9da6,roughness:.7}),roof:new T.MeshStandardMaterial({color:0x287b78,roughness:.8})};
+ const glowMat=new T.MeshStandardMaterial({color:0x5c5343,emissive:0xffedcf,emissiveIntensity:0,roughness:.8,transparent:true,opacity:0});
+ mats.glow=glowMat;let paneIndex=0;const paneCandidates=[];const glowMeshes=[];const pools=new Map(),owned=[];
+ function add(g,mat,p=[0,0,0],scale=[1,1,1],rot=[0,0,0]){const o=new T.Object3D();o.position.set(...p);o.scale.set(...scale);o.rotation.set(...rot);o.updateMatrix();const a=g.index?g.toNonIndexed():g.clone();g.dispose();a.applyMatrix4(o.matrix);if(!pools.has(mat))pools.set(mat,[]);pools.get(mat).push(a);}
+ function box(w,h,d,x,y,z,mat){add(new T.BoxGeometry(w,h,d),mat,[x,y,z]);
+  if(mat===mats.window){const hash=Math.sin(++paneIndex*127.1+41.7)*43758.5453;paneCandidates.push({w,h,d,x,y,z,rank:hash-Math.floor(hash)});}
+
+ }
+ // Beige podium and two separated lower wings: the central opening is real empty space.
+ if(options.base!==false){box(4.35,.16,2.65,0,.08,0,mats.trim);box(3.85,.68,2.15,0,.50,0,mats.base);
+  for(let i=0;i<4;i++)box(3.90,.035,2.20,0,.22+i*.17,0,mats.trim);
+  for(const x of [-1.30,-.65,0,.65,1.30])box(.43,.23,.025,x,.28,1.087,mats.dark);
+ }
+ const floor=.86,wingHeight=4.85,wx=1.17,ww=1.18,depth=1.78;
+ for(const side of [-1,1]){
+  const x=side*wx;box(ww,wingHeight,depth,x,floor+wingHeight/2,0,mats.glass);
+  for(const dx of [-ww/2,ww/2])box(.11,wingHeight+.22,depth+.06,x+dx,floor+wingHeight/2,0,mats.edge);
+  // Unequal stepped shoulders form the distinctive broad H-shaped silhouette.
+  box(ww+.15,.18,depth+.14,x,floor+wingHeight,0,mats.trim);
+  box(.24,.43,depth+.09,x+side*.47,floor+wingHeight+.12,0,mats.edge);
+  box(.26,.26,depth+.09,x-side*.45,floor+wingHeight+.04,0,mats.edge);
+ }
+ // The space between the two wings is completely open front-to-back above the podium.
+ box(1.56,4.55,1.66,0,7.52,0,mats.glass);
+ box(3.55,.53,1.88,0,5.38,0,mats.edge);
+ box(3.38,.24,1.92,0,5.55,0,mats.glass);
+ // Tall centre shaft, framed by muted stone-like vertical ribs.
+ for(const side of [-1,1]){
+  box(.105,4.55,1.76,side*.78,7.52,0,mats.edge);
+  box(.07,4.50,.055,side*.64,7.52,.858,mats.trim);
+ }
+ // Horizontal storey bands: merged geometry, no individual window meshes at runtime.
+ function facade(x,w,y0,h,d,rows,cols){
+  for(let j=1;j<rows;j++){const y=y0+j*h/rows;for(const sign of [-1,1])box(w,.019,.018,x,y,sign*(d/2+.012),mats.edge);box(.018,.019,d+.02,x-w/2-.012,y,0,mats.trim);box(.018,.019,d+.02,x+w/2+.012,y,0,mats.trim);}
+  for(let k=1;k<cols;k++){const xx=x-w/2+k*w/cols;for(const sign of [-1,1])box(.017,h,.018,xx,y0+h/2,sign*(d/2+.015),mats.trim);}
+  const sideExtent=x===0?.78:ww/2;
+  for(const sign of [-1,1]){
+   const sx=x+sign*(sideExtent+.072);box(.012,h,d-.12,sx-sign*.009,y0+h/2,0,mats.glass);
+   for(let j=1;j<rows;j++)box(.016,.018,d-.13,sx,y0+j*h/rows,0,mats.trim);
+   for(let k=1;k<6;k++)box(.016,h,.016,sx,y0+h/2,-d/2+k*d/6,mats.edge);
+   for(let j=0;j<rows;j++)for(let k=0;k<5;k++)if((j*17+k*13+Math.round(x*11))%19<4)box(.018,h/rows*.45,d/6*.64,sx+sign*.004,y0+(j+.5)*h/rows,-d/2+(k+.7)*d/6,mats.window);
+  }
+  // Selected pale panes suggest glass reflections, deliberately sparse and irregular.
+  for(let j=0;j<rows;j++)for(let k=0;k<cols;k++){const hash=(j*73+k*37+Math.round((x+3)*31))%23;if(hash<5){const xx=x-w/2+(k+.5)*w/cols,y=y0+(j+.5)*h/rows;for(const sign of [-1,1])box(w/cols*.65,h/rows*.44,.012,xx,y,sign*(d/2+.025),mats.window);}}
+ }
+ for(const side of [-1,1])facade(side*wx,ww-.14,floor+.12,wingHeight-.28,depth,26,5);
+ facade(0,1.42,5.69,3.90,1.67,34,8);
+ // Narrow inset vertical slot on the sides of the upper tower.
+ for(const s of [-1,1])box(.015,3.20,.26,s*.863,7.72,.03,mats.dark);
+ // Recessed bands on the upper tower echo the reference without literal floor counting.
+ for(const y of [6.15,7.55,8.88,9.31])for(const sign of [-1,1])box(1.20,.09,.025,0,y,sign*.857,mats.trim);
+ // Curved parapets replace the plain flat caps of the earlier model.
+ function parapet(cx,y,w,d,amp){
+  for(const sign of [-1,1]){const points=[];for(let i=0;i<=24;i++){const u=i/24,x=cx+(u-.5)*w,crest=amp*(Math.pow(Math.abs(u-.5)*2,2))+.04*Math.cos(u*Math.PI*6);points.push(new T.Vector3(x,y+crest,sign*d/2));}
+   const v=[],ix=[];for(const p of points)v.push(p.x,p.y,p.z,p.x,p.y-.17,p.z);for(let i=0;i<points.length-1;i++){const a=i*2;ix.push(a,a+2,a+1,a+1,a+2,a+3);}const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setIndex(ix);g.computeVertexNormals();add(g,mats.glass);
+   if(cx!==0)add(new T.TubeGeometry(new T.CatmullRomCurve3(points),24,.028,5,false),mats.trim);
+  }
+ }
+ box(1.48,.23,1.54,0,9.90,0,mats.glass);
+ parapet(0,9.91,1.69,1.82,.26);
+ for(const side of [-1,1])parapet(side*wx,5.78,1.35,1.95,.20);
+ // Projecting framed facade panels echo the photograph's layered vertical composition.
+ function framedPanel(cx,y,w,h,z,cols,rows){
+  for(const sign of [-1,1]){
+   box(w,h,.08,cx,y,sign*z,mats.glass);
+   for(const dx of [-w/2,w/2])box(.047,h+.09,.10,cx+dx,y,sign*(z+.055),mats.trim);
+   for(const dy of [-h/2,h/2])box(w+.06,.06,.10,cx,y+dy,sign*(z+.055),mats.trim);
+   for(let j=1;j<rows;j++)box(w,.018,.012,cx,y-h/2+j*h/rows,sign*(z+.103),mats.trim);
+   for(let k=1;k<cols;k++)box(.016,h,.012,cx-w/2+k*w/cols,y,sign*(z+.104),mats.trim);
+   for(let j=0;j<rows;j++)for(let k=0;k<cols;k++)if((j*19+k*23)%17<5)box(w/cols*.66,h/rows*.54,.012,cx-w/2+(k+.5)*w/cols,y-h/2+(j+.5)*h/rows,sign*(z+.113),mats.window);
+  }
+ }
+ framedPanel(0,7.28,1.03,3.22,.91,7,26);
+ for(const side of [-1,1])framedPanel(side*wx,2.87,.97,3.40,1.00,5,23);
+ // Small recessed openings beneath the large framed panels.
+ for(const sign of [-1,1])for(const side of [-1,1])for(let i=0;i<6;i++)box(.055,.10,.024,side*wx-.42+i*.168,1.07,sign*1.06,mats.dark);
+ // No decorative cross-bars, rear partitions or blocks inside the central portal.
+ // Chamfered, tiered crown and a slender silver antenna.
+ add(new T.CylinderGeometry(.34,.68,.50,4,1,false,Math.PI/4),mats.roof,[0,10.26,0],[1,1,1.15]);
+ add(new T.CylinderGeometry(.22,.37,.28,4,1,false,Math.PI/4),mats.trim,[0,10.60,0],[1,1,1.15]);
+ add(new T.CylinderGeometry(.075,.16,.32,8),mats.roof,[0,10.87,0]);
+ add(new T.CylinderGeometry(.021,.028,.66,7),mats.trim,[0,11.33,0]);
+ add(new T.CylinderGeometry(.035,.045,.08,7),mats.edge,[0,11.16,0]);
+ // Choose an exact count with deterministic irregular positions, without changing the facade.
+ paneCandidates.sort((a,b)=>a.rank-b.rank);
+ for(const p of paneCandidates.slice(0,240)){const {w,h,d,x,y,z}=p;const px=x+(w<.04?Math.sign(x)*.009:0),pz=z+(d<.04?Math.sign(z)*.009:0);add(new T.BoxGeometry(w,h,d),glowMat,[px,y,pz]);}
+ for(const [mat,parts]of pools){const g=new T.BufferGeometry();for(const key of ['position','normal']){const data=new Float32Array(parts.reduce((n,g)=>n+g.attributes[key].array.length,0));let off=0;for(const a of parts){data.set(a.attributes[key].array,off);off+=a.attributes[key].array.length;}g.setAttribute(key,new T.BufferAttribute(data,3));}const mesh=new T.Mesh(g,mat);mesh.castShadow=options.shadows===true;mesh.receiveShadow=options.shadows===true;root.add(mesh);if(mat===glowMat){mesh.visible=false;glowMeshes.push(mesh);}owned.push(g);parts.forEach(g=>g.dispose());}
+ root.scale.setScalar(options.scale===undefined?1:options.scale);root.userData.kaohsiung85={height:11.66,width:4.35,depth:2.65,litWindowCount:Math.min(240,paneCandidates.length)};root.userData.setNight=function(value){const n=typeof value==='boolean'?(value?1:0):Math.max(0,Math.min(1,Number(value)||0));glowMat.opacity=n;glowMat.emissiveIntensity=1.45*n;glowMeshes.forEach(m=>m.visible=n>.001);};root.userData.setNight(options.night||false);root.userData.dispose=()=>{owned.forEach(g=>g.dispose());Object.values(mats).forEach(m=>m.dispose());};return root;
+}
+
+</script>
+<script>
+/* 綠色曲線校門・依使用者照片簡化，Three.js r128+。 */
+function createCurvedSchoolGate(pos,options={}){
+ const T=THREE,root=new T.Group();root.name='DreamIsland_CurvedSchoolGate';if(pos)root.position.copy(pos);
+ // S.V01-181 修正：校門整體抬高，確保底板不被島面吃掉。
+ root.position.y += 0.18;
+ const mats={gate:new T.MeshStandardMaterial({color:0x389b8b,roughness:.88}),rim:new T.MeshStandardMaterial({color:0xadd1b1,roughness:.9}),frame:new T.MeshStandardMaterial({color:0x969bab,roughness:.9}),wall:new T.MeshStandardMaterial({color:0xd9d7cf,roughness:1}),warm:new T.MeshStandardMaterial({color:0xd69a68,roughness:1}),glass:new T.MeshStandardMaterial({color:0x759fa0,roughness:.75}),dark:new T.MeshStandardMaterial({color:0x4f6265,roughness:1}),base:new T.MeshStandardMaterial({color:0xc9c8b6,roughness:1}),leaf:new T.MeshStandardMaterial({color:0x69a95f,roughness:1})};
+ const pools=new Map(),owned=[],textures=[];
+ function add(g,mat,p=[0,0,0],scale=[1,1,1],rot=[0,0,0]){const o=new T.Object3D();o.position.set(...p);o.scale.set(...scale);o.rotation.set(...rot);o.updateMatrix();const v=g.index?g.toNonIndexed():g.clone();g.dispose();v.applyMatrix4(o.matrix);if(!pools.has(mat))pools.set(mat,[]);pools.get(mat).push(v);}
+ const box=(w,h,d,x,y,z,mat)=>add(new T.BoxGeometry(w,h,d),mat,[x,y,z]);
+ const facade=new T.Shape();facade.moveTo(-3.8,0);facade.lineTo(-3.8,2.5);facade.quadraticCurveTo(-3.3,2.8,-2.72,2.86);facade.lineTo(-2.72,4.30);facade.lineTo(-.92,4.30);facade.lineTo(-.92,3.88);facade.lineTo(-.35,3.88);facade.lineTo(-.35,3.22);facade.lineTo(1.73,3.22);facade.lineTo(1.73,3.03);facade.quadraticCurveTo(3.25,3.15,3.8,2.55);facade.lineTo(3.8,0);facade.lineTo(-3.8,0);
+ // The central outline is an asymmetric organic arch, open all the way to the ground.
+ const hole=new T.Path();hole.moveTo(-2.30,0);hole.lineTo(2.22,0);hole.lineTo(2.22,1.02);hole.bezierCurveTo(2.75,1.62,2.50,2.73,1.83,2.92);hole.bezierCurveTo(1.26,3.07,1.16,2.48,.36,2.48);hole.bezierCurveTo(-.43,2.47,-.58,3.12,-1.13,3.31);hole.bezierCurveTo(-1.83,3.65,-2.48,3.07,-2.48,2.37);hole.quadraticCurveTo(-2.47,1.64,-2.30,1.38);hole.lineTo(-2.30,0);facade.holes.push(hole);
+ for(const side of [-1,1]){const h=new T.Path(),x=side*3.15;h.moveTo(x-.23,.15);h.lineTo(x+.23,.15);h.lineTo(x+.23,1.98);h.quadraticCurveTo(x,2.15,x-.23,1.98);h.lineTo(x-.23,.15);facade.holes.push(h);}
+ // Procedural broken-ceramic mosaic: tightly packed irregular shards, not raised dots.
+ if(typeof document!=='undefined'){
+  const size=1024,canvas=document.createElement('canvas'),relief=document.createElement('canvas');canvas.width=canvas.height=relief.width=relief.height=size;
+  const c=canvas.getContext('2d'),r=relief.getContext('2d');
+  if(c&&r){
+   let seed=6926;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+   c.fillStyle='#527b72';c.fillRect(0,0,size,size);r.fillStyle='#6d6d6d';r.fillRect(0,0,size,size);
+   const cols=86,rows=49,nodes=[];
+   for(let j=0;j<=rows;j++)for(let i=0;i<=cols;i++)nodes.push({x:(i+(i&&i<cols?(random()-.5)*.65:0))*size/cols,y:(j+(j&&j<rows?(random()-.5)*.65:0))*size/rows});
+   function shard(points){const centre=points.reduce((a,p)=>({x:a.x+p.x/points.length,y:a.y+p.y/points.length}),{x:0,y:0}),shrink=.94;
+    const x=centre.x/size,y=1-centre.y/size;
+    // Turquoise centre with moss/lime patches on the side piers, like the reference.
+    const moss=Math.max(0,Math.sin(x*23+y*5)*Math.cos(y*17-x*4))*(Math.abs(x-.5)>.30?.88:.18);
+    const light=.83+random()*.32,turquoise=[42,147,139],green=[140,166,92],rgb=turquoise.map((a,k)=>Math.round((a*(1-moss)+green[k]*moss)*light));
+    c.beginPath();r.beginPath();points.forEach((p,i)=>{const xx=centre.x+(p.x-centre.x)*shrink,yy=centre.y+(p.y-centre.y)*shrink;if(i){c.lineTo(xx,yy);r.lineTo(xx,yy);}else{c.moveTo(xx,yy);r.moveTo(xx,yy);}});c.closePath();r.closePath();c.fillStyle=`rgb(${rgb.join(',')})`;c.fill();const v=180+Math.floor(random()*45);r.fillStyle=`rgb(${v},${v},${v})`;r.fill();
+    if(random()<.22){c.strokeStyle='rgba(210,234,205,.25)';c.lineWidth=.7;c.stroke();}
+   }
+   for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){const a=nodes[j*(cols+1)+i],b=nodes[j*(cols+1)+i+1],d=nodes[(j+1)*(cols+1)+i],e=nodes[(j+1)*(cols+1)+i+1];const split=random();if(split<.60){if(random()<.5){shard([a,b,e]);shard([a,e,d]);}else{shard([a,b,d]);shard([b,e,d]);}}else shard([a,b,e,d]);}
+   const map=new T.CanvasTexture(canvas),bump=new T.CanvasTexture(relief);map.anisotropy=4;if('colorSpace'in map&&T.SRGBColorSpace)map.colorSpace=T.SRGBColorSpace;else map.encoding=T.sRGBEncoding;
+   textures.push(map,bump);mats.gate.color.set(0xffffff);mats.gate.map=map;mats.gate.bumpMap=bump;mats.gate.bumpScale=.009;mats.gate.roughness=.58;
+  }
+ }
+ const gateGeometry=new T.ExtrudeGeometry(facade,{depth:.30,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.035,bevelThickness:.025,curveSegments:22});
+ const gp=gateGeometry.attributes.position,uv=gateGeometry.attributes.uv;for(let i=0;i<gp.count;i++)uv.setXY(i,(gp.getX(i)+3.85)/7.7,gp.getY(i)/4.4);uv.needsUpdate=true;
+ add(gateGeometry,mats.gate,[0,.18,.30]);
+ // Preserve the original outline and its slender inner trim exactly.
+ const pts=hole.getPoints(100).filter(p=>p.y>.05).map(p=>new T.Vector3(p.x,p.y+.18,.635));add(new T.TubeGeometry(new T.CatmullRomCurve3(pts),96,.025,5,false),mats.rim);
+ // Short school wing, with physical depth, side walls and rear classroom doors/windows.
+ if(options.school!==false){
+  const front=-.32,back=-2.55;
+  // Continuous plinth overlaps the ground plate and every wall/column foot.
+  box(8.72,.29,2.74,0,.225,-1.42,mats.frame);
+  // Photo reference: a broad concrete portal behind the green mosaic facade.
+  const concrete=new T.Shape();concrete.moveTo(-3.29,2.52);concrete.lineTo(-3.29,4.94);
+  concrete.lineTo(-1.64,4.94);concrete.bezierCurveTo(-1.36,4.95,-1.31,5.23,-.91,5.23);concrete.bezierCurveTo(-.51,5.23,-.48,5.02,-.10,5.02);concrete.bezierCurveTo(.25,5.02,.31,5.19,.64,5.19);concrete.bezierCurveTo(.96,5.19,1.04,5.03,1.35,5.03);concrete.lineTo(3.29,5.03);concrete.lineTo(3.29,2.52);concrete.lineTo(2.82,2.52);concrete.lineTo(2.82,4.27);
+  concrete.quadraticCurveTo(2.82,4.43,2.63,4.43);concrete.lineTo(1.35,4.43);concrete.bezierCurveTo(1.04,4.43,.96,4.59,.64,4.59);concrete.bezierCurveTo(.31,4.59,.25,4.42,-.10,4.42);concrete.bezierCurveTo(-.48,4.42,-.51,4.63,-.91,4.63);concrete.bezierCurveTo(-1.31,4.63,-1.36,4.35,-1.64,4.35);concrete.lineTo(-2.62,4.35);concrete.quadraticCurveTo(-2.82,4.35,-2.82,4.15);concrete.lineTo(-2.82,2.52);concrete.closePath();
+  add(new T.ExtrudeGeometry(concrete,{depth:.38,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.035,bevelThickness:.025,curveSegments:20}),mats.frame,[0,-.65,-.25]);
+  // Slim darker coping follows the upper waves and makes the concrete depth readable.
+  const wave=new T.CatmullRomCurve3([new T.Vector3(-1.64,4.965,.166),new T.Vector3(-.91,5.255,.166),new T.Vector3(-.10,5.045,.166),new T.Vector3(.64,5.225,.166),new T.Vector3(1.35,5.065,.166),new T.Vector3(2.70,5.065,.166)]);
+  add(new T.TubeGeometry(wave,64,.025,5,false),mats.dark,[0,-.65,0]);
+
+  // Keep a ground-floor central passage behind the gate.
+  for(const x of [-2.8,2.8])box(2.9,1.50,.16,x,.925,-1.62,mats.wall);
+  box(8.5,3.45,.16,0,3.40,-1.62,mats.wall);
+  for(const x of [-4.20,4.20]){
+   box(.16,4.75,2.25,x,2.60,-1.45,mats.wall);
+   for(let floor=0;floor<3;floor++){
+    box(.025,.78,1.1,x+Math.sign(x)*.09,.98+floor*1.5,-1.45,mats.glass);
+    for(let k=0;k<3;k++)box(.035,.80,.025,x+Math.sign(x)*.108,.98+floor*1.5,-1.82+k*.37,mats.wall);
+   }
+  }
+  for(let floor=0;floor<3;floor++){
+   const y=.35+floor*1.50;
+   box(8.7,.17,2.52,0,y,-1.40,mats.frame);
+   for(let bay=0;bay<6;bay++){
+    const x=-3.5+bay*1.4;
+    if(floor===0&&(bay===2||bay===3))continue;
+    // Original front windows, behind the corridor.
+    box(1.15,1.02,.08,x,y+.68,-1.46,mats.glass);
+    box(1.18,.21,.10,x,y+.16,-1.40,bay%2?mats.warm:mats.wall);
+    for(const dx of [-.38,0,.38])box(.03,1.04,.05,x+dx,y+.68,-1.39,mats.wall);
+    box(1.19,.03,.05,x,y+.74,-1.38,mats.wall);
+    // Rear classroom facade: a door beside a group of glazed windows.
+    box(1.38,1.32,.12,x,y+.75,back,mats.wall);
+    box(.29,1.05,.045,x-.47,y+.63,back-.078,mats.warm);
+    box(.20,.43,.025,x-.47,y+.84,back-.11,mats.glass);
+    box(.035,.045,.025,x-.36,y+.59,back-.115,mats.dark);
+    box(.75,.76,.045,x+.18,y+.86,back-.078,mats.glass);
+    box(.78,.20,.04,x+.18,y+.28,back-.09,bay%2?mats.wall:mats.warm);
+    for(const dx of [-.19,.06,.31,.56])box(.027,.79,.035,x+dx,y+.86,back-.11,mats.wall);
+    box(.78,.027,.035,x+.18,y+.89,back-.115,mats.wall);
+   }
+   if(floor>0)box(8.28,.28,.12,0,y+.24,front,mats.frame);
+   box(8.6,.09,.20,0,y+.04,back-.11,mats.frame);
+  }
+  for(const x of [-4.18,-2.8,-1.4,0,1.4,2.8,4.18]){
+   const hh=x===0?3.05:4.6,yy=x===0?3.405:2.63;
+   box(.13,hh,.17,x,yy,front,mats.frame);
+   box(.11,hh,.17,x,yy,back-.08,mats.frame);
+  }
+  box(8.72,.22,2.72,0,5.02,-1.42,mats.wall);
+  // Quiet rear lintel over the through-passage, with no school-name sign.
+  box(2.30,.12,.18,0,1.70,back,mats.frame);
+ }
+ // School-name board and its separate supports intentionally omitted.
+ // A small stepped approach and low planting beds complete the gate rather than a full campus.
+ if(options.base!==false){box(9.7,.12,5.4,0,.06,-.45,mats.base);for(let i=0;i<3;i++)box(4.7+i*.16,.055,.27,0,.12+i*.06,1.08-i*.24);
+  for(const side of [-1,1]){box(1.1,.18,.7,side*4.12,.21,.92,mats.wall);for(let k=0;k<3;k++)add(new T.SphereGeometry(1,8,6),mats.leaf,[side*4.12+(k-1)*.28,.47,.92],[.30,.26,.27]);}
+ }
+ for(const [mat,parts]of pools){const g=new T.BufferGeometry();for(const key of ['position','normal','uv']){if(!parts.every(p=>p.attributes[key]))continue;const n=parts[0].attributes[key].itemSize,data=new Float32Array(parts.reduce((n,p)=>n+p.attributes[key].array.length,0));let off=0;for(const p of parts){data.set(p.attributes[key].array,off);off+=p.attributes[key].array.length;}g.setAttribute(key,new T.BufferAttribute(data,n));}const mesh=new T.Mesh(g,mat);mesh.castShadow=options.shadows===true;mesh.receiveShadow=options.shadows===true;root.add(mesh);owned.push(g);parts.forEach(g=>g.dispose());}
+ // S.V01-181：仁愛國小夜間淺色校舍與底板不再形成亮色矩形；保留所有幾何和白天配色。
+ const schoolDayColors={wall:mats.wall.color.clone(),base:mats.base.color.clone(),frame:mats.frame.color.clone()};
+ root.userData.setNight=function(night){
+  const enabled=!!night;
+  mats.wall.color.copy(enabled?new T.Color(0x354046):schoolDayColors.wall);
+  mats.base.color.copy(enabled?new T.Color(0x303834):schoolDayColors.base);
+  mats.frame.color.copy(enabled?new T.Color(0x46515b):schoolDayColors.frame);
+ };
+ root.scale.setScalar(options.scale===undefined?1:options.scale);root.userData.schoolGate={width:9.7,depth:5.4};root.userData.dispose=()=>{owned.forEach(g=>g.dispose());Object.values(mats).forEach(m=>m.dispose());textures.forEach(t=>t.dispose());};return root;
+}
+
+</script>
 </head>
 <body class="relative w-full h-full overflow-hidden">
 
@@ -1258,6 +1470,9 @@ function createCartoonWhale(options={}) {
         <button id="ambientSoundBtn" class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95">
           環境音 ON
         </button>
+
+        <!-- S.V01-181：三段畫質選單，位於環境音旁。 -->
+        <button id="graphicsQualityBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="graphicsQualityMenu" title="選擇高級、普通或省電畫質" class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95">畫質：普通 ▾</button>
 
         <!-- 環境音量滑桿與百分比顯示 (範圍 0~100%，預設 30%) -->
         <div class="glass-hud px-2.5 py-1.5 rounded-2xl flex items-center gap-1.5">
@@ -1368,13 +1583,34 @@ function createCartoonWhale(options={}) {
     <!-- 底部操作提示與左下角版本編號 -->
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
-      <span id="gameVersionBadge" class="absolute left-2 sm:left-4 font-mono font-medium text-slate-400 select-none">(S.V01 - 178)</span>
+      <div class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 flex flex-col items-start gap-0.5 text-slate-400 select-none pointer-events-none">
+        <span id="gameVersionBadge" class="font-mono font-medium">(S.V01 - 183)</span>
+        <span id="gameVisitCount" aria-live="polite">累積瀏覽次數：讀取中</span>
+      </div>
       <script>
         // 左下角版本標籤自動與網頁標題同步，避免後續改版忘記更新。
         (() => {
-          const match = document.title.match(/SV\.\d+-\d+/);
+          const match = document.title.match(/S\.V\d+\s*-\s*\d+/);
           const badge = document.getElementById('gameVersionBadge');
           if (match && badge) badge.textContent = `(${match[0]})`;
+        })();
+        // 公開計數器僅顯示本遊戲正式網址 /island/ 的累積次數；讀取失敗不影響遊戲。
+        (() => {
+          const label = document.getElementById('gameVisitCount');
+          const url = 'https://elsu.goatcounter.com/counter/' + encodeURIComponent('/island/') + '.json';
+          async function updateVisitCount() {
+            try {
+              const response = await fetch(url, { cache: 'no-store' });
+              if (!response.ok) throw new Error('GoatCounter HTTP ' + response.status);
+              const data = await response.json();
+              if (typeof data.count !== 'string' && typeof data.count !== 'number') throw new Error('Invalid count');
+              label.textContent = '累積瀏覽次數：' + data.count;
+            } catch (error) {
+              if (label.textContent.includes('讀取中')) label.textContent = '累積瀏覽次數：暫無資料';
+            }
+          }
+          setTimeout(updateVisitCount, 2500);
+          setInterval(updateVisitCount, 60000);
         })();
       </script>
       <span>拖曳旋轉 360° 全景 ‧ 滑鼠滾輪或雙指縮放視角</span>
@@ -1436,7 +1672,7 @@ function createCartoonWhale(options={}) {
             </div>
             <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
               <span class="text-slate-400">召喚所有人物</span>
-              <span class="font-mono font-bold text-fuchsia-400 bg-slate-950 px-2 py-0.5 rounded">marshmallow</span>
+              <span class="font-mono font-bold text-fuchsia-400 bg-slate-950 px-2 py-0.5 rounded">people</span>
             </div>
             <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
               <span class="text-slate-300">台北 101 播放一輪煙火（含音效）</span>
@@ -2364,6 +2600,8 @@ function createDanjiangBridge(pos, options = {}) {
         name: "夢幻水晶旋轉木馬",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
+          // S.V01-181 修正：整體抬高，避免底座埋入島面。
+          g.position.y += 0.16;
           // 整體縮小，讓旋轉木馬更精巧，不再壓過周圍地標。
           g.scale.setScalar(0.70);
           // SV.01-75：保留白色主體，加入柔和香檳金、淡薰衣草與霧藍，避免整座全白。
@@ -2422,6 +2660,9 @@ function createDanjiangBridge(pos, options = {}) {
           g.add(foundation, foundationTrim, base1, base2, fence, centerPillar, mirrorRing, canopy, canopyRing, topFinial);
           // 旋轉木馬由全域動畫迴圈持續旋轉，底座與馬匹一起轉動。
           g.userData.carouselData = { speed: 0.35 };
+          g.userData.fixedMonumentWidth = 2.7;
+          g.userData.canonicalScale = 2.7 / 5.64;
+          g.scale.setScalar(g.userData.canonicalScale);
           return g;
         }
       },
@@ -2540,6 +2781,8 @@ function createDanjiangBridge(pos, options = {}) {
         name: "古希臘神殿",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
+          // S.V01-181 修正：整體抬高，避免三層階梯基座埋入島面。
+          g.position.y += 0.18;
           g.scale.set(0.35, 0.35, 0.35); // 依需求再更進一步縮小至 35% 精緻微縮尺寸
           const marbleMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.55 });
           const shadeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.65 });
@@ -2635,6 +2878,9 @@ function createDanjiangBridge(pos, options = {}) {
           });
 
           g.add(roof);
+          g.userData.fixedMonumentWidth = 2.5;
+          g.userData.canonicalScale = 2.5 / 4.6;
+          g.scale.setScalar(g.userData.canonicalScale);
           return g;
         }
       },
@@ -2708,8 +2954,8 @@ function createDanjiangBridge(pos, options = {}) {
         name: "巴黎鐵塔",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
-          // 精確微調縮放至 0.41，使 3D 渲染實際高度剛好約為 4.5 單位 (11.08 * 0.41 ≈ 4.54)
-          g.scale.set(0.41, 0.41, 0.41);
+          // 外層 g 固定比例 1，只供登場動畫、祕技、檢視與排列模式控制。
+          // 保留內外層分離：內層依原生 11.085 單位等比調到 7.5，外層僅作出場動畫。
 
           // 嚴格對標照片中的巴黎鐵塔經典三段式鋼鐵暖古銅色 (Warm Bronze & Dark Steel)
           const towerMat = new THREE.MeshStandardMaterial({
@@ -2927,6 +3173,14 @@ function createDanjiangBridge(pos, options = {}) {
           summitBeacon.position.y = spireTopY + 2.1;
 
           g.add(summitL3Base, cupolaChamber, cupolaDome, spireAntenna, summitBeacon);
+          const towerModel = new THREE.Group();
+          towerModel.name = "EiffelTower_InnerModel";
+          while (g.children.length) towerModel.add(g.children[0]);
+          towerModel.scale.setScalar(10 / 11.085); // 內層等比縮放：最高端 11.085 → 10；外層仍維持 1
+          g.add(towerModel);
+          g.userData.canonicalScale = 1.0;
+          g.userData.eiffelInnerScale = 10 / 11.085;
+          g.userData.fixedTowerHeight = 10;
           return g;
         }
       },
@@ -3168,12 +3422,13 @@ function createDanjiangBridge(pos, options = {}) {
       {
         name: "台北一零一摩天大樓",
         build: (pos) => {
-          // S.V01-178：模型自身已按 height/50.8 縮放。不要再以 Box3
+          // S.V01-179：模型自身已按 height/50.8 縮放。不要再以 Box3
           // 測量 InstancedMesh 的包圍盒後二次放大，否則會變成巨塔。
-          // 巴黎鐵塔在原始模型 scale=0.41 時約 4.54 單位；101 固定 5.10 單位。
-          const g = createTaipei101(pos, { height: 5.10, detail: 'high' });
+          // 兩座塔固定高度：巴黎鐵塔 10，101 11.5；不以 r128 Box3 再校正。
+          const g = createTaipei101(pos, { height: 11.5, detail: 'high' });
           g.name = "台北一零一摩天大樓";
           g.userData.isTaipei101 = true;
+          g.userData.fixedTowerHeight = 11.5;
           g.userData.canonicalScale = 1.0;
           return g;
         }
@@ -5829,6 +6084,164 @@ return {compose, length};
     // SV.01-158：club 模式常駐展開防護罩，並以多色極光流光循環。
     let clubMode = false;
 
+    // S.V01-180 仁愛國小：只保留空間，真正輸入祕技才建立模型。
+    let schoolGateReserved = null;
+    let schoolGateEasterEgg = null;
+    const SCHOOL_GATE_SCALE = 3.4 / 9.7; // 固定底板寬度 3.40，等比例縮放
+    // 校門原始底板 9.7 × 5.4，生成後寬 3.40、深約 1.89；仍預留 4.7 × 3.0（含充足緩衝）。
+    const SCHOOL_GATE_WIDTH = 9.7 * SCHOOL_GATE_SCALE;
+    const SCHOOL_GATE_DEPTH = 5.4 * SCHOOL_GATE_SCALE;
+    const schoolMountains = [
+      [-6,-5.5,5.5],[-8.8,-3.8,4.8],[-3.8,-7.5,5.2],[-2,-8,4.2],[-7.5,-6.8,4.2],[5.8,-6.5,4.8]
+    ];
+    function schoolGateFootprint(x,z,width=4.7,depth=3.0,yaw=0) {
+      return {x,z,width,depth,yaw};
+    }
+    function schoolFootprintCorners(f) {
+      const c=Math.cos(f.yaw||0),t=Math.sin(f.yaw||0),hw=f.width/2,hd=f.depth/2;
+      return [[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]].map(([a,b])=>({x:f.x+a*c+b*t,z:f.z-a*t+b*c}));
+    }
+    function schoolFootprintsOverlap(a,b,padding=0) {
+      // SAT 投影檢查：同時考慮底板寬深、旋轉、縮放與安全距離。
+      const A=schoolFootprintCorners(a),B=schoolFootprintCorners(b);
+      for(const pts of [A,B]) for(let i=0;i<2;i++) {
+        const p=pts[i],q=pts[(i+1)%4],vx=q.x-p.x,vz=q.z-p.z;
+        const nx=-vz,nz=vx,len=Math.hypot(nx,nz)||1;
+        const av=A.map(v=>v.x*nx+v.z*nz),bv=B.map(v=>v.x*nx+v.z*nz);
+        if(Math.max(...av)+padding*len < Math.min(...bv) || Math.max(...bv)+padding*len < Math.min(...av)) return false;
+      }
+      return true;
+    }
+    function schoolGateAvoids(x,z,w=1.0,d=1.0,yaw=0,padding=0) {
+      return !schoolGateReserved || !schoolFootprintsOverlap(schoolGateFootprint(x,z,w,d,yaw),schoolGateReserved,padding);
+    }
+    function schoolExistingFootprint(obj) {
+      if(!obj || !obj.position) return null;
+      if(obj.userData?.isSchoolGateEasterEgg) return schoolGateReserved;
+      // 以物件世界幾何邊界作為占地：包括群組旋轉與縮放，不修正模型高度。
+      obj.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(obj);
+      if(box.isEmpty()) return schoolGateFootprint(obj.position.x,obj.position.z,2.5,2.5);
+      return schoolGateFootprint((box.min.x+box.max.x)/2,(box.min.z+box.max.z)/2,
+         Math.max(.7,box.max.x-box.min.x),Math.max(.7,box.max.z-box.min.z));
+    }
+    function schoolGrassContains(x,z) {
+      const polygon=Array.from({length:48},(_,i)=>{const a=i/48*Math.PI*2,r=16.5+Math.sin(a*2)*3+Math.cos(a*3)*2.2+Math.sin(a*5);return {x:Math.cos(a)*r,z:Math.sin(a)*r};});
+      let inside=false;
+      for(let i=0,j=polygon.length-1;i<polygon.length;j=i++) {
+        const a=polygon[i],b=polygon[j];
+        if((a.z>z)!==(b.z>z) && x<(b.x-a.x)*(z-a.z)/(b.z-a.z)+a.x)inside=!inside;
+      }
+      return inside;
+    }
+    function schoolRiverClear(x,z) {
+      // 以原河流取樣計算中心線距離，並加上兩側水道、岸邊與保留緩衝。
+      const samples=dreamRiverSamples();
+      for(let i=0;i<samples.length-1;i++) {
+        const a=samples[i],b=samples[i+1],dx=b.x-a.x,dz=b.z-a.z;
+        const t=Math.max(0,Math.min(1,((x-a.x)*dx+(z-a.z)*dz)/(dx*dx+dz*dz||1)));
+        const dist=Math.hypot(x-a.x-t*dx,z-a.z-t*dz);
+        if(dist < Math.max(a.wl,a.wr,b.wl,b.wr)+.85)return false;
+      }
+      return true;
+    }
+    function schoolGateSiteLegal(f) {
+      // 檢查整塊矩形：四角、四邊及內部取樣，而不是只看中心。
+      const pts=schoolFootprintCorners(f),grid=[];
+      for(let i=0;i<=8;i++)for(let j=0;j<=5;j++) {
+        const u=i/8,v=j/5;
+        const a=pts[0],b=pts[1],c=pts[3];
+        grid.push({x:a.x+(b.x-a.x)*u+(c.x-a.x)*v,z:a.z+(b.z-a.z)*u+(c.z-a.z)*v});
+      }
+      for(const p of grid) {
+        if(!schoolGrassContains(p.x,p.z) || !schoolRiverClear(p.x,p.z))return false;
+        if(schoolMountains.some(m=>Math.hypot(p.x-m[0],p.z-m[1])<m[2]+.55))return false;
+        // 梯田、湖泊及初始固定樹木的位置也算固定設施。
+        if(p.x>-10.0&&p.x<-1.0&&p.z>-.8&&p.z<4.2)return false;
+        if(Math.hypot((p.x-4.5)/3.95,(p.z-1.6)/2.65)<1.15)return false;
+        const trees=[[10.2,2.7],[7.4,7.4],[2.7,10.2],[-2.7,10.2],[-7.4,7.4],[-10.2,2.7],[-10.2,-2.7],[-7.4,-7.4],[-2.7,-10.2],[2.7,-10.2],[7.4,-7.4],[10.2,-2.7]];
+        if(trees.some(t=>Math.hypot(p.x-t[0],p.z-t[1])<1.4))return false;
+      }
+      return true;
+    }
+    function reserveSchoolGateSite() {
+      // 優先島嶼左右側，確保在 FULL 出現之前即劃下不可建造範圍。
+      const candidates=[];
+      for(const sign of [1,-1])for(const x of [12,13.5,10.5,15,9,7.5])for(const z of [7,5,9,3,11,0,-3,-6]) {
+        candidates.push(schoolGateFootprint(sign*x,z,4.7,3.0,0));
+      }
+      for(const f of candidates)if(schoolGateSiteLegal(f)) {schoolGateReserved=f;return;}
+      // 外圈加密搜尋：不以可能重疊的預設中心點硬塞模型。
+      for(let x=-17;x<=17;x+=.35)for(let z=-13;z<=13;z+=.35) {
+        const f=schoolGateFootprint(x,z,4.7,3.0,0);
+        if(schoolGateSiteLegal(f)) {schoolGateReserved=f;return;}
+      }
+      schoolGateReserved=null;
+    }
+    function shiftObjectOutsideSchool(obj, desiredScale=null) {
+      if(!schoolGateReserved || !obj || !obj.position || obj.userData?.isSchoolGateEasterEgg)return;
+      const original=obj.scale.clone();
+      if(desiredScale!==null)obj.scale.setScalar(desiredScale);
+      obj.updateMatrixWorld(true);
+      let occupied=schoolExistingFootprint(obj);
+      if(occupied && schoolFootprintsOverlap(occupied,schoolGateReserved,.24)) {
+        // 優先向左右兩側移動：以模型投影後的完整寬深（含旋轉）驗證。
+        const x=obj.position.x,z=obj.position.z;
+        let chosen=null;
+        for(const dz of [0,2,-2,4,-4,6,-6,8,-8]) {
+          for(const dx of [2,-2,4,-4,6,-6,8,-8,10,-10,12,-12,14,-14]) {
+            obj.position.set(x+dx,obj.position.y,z+dz);
+            obj.updateMatrixWorld(true);
+            occupied=schoolExistingFootprint(obj);
+            if(occupied && !schoolFootprintsOverlap(occupied,schoolGateReserved,.28)) {
+              chosen={x:obj.position.x,z:obj.position.z};break;
+            }
+          }
+          if(chosen)break;
+        }
+        if(!chosen)obj.position.set(x,obj.position.y,z);
+      }
+      if(desiredScale!==null)obj.scale.copy(original);
+      obj.updateMatrixWorld(true);
+    }
+    function keepWalkerOutsideSchool(obj,r=.36) {
+      if(!obj || !schoolGateReserved) return;
+      const p=obj.position,gate=schoolGateReserved;
+      if(schoolGateAvoids(p.x,p.z,r*2,r*2,0,.12))return;
+      // 推離最近邊界，不將人物凍結；下一幀繼續其原本的散步動作。
+      const dx=p.x-gate.x,dz=p.z-gate.z,c=Math.cos(gate.yaw),si=Math.sin(gate.yaw);
+      const lx=dx*c-dz*si,lz=dx*si+dz*c;
+      const hx=gate.width/2+r+.16,hz=gate.depth/2+r+.16;
+      let nx=lx,nz=lz;
+      if(hx-Math.abs(lx)<hz-Math.abs(lz))nx=(lx<0?-1:1)*hx;
+      else nz=(lz<0?-1:1)*hz;
+      p.x=gate.x+nx*c+nz*si;p.z=gate.z-nx*si+nz*c;
+    }
+    function summonSchoolGateEasterEgg() {
+      if(schoolGateEasterEgg && schoolGateEasterEgg.parent) {
+        showCheatNotice('仁愛國小已經召喚過囉！');return;
+      }
+      if(!schoolGateReserved)reserveSchoolGateSite();
+      if(!schoolGateReserved){showCheatNotice('校門預留地尚未完成配置。');return;}
+      const f=schoolGateReserved;
+      const obj=createCurvedSchoolGate(new THREE.Vector3(f.x,1.58,f.z),{
+        scale:SCHOOL_GATE_SCALE,school:true,base:true,shadows:false
+      });
+      obj.name='仁愛國小（獨立彩蛋）';
+      obj.rotation.y=f.yaw;
+      obj.userData.isSchoolGateEasterEgg=true;
+      // 夜間召喚當下立即更新材質，不等待下一次天色變化。
+      const schoolIsNight = nightPatrolMode || (typeof timePhase !== 'undefined' && timePhase === 3);
+      obj.userData.setNight(schoolIsNight);
+      obj.userData._schoolNight = schoolIsNight;
+      obj.userData.targetScale=SCHOOL_GATE_SCALE;
+      obj.scale.setScalar(SCHOOL_GATE_SCALE);
+      schoolGateEasterEgg=obj;
+      scene.add(obj);spawnedIslandObjects.push(obj);
+      if(sound && sound.upgradeFanfare)sound.upgradeFanfare();
+      showCheatNotice('仁愛國小校門召喚成功！');
+    }
+
     const spawnedIslandObjects = [];
     const islandNightLights = [];
     // SV.01-125：台北101彩色夜間煙火粒子與夜晚觸發狀態
@@ -6081,9 +6494,9 @@ return {compose, length};
     let hideTypingMode = false;
     function refreshTypingMask() {
       if (!typeInputMask || !typeInput) return;
-      typeInputMask.textContent = hideTypingMode ? '*'.repeat(Array.from(typeInput.value).length) : '';
-      typeInputMask.classList.toggle('hidden', !hideTypingMode || !typeInput.value.length);
-      typeInput.style.color = hideTypingMode ? 'transparent' : '';
+      typeInputMask.textContent = numpadSecretDigits ? '*'.repeat(numpadSecretDigits.length) : (hideTypingMode ? '*'.repeat(Array.from(typeInput.value).length) : '');
+      typeInputMask.classList.toggle('hidden', !(numpadSecretDigits || (hideTypingMode && typeInput.value.length)));
+      typeInput.style.color = (numpadSecretDigits || hideTypingMode) ? 'transparent' : '';
       typeInput.style.caretColor = hideTypingMode ? '#ffffff' : '';
     }
     function setHideTypingMode(enabled) {
@@ -6099,6 +6512,7 @@ return {compose, length};
     const muteBtn = document.getElementById('muteBtn');
     const bgmBtn = document.getElementById('bgmBtn');
     const ambientSoundBtn = document.getElementById('ambientSoundBtn');
+    const graphicsQualityBtn = document.getElementById('graphicsQualityBtn');
     const ambientVolSlider = document.getElementById('ambientVolSlider');
     const ambientVolLabel = document.getElementById('ambientVolLabel');
     const screensaverBtn = document.getElementById('screensaverBtn');
@@ -6115,6 +6529,65 @@ return {compose, length};
     const currentInspectLabel = document.getElementById('currentInspectLabel');
 
     let currentInspectIndex = 0;
+
+    // S.V01-181：畫質三段切換。只修改渲染像素密度與陰影，不改場景、地標或角色動畫。
+    const graphicsModes = {
+      high:   {label:'高級畫質', pixelRatio:2.0, shadows:true,  color:'text-emerald-300'},
+      normal: {label:'普通畫質', pixelRatio:1.25,shadows:true,  color:'text-sky-300'},
+      saving: {label:'省電畫質', pixelRatio:0.75,shadows:false, color:'text-amber-300'}
+    };
+    let graphicsQualityMode = 'normal';
+    function applyGraphicsQuality() {
+      if (!renderer) return;
+      const mode = graphicsModes[graphicsQualityMode];
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      renderer.setPixelRatio(Math.min(dpr, mode.pixelRatio));
+      renderer.shadowMap.enabled = mode.shadows;
+      renderer.shadowMap.needsUpdate = true;
+    }
+    if (graphicsQualityBtn) {
+      const menu = document.createElement('div');
+      menu.id = 'graphicsQualityMenu';
+      menu.setAttribute('role', 'group');
+      menu.setAttribute('aria-label', '畫質設定');
+      menu.hidden = true;
+      menu.style.cssText = 'position:fixed;z-index:250;min-width:164px;padding:6px;border:1px solid rgba(255,255,255,.22);border-radius:14px;background:rgba(15,23,42,.97);box-shadow:0 12px 32px rgba(0,0,0,.45);';
+      menu.innerHTML = Object.entries(graphicsModes).map(([key,mode]) =>
+        `<button type="button" data-quality="${key}" style="display:block;width:100%;text-align:left;padding:10px 12px;border-radius:9px;font-size:13px;font-weight:700;color:#fff;">${mode.label}</button>`
+      ).join('');
+      document.body.appendChild(menu);
+      const refresh = () => {
+        const mode = graphicsModes[graphicsQualityMode];
+        graphicsQualityBtn.textContent = '畫質：' + mode.label.replace('畫質','') + ' ▾';
+        graphicsQualityBtn.className = 'glass-hud px-3 py-2 rounded-2xl text-xs font-bold ' + mode.color +
+          ' hover:text-white hover:bg-slate-700/60 transition active:scale-95';
+        menu.querySelectorAll('[data-quality]').forEach(btn => {
+          const selected = btn.dataset.quality === graphicsQualityMode;
+          btn.style.background = selected ? 'rgba(16,185,129,.30)' : 'transparent';
+          btn.textContent = (selected ? '✓ ' : '  ') + graphicsModes[btn.dataset.quality].label;
+          btn.setAttribute('aria-pressed', String(selected));
+        });
+      };
+      const close = () => {menu.hidden=true;graphicsQualityBtn.setAttribute('aria-expanded','false');};
+      const locate = () => {
+        const b=graphicsQualityBtn.getBoundingClientRect(),w=164,h=140;
+        menu.style.left=Math.max(6,Math.min(window.innerWidth-w-6,b.left))+'px';
+        menu.style.top=(b.bottom+h+8<window.innerHeight ? b.bottom+6 : Math.max(6,b.top-h-6))+'px';
+      };
+      graphicsQualityBtn.addEventListener('click', () => {
+        if (!menu.hidden) {close();return;}
+        locate();menu.hidden=false;graphicsQualityBtn.setAttribute('aria-expanded','true');
+      });
+      menu.addEventListener('click', e => {
+        const button=e.target.closest('[data-quality]');if(!button)return;
+        graphicsQualityMode=button.dataset.quality;
+        applyGraphicsQuality();refresh();close();
+      });
+      document.addEventListener('pointerdown',e=>{if(!menu.hidden&&!menu.contains(e.target)&&e.target!==graphicsQualityBtn)close();});
+      document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden)close();});
+      window.addEventListener('resize',()=>{if(!menu.hidden)locate();});
+      refresh();
+    }
 
     function initThreeScene() {
       try {
@@ -6133,6 +6606,7 @@ return {compose, length};
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        applyGraphicsQuality();
         canvasWrapper.appendChild(renderer.domElement);
 
         ambientLight = new THREE.AmbientLight(0xffffff, 0.72);
@@ -6160,6 +6634,7 @@ return {compose, length};
         createStarfield();
         createFloatingClouds();
         createRainParticleSystem();
+        reserveSchoolGateSite();
         createRichIslandTerrain();
         createInitialNature();
         createAquaticLife();
@@ -7154,6 +7629,8 @@ return {compose, length};
         const radius = Math.sqrt(minRadius * minRadius + rand() * (maxRadius * maxRadius - minRadius * minRadius));
         const candidate = { x: Math.cos(angle) * radius, z: Math.sin(angle) * radius };
 
+        if (!schoolGateAvoids(candidate.x,candidate.z,2.5,2.5,0,.28)) continue;
+
         // 島面邊緣保留餘裕：圓形半徑之外再以橢圓限制兩軸，避免候選點落到沙灘外或海上。
         // X 軸是島嶼較寬的左右方向；Z 軸較短，符合島面實際可用草地輪廓。
         if (radius > maxRadius) continue;
@@ -7195,7 +7672,7 @@ return {compose, length};
       }
 
       // 空間較擁擠時回傳最好的候選位置，避免生成流程中斷。
-      return best || { x: 12, z: 0 };
+      return best || (schoolGateAvoids(12,0,2.5,2.5) ? { x: 12, z: 0 } : { x: 0, z: 12 });
     }
 
     function spawnOrUpgradeIslandCreation(blueprint) {
@@ -7935,6 +8412,7 @@ return {compose, length};
 
       objGroup.scale.set(0.01, 0.01, 0.01);
       scene.add(objGroup);
+      shiftObjectOutsideSchool(objGroup);
       spawnedIslandObjects.push(objGroup);
 
       // 每次答對後都會播放的開拓啵聲也會疊在答對提示音上；只將這個常規開拓音降至原本 20%。
@@ -8252,6 +8730,20 @@ return {compose, length};
           }
         }
       }
+      // 仁愛國小：夜間調暗底板與校舍牆面；不影響其他建築和場景照明。
+      if (schoolGateEasterEgg && schoolGateEasterEgg.parent && typeof schoolGateEasterEgg.userData.setNight === 'function') {
+        if (schoolGateEasterEgg.userData._schoolNight !== isNight) {
+          schoolGateEasterEgg.userData._schoolNight = isNight;
+          schoolGateEasterEgg.userData.setNight(isNight);
+        }
+      }
+      // 高雄85彩蛋模型已有獨立日夜窗燈設定，僅在天色切換時更新。
+      if (kaohsiung85EasterEgg && kaohsiung85EasterEgg.parent) {
+        if (kaohsiung85EasterEgg.userData._kaohsiung85Night !== isNight) {
+          kaohsiung85EasterEgg.userData._kaohsiung85Night = isNight;
+          kaohsiung85EasterEgg.userData.setNight(isNight);
+        }
+      }
       // S.V01 - 173：只同步淡江大橋的夜間光雕，不影響其他地標與日夜規則。
       for (const obj of spawnedIslandObjects) {
         if (obj.userData && obj.userData.danjiang) {
@@ -8543,6 +9035,64 @@ return {compose, length};
       showCheatNotice('召喚台北101成功！');
     }
 
+    // S.V01-179：高雄85大樓僅作彩蛋召喚，不加入正式 50 地標清單或解鎖計數。
+    let kaohsiung85EasterEgg = null;
+    function summonKaohsiung85Cheat() {
+      if (kaohsiung85EasterEgg && kaohsiung85EasterEgg.parent) {
+        showCheatNotice('高雄85大樓已經在島上了！');
+        return;
+      }
+      // 高雄85大樓獨立等比例縮放：原始高度 11.66 × (7 / 11.66) = 7；不修改其他地標。
+      // S.V01-180：彩蛋專用選址。優先挑選外圍空地，並檢查建築底座與其他物件的安全距離。
+      // 不再直接沿用一般地標的中心點隨機選址，以免 85 大樓壓在別的建築上。
+      function findKaohsiung85Spot() {
+        const buildingRadius = 2.2; // 底座 4.35 × 2.65，縮放 7/11.66 後半對角線約 1.53，再留約 0.67 安全距離
+        const others = spawnedIslandObjects.filter(o => o && o.position && !o.userData?.isKaohsiung85EasterEgg);
+        const mountains = [
+          {x:-6.0,z:-5.5,r:5.5},{x:-8.8,z:-3.8,r:4.8},
+          {x:-3.8,z:-7.5,r:5.2},{x:-2.0,z:-8.0,r:4.2},
+          {x:-7.5,z:-6.8,r:4.2}
+        ];
+        // 已存在的建築、樹木和裝飾物，統一保留至少幾個單位的間隙。
+        const occupied = others.filter(o => Math.hypot(o.position.x,o.position.z) < 24).map(o => ({
+          x:o.position.x, z:o.position.z,
+          r: (o.userData?.isEluanbiLighthouse ? 3.2 :
+              o.name?.includes('安平古堡') ? 4.3 :
+              o.name?.includes('台北101') ? 2.4 :
+              o.name?.includes('神殿') ? 3.6 : 2.45)
+        }));
+        let best = null, bestClearance = -Infinity;
+        // 交錯掃描外圈與中圈，避免落入島中央密集區；固定序列使相同場景位置穩定。
+        for (let i=0;i<720;i++) {
+          const angle = (i * 2.399963229728653 + .47) % (Math.PI*2);
+          const radius = 10.2 + ((i*37)%109)/109*4.1;
+          const x=Math.cos(angle)*radius, z=Math.sin(angle)*radius;
+          if(!schoolGateAvoids(x,z,4.4,4.4,0,.5))continue;
+          // 草地輪廓＋建築底座緩衝，避免靠近海岸邊掉進水裡。
+          if ((x*x)/(17.0*17.0)+(z*z)/(13.4*13.4) > .88) continue;
+          if (mountains.some(m => Math.hypot(x-m.x,z-m.z) < m.r + buildingRadius + .65)) continue;
+          const clearance = occupied.length ? Math.min(...occupied.map(o=>Math.hypot(x-o.x,z-o.z)-o.r-buildingRadius)) : 10;
+          // 找到足夠空的草地就使用；否則選擇最不擁擠的候選點。
+          if (clearance > bestClearance) { bestClearance=clearance; best={x,z}; }
+          if (clearance >= 1.7) break;
+        }
+        return best || getBalancedIslandPlacement(85085, 10.0, 14.2, 5.5);
+      }
+      const safeSpot = findKaohsiung85Spot();
+      const groundY = 1.35;
+      const obj = createKaohsiung85(new THREE.Vector3(safeSpot.x, groundY, safeSpot.z), {scale: 7 / 11.66, night: false});
+      obj.name = '高雄85大樓（彩蛋）';
+      obj.userData.isKaohsiung85EasterEgg = true;
+      obj.userData._kaohsiung85Night = false;
+      // 使用既有地標陣列統一管理日夜切換和重開清理，不增加解鎖數量。
+      shiftObjectOutsideSchool(obj);
+      scene.add(obj);
+      spawnedIslandObjects.push(obj);
+      kaohsiung85EasterEgg = obj;
+      sound.upgradeFanfare();
+      showCheatNotice('召喚高雄85大樓成功！');
+    }
+
     function spawnSpecialMonument() {
       const monumentIndex = specialMonumentsSpawned % SPECIAL_MONUMENTS.length;
       const monument = SPECIAL_MONUMENTS[monumentIndex];
@@ -8653,8 +9203,10 @@ return {compose, length};
       
       // 大小錯落有致：為不同紀念地標賦予微型、精巧、中型或威嚴等多樣化比例 (0.65 ~ 1.25)
       const scaleVariation = 0.72 + (Math.random() * 0.45);
-      // 101 與巴黎鐵塔固定比例，避免不同模式或隨機縮放造成高度反轉。
-      const finalMonumentScale = (monumentObj.userData.isTaipei101 || monument.name === '巴黎鐵塔') ? 1.0 : scaleVariation;
+      // 05 與 09 以原始底座寬度固定外層縮放；塔類維持自身固定高度。
+      const finalMonumentScale = monumentObj.userData.fixedMonumentWidth
+        ? monumentObj.userData.canonicalScale
+        : (monumentObj.userData.fixedTowerHeight ? monumentObj.userData.canonicalScale : scaleVariation);
       monumentObj.userData.targetScale = finalMonumentScale;
       monumentObj.scale.set(0.01, 0.01, 0.01);
 
@@ -8668,6 +9220,7 @@ return {compose, length};
         monumentObj.rotation.y = Math.random() * Math.PI * 2;
       }
 
+      shiftObjectOutsideSchool(monumentObj, finalMonumentScale);
       scene.add(monumentObj);
       spawnedIslandObjects.push(monumentObj);
 
@@ -8681,7 +9234,9 @@ return {compose, length};
       let progress = 0;
       const animTimer = setInterval(() => {
         progress += 0.08;
-        const s = Math.sin(progress * Math.PI * 0.75) * finalMonumentScale * 1.2;
+        const s = monumentObj.userData.fixedTowerHeight
+          ? Math.sin(Math.min(progress, 1) * Math.PI / 2) * finalMonumentScale
+          : Math.sin(progress * Math.PI * 0.75) * finalMonumentScale * 1.2;
         if (progress >= 1.0) {
           monumentObj.scale.setScalar(finalMonumentScale);
           clearInterval(animTimer);
@@ -8723,7 +9278,7 @@ return {compose, length};
       }
     }
 
-    // 一鍵全體人物大集合秘技 (marshmallow / matshmallow)
+    // 一鍵全體人物大集合秘技 (people / people)
     function triggerAllMilestonesCheat() {
       sound.init();
 
@@ -8835,7 +9390,15 @@ return {compose, length};
     function clearAllIslandCreations() {
       sound.init();
 
+      if(schoolGateEasterEgg) {
+        if(schoolGateEasterEgg.userData.dispose)schoolGateEasterEgg.userData.dispose();
+        schoolGateEasterEgg=null;
+      }
       // 清除一般生成物件
+      if (kaohsiung85EasterEgg) {
+        if (kaohsiung85EasterEgg.userData.dispose) kaohsiung85EasterEgg.userData.dispose();
+        kaohsiung85EasterEgg = null;
+      }
       spawnedIslandObjects.forEach(obj => scene.remove(obj));
       spawnedIslandObjects.length = 0;
 
@@ -8899,6 +9462,7 @@ return {compose, length};
       vitality = 100;
       isEternalVitality = false;
       numpadLifeShieldMode = false;
+      numpadSecretDigits = '';
       if (milestoneCounter) milestoneCounter.textContent = '0 / 50';
       if (scoreEl) scoreEl.textContent = '0';
       if (vitalityBar) {
@@ -9623,7 +10187,7 @@ return {compose, length};
             if (specialMonumentsSpawned >= 10 && !migratoryFlockUnlocked) {
               spawnMigratoryFlock();
             }
-            // 沿用既有 marshmallow 人物生成及動畫登場流程。
+            // 沿用既有 people 人物生成及動畫登場流程。
             triggerAllMilestonesCheat();
             checkEternalVitality();
             if (milestoneCounter) milestoneCounter.textContent = '50 / 50';
@@ -9683,6 +10247,14 @@ return {compose, length};
         // 輸入「台北101」直接召喚地標；不佔用中央燈塔位置，也不改正式地標進度。
         if (val === '台北101') {
           summonTaipei101Cheat();
+          typeInput.value = '';
+          typeInput.dispatchEvent(new Event('input', { bubbles: true }));
+          typeInput.focus();
+          return;
+        }
+
+        if (val === '高雄85大樓') {
+          summonKaohsiung85Cheat();
           typeInput.value = '';
           typeInput.dispatchEvent(new Event('input', { bubbles: true }));
           typeInput.focus();
@@ -9927,8 +10499,16 @@ return {compose, length};
           return;
         }
 
-        // 作弊碼檢測：專屬保密指令 marshmallow（召喚全體人物，不召喚地標）
-        if (code === 'marshmallow' || code === 'matshmallow') {
+        // 仁愛國小獨立彩蛋：僅由文字＋Enter 召喚，不計入 50 地標。
+        if (val === '仁愛國小') {
+          summonSchoolGateEasterEgg();
+          typeInput.value = '';
+          typeInput.focus();
+          return;
+        }
+
+        // 作弊碼檢測：專屬保密指令 people（召喚全體人物，不召喚地標）
+        if (code === 'people') {
           triggerAllMilestonesCheat();
           return;
         }
@@ -9959,7 +10539,7 @@ return {compose, length};
     });
 
     typeInput.addEventListener('input', () => {
-      if (!hideTypingMode && numpadSecretCount === 0) typeInput.style.color = '';
+      if (!hideTypingMode && numpadSecretDigits.length === 0) typeInput.style.color = '';
       refreshTypingMask();
     });
 
@@ -10007,36 +10587,25 @@ return {compose, length};
       }, 0);
     }
 
-    // S.V01-178：專用右側小鍵盤祕技。只接受 KeyboardEvent.code 的 Numpad 鍵，
-    // 不會將上方數字列或一般打字誤判為暗號；按十下直接解鎖，無須 Enter。
-    let numpadSecretCount = 0;
-    const numpadSecretCodes = new Set([
-      'Numpad0','Numpad1','Numpad2','Numpad3','Numpad4',
-      'Numpad5','Numpad6','Numpad7','Numpad8','Numpad9',
-      'NumpadDecimal','NumpadAdd','NumpadSubtract','NumpadMultiply','NumpadDivide'
-    ]);
-    typeInput.addEventListener('keydown', (e) => {
-      if (gameState !== 'RUNNING' || e.isComposing || e.repeat || !numpadSecretCodes.has(e.code)) {
-        if (!numpadSecretCodes.has(e.code) && e.key !== 'Shift' && e.key !== 'Control' && e.key !== 'Alt') {
-          numpadSecretCount = 0;
-        }
+    // S.V01-179：右側數字小鍵盤 12 碼隱藏祕技：00 + 任意8個數字 + 99，Enter 驗證。
+    // 密碼內容不放入祕技面板，並且只顯示星號。
+    let numpadSecretDigits = '';
+    const numpadSecretCodes = new Set(Array.from({length:10}, (_,i) => 'Numpad'+i));
+    function resetNumpadSecret() {
+      numpadSecretDigits = '';
+      if (typeInput) {
+        typeInput.value = '';
+        refreshTypingMask();
+      }
+    }
+    function commitNumpadSecret() {
+      const valid = /^00[0-9]{8}99$/.test(numpadSecretDigits);
+      resetNumpadSecret();
+      if (!valid) {
+        showCheatNotice('密碼格式不正確，請重新輸入。');
+        typeInput.focus();
         return;
       }
-      e.preventDefault();
-      e.stopPropagation();
-      // 切換到小鍵盤輸入時隱藏既有答題文字，避免密碼以明碼顯示。
-      if (numpadSecretCount === 0) typeInput.value = '';
-      numpadSecretCount++;
-      typeInput.value = '*'.repeat(numpadSecretCount);
-      typeInput.style.color = 'transparent';
-      if (typeInputMask) {
-        typeInputMask.textContent = '*'.repeat(numpadSecretCount);
-        typeInputMask.classList.remove('hidden');
-      }
-      if (numpadSecretCount < 10) return;
-      numpadSecretCount = 0;
-      typeInput.value = '';
-      refreshTypingMask();
       numpadLifeShieldMode = true;
       isEternalVitality = true;
       vitality = 100;
@@ -10057,6 +10626,44 @@ return {compose, length};
       sound.init();
       sound.upgradeFanfare();
       typeInput.focus();
+    }
+    typeInput.addEventListener('keydown', (e) => {
+      if (gameState !== 'RUNNING' || e.isComposing || e.repeat) return;
+      if (numpadSecretCodes.has(e.code)) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (!numpadSecretDigits) typeInput.value = '';
+        if (numpadSecretDigits.length < 12) numpadSecretDigits += e.code.slice(-1);
+        typeInput.value = '*'.repeat(numpadSecretDigits.length);
+        typeInput.style.color = 'transparent';
+        if (typeInputMask) {
+          typeInputMask.textContent = '*'.repeat(numpadSecretDigits.length);
+          typeInputMask.classList.remove('hidden');
+        }
+        return;
+      }
+      if (!numpadSecretDigits) return;
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        commitNumpadSecret();
+        return;
+      }
+      if (e.key === 'Backspace') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        numpadSecretDigits = numpadSecretDigits.slice(0,-1);
+        typeInput.value = '*'.repeat(numpadSecretDigits.length);
+        if (typeInputMask) {
+          typeInputMask.textContent = typeInput.value;
+          typeInputMask.classList.toggle('hidden', !numpadSecretDigits.length);
+        }
+        if (!numpadSecretDigits) refreshTypingMask();
+        return;
+      }
+      if (['Shift','Control','Alt','Meta','Tab'].includes(e.key)) return;
+      // 切回一般鍵盤輸入時，先清除未完成的密碼。
+      resetNumpadSecret();
     }, true);
 
     typeInput.addEventListener('keydown', (e) => {
@@ -10290,11 +10897,13 @@ return {compose, length};
       let existingObj = spawnedIslandObjects.find(obj => obj.userData && obj.userData.monumentIndex === idx);
 
       if (!existingObj) {
-        const pos = new THREE.Vector3(0, 1.35, 4.0);
+        const inspectorX=schoolGateAvoids(0,4,3,3) ? 0 : -5;
+        const pos = new THREE.Vector3(inspectorX, 1.35, 4.0);
         existingObj = monument.build(pos);
-        const inspectionScale = existingObj.userData.isTaipei101 ? existingObj.userData.canonicalScale : 1.2;
+        const inspectionScale = (existingObj.userData.fixedTowerHeight || existingObj.userData.fixedMonumentWidth) ? existingObj.userData.canonicalScale : 1.2;
         Object.assign(existingObj.userData, { targetScale: inspectionScale, monumentIndex: idx });
         existingObj.scale.setScalar(inspectionScale);
+        shiftObjectOutsideSchool(existingObj);
         scene.add(existingObj);
         spawnedIslandObjects.push(existingObj);
       }
@@ -10333,14 +10942,20 @@ return {compose, length};
       SPECIAL_MONUMENTS.forEach((monument, idx) => {
         const c = idx % cols;
         const r = Math.floor(idx / cols);
-        const posX = startX + c * spacingX;
-        const posZ = startZ + r * spacingZ;
+        let posX = startX + c * spacingX;
+        let posZ = startZ + r * spacingZ;
+        if(!schoolGateAvoids(posX,posZ,2.5,2.5,0,.25)) {
+          for(const dx of [3, -3, 6, -6, 9, -9, 12, -12, 15, -15]) {
+            if(schoolGateAvoids(posX+dx,posZ,2.5,2.5,0,.25)) {posX+=dx;break;}
+          }
+        }
 
         const pos = new THREE.Vector3(posX, 1.35, posZ);
         const obj = monument.build(pos);
-        const gridScale = obj.userData.isTaipei101 ? obj.userData.canonicalScale : 0.75;
+        const gridScale = (obj.userData.fixedTowerHeight || obj.userData.fixedMonumentWidth) ? obj.userData.canonicalScale : 0.75;
         Object.assign(obj.userData, { targetScale: gridScale, monumentIndex: idx });
         obj.scale.setScalar(gridScale);
+        shiftObjectOutsideSchool(obj);
         scene.add(obj);
         spawnedIslandObjects.push(obj);
       });
@@ -10725,6 +11340,7 @@ return {compose, length};
             a.head.rotation.y = Math.sin(animTime * 2.5) * 0.2;
           }
         }
+        keepWalkerOutsideSchool(a.group,.38);
         // 動物會移動，因此每一幀都限制在島內安全半徑，避免走到海面。
         const landLimit = 15.0;
         const animalRadius = Math.hypot(a.group.position.x, a.group.position.z);
@@ -10751,6 +11367,7 @@ return {compose, length};
         const walkCycle = Math.sin(t * 3.5 + p.offset);
         if (p.arm) p.arm.rotation.z = -0.4 + walkCycle * 0.45;
         p.group.position.x = p.baseX + Math.sin(t * 1.2 + p.offset) * p.walkRange;
+        keepWalkerOutsideSchool(p.group,.35);
       });
 
       walkingCelebrities.forEach(c => {
@@ -10782,6 +11399,8 @@ return {compose, length};
           const dz = -Math.sin(animTime) * rz;
           c.group.rotation.y = Math.atan2(dx, dz);
         }
+
+        keepWalkerOutsideSchool(c.group,.4);
 
         // 巴斯光年：隨機散步後展翼、升至巴黎鐵塔約 4.5 單位的高度、繞島三圈再降落。
         if (c.buzzFlight) {
@@ -10898,7 +11517,7 @@ return {compose, length};
   // SV.01-133：將既有控制按鈕移入手機／平板右側可收合選單；桌面寬度時還原原始 DOM 位置與布局。
   (function () {
     const mq = window.matchMedia('(max-width: 760px)');
-    const controlIds = ['bgmBtn','muteBtn','ambientSoundBtn','ambientVolSlider','lightningSystemBtn','screensaverBtn','inspectorBtn'];
+    const controlIds = ['bgmBtn','muteBtn','ambientSoundBtn','graphicsQualityBtn','ambientVolSlider','lightningSystemBtn','screensaverBtn','inspectorBtn'];
     const nodes = new Map();
     const dock = document.createElement('aside');
     dock.id = 'mobileControlDock';
@@ -11001,7 +11620,7 @@ return {compose, length};
     function moveIntoMobile() {
       if (isMobile) return;
       isMobile = true;
-      const audioIds = ['bgmBtn','muteBtn','ambientSoundBtn','ambientVolSlider'];
+      const audioIds = ['bgmBtn','muteBtn','ambientSoundBtn','graphicsQualityBtn','ambientVolSlider'];
       const systemIds = ['lightningSystemBtn','screensaverBtn','inspectorBtn'];
       audioIds.forEach(id => {
         const info = nodes.get(id); if (!info) return;
