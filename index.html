@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>我的夢想島：中文打字開拓記（S.V01 - 184）</title>
+  <title>我的夢想島：中文打字開拓記（S.V01 - 190）</title>
   <script data-goatcounter="https://elsu.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
   <!-- 版本：SV.01-158｜安平古堡防重疊並調至第35位 -->
   <!-- Tailwind CSS CDN -->
@@ -11,7 +11,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&family=Roboto:wght@100;200;300&display=swap" rel="stylesheet">
   <!-- Three.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
@@ -791,11 +791,141 @@ function buildDreamRiver(terrainGroup, options = {}){
       #movableQuestionPanel .panel-position-reset { display:none !important; }
     }
 
+    /* S.V01-188：右下角半透明呼吸光圓形按鍵；佈置工具列保留低彩度分組。 */
+    #layoutEnterBtn {
+      position:fixed;
+      right:34px;
+      bottom:67px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      width:76px;
+      height:76px;
+      padding:0 !important;
+      background:rgba(255,255,255,.07) !important;
+      color:#fff !important;
+      border:1.5px solid rgba(255,255,255,.78);
+      border-radius:50%;
+      box-shadow:0 0 10px rgba(255,255,255,.10),inset 0 0 10px rgba(255,255,255,.045) !important;
+      font-weight:700;
+      font-size:15px;
+      line-height:1.16;
+      letter-spacing:.055em;
+      text-shadow:0 0 8px rgba(255,255,255,.45),0 1px 4px rgba(0,0,0,.35);
+      animation:layoutButtonBreathe 3s ease-in-out infinite;
+    }
+    #layoutEnterBtn.hidden { display:none !important; }
+    #layoutEnterBtn:hover { animation-play-state:paused;opacity:1;border-color:#fff;box-shadow:0 0 18px rgba(255,255,255,.35) !important; }
+    @keyframes layoutButtonBreathe {
+      0%,100% { opacity:.58;filter:brightness(.82); }
+      50% { opacity:1;filter:brightness(1.22); }
+    }
+    @media (prefers-reduced-motion:reduce) { #layoutEnterBtn { animation:none;opacity:.9; } }
+    #layoutToolbar {
+      width:min(720px,calc(100vw - 24px));
+      max-height:calc(100dvh - 24px);
+      overflow-y:auto;
+      border:1px solid rgba(255,255,255,.20);
+      border-radius:14px;
+      padding:12px 14px 10px;
+      background:rgba(15,23,42,.90);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+      box-shadow:0 12px 35px rgba(0,0,0,.26);
+      touch-action:manipulation;
+    }
+    #layoutToolbar .layout-toolbar-heading { display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px; }
+    #layoutToolbar .layout-toolbar-title { color:#f8fafc;font-size:13px;font-weight:800;letter-spacing:.08em;white-space:nowrap; }
+    #layoutToolbar #layoutSelectedName { flex:1;min-width:0;color:#a5b4c7;font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right; }
+    #layoutToolbar .layout-reset-all { flex-shrink:0;color:#cbd5e1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:6px 9px;font-size:11px;font-weight:600; }
+    #layoutToolbar .layout-reset-all:hover { background:rgba(255,255,255,.16); }
+    #layoutToolbar .layout-toolbar-groups { display:flex;flex-wrap:wrap;gap:7px;align-items:stretch; }
+    #layoutToolbar .layout-toolbar-group { display:flex;align-items:center;gap:5px;padding:5px 6px;border:1px solid rgba(148,163,184,.15);background:rgba(148,163,184,.07);border-radius:9px; }
+    #layoutToolbar .layout-toolbar-group-title { font-size:10px;color:#94a3b8;padding:0 4px;white-space:nowrap; }
+    #layoutToolbar .layout-action { color:#e2e8f0;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.10);border-radius:6px;padding:7px 9px;font-size:12px;font-weight:600;white-space:nowrap;line-height:1.25; }
+    #layoutToolbar .layout-action:hover:not(:disabled) { background:rgba(255,255,255,.17); }
+    #layoutToolbar .layout-action:disabled { opacity:.35;cursor:default; }
+    #layoutToolbar .layout-action-warning { color:#fecaca;border-color:rgba(248,113,113,.20); }
+    #layoutToolbar .layout-action-save { color:#052e26;background:#6ee7b7;border-color:transparent;font-weight:800; }
+    #layoutToolbar .layout-action-save:hover:not(:disabled) { background:#a7f3d0; }
+    #layoutToolbar #layoutStatus { padding-top:9px;margin-top:9px;border-top:1px solid rgba(255,255,255,.11);font-size:11px;line-height:1.4;color:#94a3b8; }
+    @media (max-width:620px) {
+      #layoutEnterBtn { right:14px;bottom:calc(env(safe-area-inset-bottom) + 94px);width:68px;height:68px;font-size:13px; }
+      #layoutToolbar { padding:10px; }
+      #layoutToolbar .layout-toolbar-heading { flex-wrap:wrap;gap:4px;margin-bottom:7px; }
+      #layoutToolbar .layout-toolbar-groups { gap:5px; }
+      #layoutToolbar .layout-toolbar-group { flex-wrap:wrap;gap:4px; }
+      #layoutToolbar .layout-action { padding:7px 8px;font-size:11px; }
+    }
+
   </style>
 
   <style>
     /* S.V01 - 173：左側直式遠近拉桿，只在行動版顯示。 */
     #mobileIslandZoomRail { display:none; }
+    /* S.V01-190：三款白色時鐘，支援拖曳記憶與五秒提示。 */
+    #screensaverClock {
+      position:fixed; z-index:42; top:18%; left:50%; transform:translate(-50%,-50%);
+      width:max-content; max-width:94vw; pointer-events:auto; touch-action:none;
+      cursor:grab; user-select:none; -webkit-user-select:none; text-align:center;
+      color:#fff; font-variant-numeric:tabular-nums;
+      font-size:clamp(56px,10vw,168px); line-height:1; letter-spacing:-.045em;
+      text-shadow:0 4px 24px rgba(0,0,0,.38),0 1px 3px rgba(0,0,0,.35);
+    }
+    #screensaverClock.dragging {cursor:grabbing;}
+    #screensaverClock.clock-a {
+      font-family:Impact,'Arial Narrow','Roboto Condensed','Arial Black',sans-serif;
+      font-weight:900; font-stretch:condensed; letter-spacing:-.035em;
+    }
+    #screensaverClock.clock-b {
+      font-family:Roboto,'Helvetica Neue','Segoe UI Light',Arial,sans-serif;
+      font-weight:100; letter-spacing:-.035em; font-size:clamp(58px,9.6vw,162px);
+    }
+    #screensaverClock.clock-c {
+      font-family:Didot,'Bodoni MT','Times New Roman',serif;
+      font-weight:400; letter-spacing:-.035em; font-size:clamp(58px,9.6vw,162px);
+    }
+    #screensaverClock .clock-period {display:inline-block; vertical-align:baseline;}
+    #screensaverClock.clock-b .clock-period {
+      font-family:Roboto,'Helvetica Neue',Arial,sans-serif;
+      font-weight:100; font-size:.27em; vertical-align:top;
+      margin-left:.12em; letter-spacing:-.025em; line-height:1.25;
+    }
+    #screensaverClock.clock-c .clock-period {
+      display:block; font-family:Georgia,serif; font-size:.20em;
+      letter-spacing:.20em; font-weight:400; line-height:1.65;
+    }
+    #screensaverClock.clock-c .clock-period::before,
+    #screensaverClock.clock-c .clock-period::after {
+      content:''; display:inline-block; vertical-align:middle;
+      width:1.5em; border-top:1px solid rgba(255,255,255,.7); margin:0 .75em;
+    }
+    #screensaverClock .clock-drag-hint {
+      display:block; width:100%; margin-top:13px; font:500 13px/1.5 'Noto Sans TC',sans-serif;
+      letter-spacing:.12em; color:rgba(255,255,255,.93); text-align:center;
+      white-space:nowrap; opacity:0; visibility:hidden;
+      transition:opacity .65s ease,visibility .65s ease; pointer-events:none;
+      text-shadow:0 2px 8px rgba(0,0,0,.65);
+    }
+    #screensaverClock .clock-drag-hint.visible {opacity:1;visibility:visible;}
+    @media(max-width:760px) {
+      #screensaverClock {font-size:clamp(46px,13vw,95px);}
+      #screensaverClock.clock-b,#screensaverClock.clock-c {font-size:clamp(46px,12.8vw,93px);}
+      #screensaverClock .clock-drag-hint {font-size:11px;margin-top:9px;}
+    }
+    #screensaverClock.hidden {display:none!important;}
+    .island-choice-menu[hidden] {display:none!important;}
+    .island-choice-menu {
+      position:fixed; z-index:250; min-width:166px; padding:6px;
+      border:1px solid rgba(255,255,255,.25); border-radius:14px;
+      background:rgba(15,23,42,.97); box-shadow:0 12px 32px rgba(0,0,0,.45);
+    }
+    .island-choice-menu button {display:block; width:100%; text-align:left; padding:10px 12px;
+      border-radius:9px; font-size:13px; font-weight:700; color:#fff;}
+    .island-choice-menu button:hover,.island-choice-menu button[aria-pressed="true"] {
+      background:rgba(16,185,129,.27);
+    }
     /* S.V01-184：螢幕保護時隱藏行動版獨立浮動元件，退出後自動恢復。 */
     body.island-screensaver-active #mobileIslandZoomRail,
     body.island-screensaver-active #mobileVitalityBadge { display:none !important; }
@@ -1424,8 +1554,9 @@ function createCurvedSchoolGate(pos,options={}){
   box(2.30,.12,.18,0,1.70,back,mats.frame);
  }
  // School-name board and its separate supports intentionally omitted.
+ // S.V01-186：入口階梯必須指定可受日夜調色控制的材質，避免預設白色亮條。
  // A small stepped approach and low planting beds complete the gate rather than a full campus.
- if(options.base!==false){box(9.7,.12,5.4,0,.06,-.45,mats.base);for(let i=0;i<3;i++)box(4.7+i*.16,.055,.27,0,.12+i*.06,1.08-i*.24);
+ if(options.base!==false){box(9.7,.12,5.4,0,.06,-.45,mats.base);for(let i=0;i<3;i++)box(4.7+i*.16,.055,.27,0,.12+i*.06,1.08-i*.24,mats.base);
   for(const side of [-1,1]){box(1.1,.18,.7,side*4.12,.21,.92,mats.wall);for(let k=0;k<3;k++)add(new T.SphereGeometry(1,8,6),mats.leaf,[side*4.12+(k-1)*.28,.47,.92],[.30,.26,.27]);}
  }
  for(const [mat,parts]of pools){const g=new T.BufferGeometry();for(const key of ['position','normal','uv']){if(!parts.every(p=>p.attributes[key]))continue;const n=parts[0].attributes[key].itemSize,data=new Float32Array(parts.reduce((n,p)=>n+p.attributes[key].array.length,0));let off=0;for(const p of parts){data.set(p.attributes[key].array,off);off+=p.attributes[key].array.length;}g.setAttribute(key,new T.BufferAttribute(data,n));}const mesh=new T.Mesh(g,mat);mesh.castShadow=options.shadows===true;mesh.receiveShadow=options.shadows===true;root.add(mesh);owned.push(g);parts.forEach(g=>g.dispose());}
@@ -1489,8 +1620,8 @@ function createCurvedSchoolGate(pos,options={}){
           <span id="scoreEl" class="font-black text-emerald-400 text-xs sm:text-sm">0</span>
         </div>
 
-        <!-- 純文字音樂按鈕 (四段循環：音樂1 → 音樂2 → 音樂3 → 音樂關) -->
-        <button id="bgmBtn" class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95">
+        <!-- 桌機四選一下拉；行動版仍保留原按鍵操作。 -->
+        <button id="bgmBtn" aria-haspopup="true" aria-expanded="false" aria-controls="bgmChoiceMenu" class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95">
           音樂1
         </button>
 
@@ -1531,8 +1662,8 @@ function createCurvedSchoolGate(pos,options={}){
           <span>地標圖鑑</span>
         </button>
 
-        <!-- 螢幕保護模式按鈕（一開始即可自由開啟） -->
-        <button id="screensaverBtn" class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95 flex items-center gap-1">
+        <!-- 三選一下拉：一般觀賞／時計觀賞／關閉。 -->
+        <button id="screensaverBtn" aria-haspopup="true" aria-expanded="false" aria-controls="screensaverChoiceMenu" class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95 flex items-center gap-1">
           <span>螢幕保護</span>
         </button>
       </div>
@@ -1622,7 +1753,7 @@ function createCurvedSchoolGate(pos,options={}){
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
       <div class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 flex flex-col items-start gap-0.5 text-slate-400 select-none pointer-events-none">
-        <span id="gameVersionBadge" class="font-mono font-medium">(S.V01 - 184)</span>
+        <span id="gameVersionBadge" class="font-mono font-medium">(S.V01 - 190)</span>
         <span id="gameVisitCount" aria-live="polite">累積瀏覽次數：讀取中</span>
       </div>
       <script>
@@ -1655,7 +1786,38 @@ function createCurvedSchoolGate(pos,options={}){
     </footer>
   </div>
 
+  <!-- 時計只在「螢幕保護時計開」模式顯示，依裝置本地時間更新。 -->
+  <div id="screensaverClock" class="hidden" role="timer" aria-label="現在時間"></div>
+
   <!-- 螢幕保護模式退出提示浮標 -->
+  <!-- 完成全部地標與人物試煉後才顯示；開發祕技 layout 可直接測試。 -->
+  <button id="layoutEnterBtn" type="button" class="hidden z-40 interactive" aria-label="開始佈置"><span>開始</span><span>佈置</span></button>
+  <div id="layoutToolbar" class="hidden fixed z-40 left-1/2 -translate-x-1/2 top-3 text-white interactive">
+    <div class="layout-toolbar-heading">
+      <span class="layout-toolbar-title">島嶼佈置</span>
+      <span id="layoutSelectedName">點選地標或樹木，再拖曳移動</span>
+      <button id="layoutResetAll" type="button" class="layout-reset-all" title="將所有地標與樹木還原為本局最初生成的位置">回到初始狀態</button>
+    </div>
+    <div class="layout-toolbar-groups">
+      <div class="layout-toolbar-group">
+        <span class="layout-toolbar-group-title">物件</span>
+        <button id="layoutTurnLeft" type="button" class="layout-action" aria-label="物件向左旋轉十五度">左轉 15°</button>
+        <button id="layoutTurnRight" type="button" class="layout-action" aria-label="物件向右旋轉十五度">右轉 15°</button>
+        <button id="layoutUndoObject" type="button" class="layout-action">還原物件</button>
+        <button id="layoutDeleteTree" type="button" class="layout-action layout-action-warning hidden">刪除樹木</button>
+      </div>
+      <div class="layout-toolbar-group">
+        <span class="layout-toolbar-group-title">紀錄</span>
+        <button id="layoutUndoStep" type="button" class="layout-action" disabled>上一步</button>
+        <button id="layoutRedoStep" type="button" class="layout-action" disabled>下一步</button>
+      </div>
+      <div class="layout-toolbar-group">
+        <button id="layoutCancelBtn" type="button" class="layout-action">取消</button>
+        <button id="layoutSaveBtn" type="button" class="layout-action layout-action-save">完成佈置・儲存</button>
+      </div>
+    </div>
+    <div id="layoutStatus">拖曳物件可移動；在空白處拖曳可旋轉島嶼；只有樹木可以刪除。</div>
+  </div>
   <div id="screensaverExitBadge" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-full glass-hud text-xs sm:text-sm font-bold text-white shadow-2xl cursor-pointer hover:bg-slate-800/90 transition active:scale-95 border border-emerald-400/40 animate-pulse">
     ✨ 螢幕保護觀賞中 ‧ 點擊此處或按 ESC 退出
   </div>
@@ -6107,6 +6269,16 @@ return {compose, length};
     const fadingShieldRoots = [];
     let currentCreationIndex = 0;
     let specialMonumentsSpawned = 0;
+    // 草地 ExtrudeGeometry 上表面 = 底部 0.72 + 深度 0.75 + bevel 0.25。
+    // 原本許多物件以 1.35 生成，導致底座有約 0.37 單位埋進草地。
+    const ISLAND_GRASS_SURFACE_Y = 1.72;
+    const ISLAND_DECOR_BASE_Y = ISLAND_GRASS_SURFACE_Y + 0.04;
+    // S.V01-186：燈塔位於島心偏向主要視角的河流前側草地，避開後方山峰遮擋。
+    // 開局即預留；燈塔底座半徑約 2.15，另留其他建物及旋轉餘裕。
+    const ELUANBI_SITE = Object.freeze({ x: 0, z: 3.6, radius: 5.2 });
+    function outsideEluanbiSite(x, z, objectRadius = 0) {
+      return Math.hypot(x - ELUANBI_SITE.x, z - ELUANBI_SITE.z) >= ELUANBI_SITE.radius + objectRadius;
+    }
     let isEternalVitality = false;
     let isScreensaverActive = false;
 
@@ -6184,6 +6356,8 @@ return {compose, length};
       return true;
     }
     function schoolGateSiteLegal(f) {
+      // 學校彩蛋也不得占用最後才登場的中央燈塔保留地。
+      if (!schoolFootprintCorners(f).every(p => outsideEluanbiSite(p.x, p.z))) return false;
       // 檢查整塊矩形：四角、四邊及內部取樣，而不是只看中心。
       const pts=schoolFootprintCorners(f),grid=[];
       for(let i=0;i<=8;i++)for(let j=0;j<=5;j++) {
@@ -6281,6 +6455,362 @@ return {compose, length};
     }
 
     const spawnedIslandObjects = [];
+    // 島嶼佈置模式：僅儲存位置與水平轉角，不儲存答題進度，也不需要登入。
+    const LAYOUT_STORAGE_KEY = 'elsu-dream-island-layout-v1';
+    let savedIslandLayout = {};
+    try {
+      const stored = JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY) || '{}');
+      if (stored && typeof stored === 'object' && !Array.isArray(stored)) savedIslandLayout = stored;
+    } catch (error) { console.warn('島嶼佈置紀錄無法讀取：', error); }
+    const layoutInitialTrees = [];
+    const completedLayoutTrials = new Set();
+    let layoutUnlocked = false;
+    let layoutDebugPending = false;
+    let layoutEditing = false;
+    let layoutPointerActive = false;
+    let layoutSelectedObject = null;
+    let layoutSnapshot = new Map();
+    let layoutUndoHistory = [];
+    let layoutHistoryIndex = 0;
+    let layoutResetRequested = false;
+    let layoutCameraRestore = null;
+    let layoutWasPaused = false;
+    let layoutCameraBlend = 0;
+    let layoutSelectionRing = null;
+    const layoutRaycaster = new THREE.Raycaster();
+    const layoutPointerNDC = new THREE.Vector2();
+    const layoutDragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -1.35);
+    const layoutIntersection = new THREE.Vector3();
+    const layoutEnterBtn = document.getElementById('layoutEnterBtn');
+    const layoutToolbar = document.getElementById('layoutToolbar');
+    const layoutSelectedName = document.getElementById('layoutSelectedName');
+    const layoutStatus = document.getElementById('layoutStatus');
+    const layoutDeleteTreeBtn = document.getElementById('layoutDeleteTree');
+    const layoutUndoStepBtn = document.getElementById('layoutUndoStep');
+    const layoutRedoStepBtn = document.getElementById('layoutRedoStep');
+    function layoutIsGroundDecoration(obj) {
+      return !!(obj && obj.userData && obj.userData.layoutKey && obj.parent);
+    }
+    function allLayoutObjects() {
+      return [...layoutInitialTrees, ...spawnedIslandObjects].filter(layoutIsGroundDecoration);
+    }
+    function allEditableLayoutObjects() {
+      return allLayoutObjects().filter(obj => !obj.userData.layoutDeleted && obj.visible);
+    }
+    function applyStoredLayout(obj) {
+      // 紀錄本局尚未套用個人佈置前的原始位置，供「回到初始狀態」使用。
+      if (!obj.userData.layoutDefault) {
+        obj.userData.layoutDefault={x:obj.position.x,z:obj.position.z,yaw:obj.rotation.y,deleted:false};
+      }
+      const key = obj.userData && obj.userData.layoutKey;
+      const saved = key && savedIslandLayout[key];
+      if (!saved) return;
+      if (obj.userData.layoutTree && saved.deleted === true) {
+        obj.userData.layoutDeleted = true;
+        obj.visible = false;
+      }
+      if (!Number.isFinite(saved.x) || !Number.isFinite(saved.z) || !Number.isFinite(saved.yaw)) return;
+      obj.position.x = saved.x;
+      obj.position.z = saved.z;
+      obj.rotation.y = saved.yaw;
+    }
+    function updateLayoutEntry() {
+      if (layoutEnterBtn) layoutEnterBtn.classList.toggle('hidden', !layoutUnlocked || layoutEditing || isScreensaverActive || gameState !== 'RUNNING');
+    }
+    function evaluateLayoutUnlock() {
+      if (layoutUnlocked || specialMonumentsSpawned < 50 || completedLayoutTrials.size < Object.keys(MILESTONE_SPECIAL_TRIALS).length) return;
+      layoutUnlocked = true;
+      updateLayoutEntry();
+      showCheatNotice('🎉 您已經解鎖佈置模式！點選「開始佈置」打造自己的夢想島。');
+    }
+    function layoutCheckPlacement(obj, x, z) {
+      const isSea = !!obj.userData.layoutSea;
+      const isTree = !!obj.userData.layoutTree;
+      const radial = Math.hypot(x, z);
+      if (isSea) {
+        if (radial < 13.8 || radial > 34) return false;
+      } else {
+        // 直接偵測真正的 3D 草地網格，不再使用橢圓、山體估算範圍或河道緩衝區。
+        // 因為過去那些隱形限制，把視覺上明明是草地的大片區域錯誤封鎖。
+        if (!layoutHasGrassBelow(x,z)) return false;
+      }
+      for (const other of allEditableLayoutObjects()) {
+        if (other === obj || !other.parent) continue;
+        const otherTree = !!other.userData.layoutTree;
+        // 允許樹木互相靠近與地標混搭；只防止兩座地標中心幾乎重疊。
+        if (!isTree && !otherTree && Math.hypot(x-other.position.x,z-other.position.z) < 0.55) return false;
+      }
+      return true;
+    }
+    const layoutGroundRay = new THREE.Raycaster();
+    function layoutHasGrassBelow(x,z) {
+      if (!islandGrassMesh) return false;
+      islandGrassMesh.updateMatrixWorld(true);
+      layoutGroundRay.set(new THREE.Vector3(x,40,z),new THREE.Vector3(0,-1,0));
+      const grassHit=layoutGroundRay.intersectObject(islandGrassMesh,false).find(hit => hit.face && hit.face.normal.y > 0.5);
+      if (!grassHit) return false;
+      // 僅阻止落在「真正的山體」上方，不再用超大的山區圓形預估禁放。
+      if (layoutMountainMeshes.length) {
+        const rockHits=layoutGroundRay.intersectObjects(layoutMountainMeshes,false);
+        if (rockHits.some(hit => hit.point.y > ISLAND_GRASS_SURFACE_Y + 0.2)) return false;
+      }
+      return true;
+    }
+    function layoutObjectState(obj) {
+      return { x:obj.position.x,z:obj.position.z,yaw:obj.rotation.y,deleted:!!obj.userData.layoutDeleted };
+    }
+    function layoutRestoreState(obj,state) {
+      if (!obj || !state) return;
+      obj.position.x=state.x;obj.position.z=state.z;obj.rotation.y=state.yaw;
+      obj.userData.layoutDeleted=!!(obj.userData.layoutTree && state.deleted);
+      obj.visible=!obj.userData.layoutDeleted;
+    }
+    function layoutSameState(a,b) {
+      return a && b && a.x===b.x && a.z===b.z && a.yaw===b.yaw && a.deleted===b.deleted;
+    }
+    function layoutUpdateHistoryButtons() {
+      layoutUndoStepBtn.disabled=layoutHistoryIndex===0;
+      layoutRedoStepBtn.disabled=layoutHistoryIndex===layoutUndoHistory.length;
+    }
+    function layoutRecordChange(obj,before) {
+      const after=layoutObjectState(obj);
+      if (layoutSameState(before,after)) return;
+      layoutUndoHistory.length=layoutHistoryIndex;
+      layoutUndoHistory.push({obj,before,after,resetBefore:layoutResetRequested,resetAfter:layoutResetRequested});
+      if(layoutUndoHistory.length>100)layoutUndoHistory.shift();
+      layoutHistoryIndex=layoutUndoHistory.length;
+      layoutUpdateHistoryButtons();
+    }
+    function layoutSetSelected(obj) {
+      layoutSelectedObject = obj;
+      if (layoutSelectedName) layoutSelectedName.textContent = obj ? (obj.userData.layoutLabel || obj.name || '已選取') : '點選地標或樹木，再拖曳移動';
+      if (layoutSelectionRing) layoutSelectionRing.visible = !!obj;
+      layoutDeleteTreeBtn.classList.toggle('hidden',!obj || !obj.userData.layoutTree);
+    }
+    function enterIslandLayoutMode() {
+      if (!layoutUnlocked || layoutEditing || !renderer || !camera) return;
+      if (lightningStormActive) { showCheatNotice('請等待本次閃電結束，再開始佈置。'); return; }
+      if (renderModeActive) stopRenderMode('已進入島嶼佈置模式。');
+      layoutEditing = true;
+      layoutWasPaused = isIslandPaused;
+      isIslandPaused = true;
+      layoutCameraRestore = { angle:sphericalAngle, dist:targetCamDist, look:targetCamLookAt.clone() };
+      targetCamLookAt.set(0, 1.3, 0);
+      targetCamDist = 40;
+      layoutSnapshot = new Map(allLayoutObjects().map(obj => [obj, layoutObjectState(obj)]));
+      layoutUndoHistory=[];
+      layoutHistoryIndex=0;
+      layoutResetRequested=false;
+      layoutUpdateHistoryButtons();
+      if (!layoutSelectionRing) {
+        layoutSelectionRing = new THREE.Mesh(new THREE.RingGeometry(1.2,1.35,40),new THREE.MeshBasicMaterial({color:0x6ee7b7,transparent:true,opacity:0.8,side:THREE.DoubleSide,depthWrite:false}));
+        layoutSelectionRing.rotation.x=-Math.PI/2;
+        layoutSelectionRing.renderOrder=20;
+        scene.add(layoutSelectionRing);
+      }
+      layoutSetSelected(null);
+      layoutToolbar.classList.remove('hidden');
+      if (layoutEnterBtn) layoutEnterBtn.classList.add('hidden');
+      if (typeInput) typeInput.blur();
+      if (layoutStatus) { layoutStatus.textContent = '拖曳物件可移動；在空白處拖曳可旋轉島嶼。只有樹木可刪除。'; layoutStatus.style.color='#cbd5e1'; }
+    }
+    function leaveIslandLayoutMode(save) {
+      if (!layoutEditing) return;
+      layoutPointerActive = false;
+      if (save) {
+        // 保留先前已儲存、但本局因閃電而缺席的物件配置。
+        // 使用者按了全島重設，就把先前未出現在本局的舊佈置紀錄一併清掉。
+        const next = layoutResetRequested ? {} : { ...savedIslandLayout };
+        for (const obj of allLayoutObjects()) {
+          const current=layoutObjectState(obj);
+          // 重設後若沒有再編輯，該物件恢復日後正常隨機生成，不鎖定這一局的初始座標。
+          if (layoutResetRequested && layoutSameState(current,obj.userData.layoutDefault)) continue;
+          next[obj.userData.layoutKey] = current;
+        }
+        try {
+          localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(next));
+          savedIslandLayout = next;
+          showCheatNotice('🏝️ 島嶼佈置已儲存！下次遊玩會依照這份配置建造。');
+        } catch (error) {
+          console.warn('無法儲存島嶼佈置：', error);
+          showCheatNotice('⚠️ 瀏覽器無法儲存佈置，請確認未封鎖網站儲存空間。');
+        }
+      } else {
+        for (const [obj,pos] of layoutSnapshot) {
+          if (!obj.parent) continue;
+          layoutRestoreState(obj,pos);
+        }
+        showCheatNotice('已取消本次佈置，恢復編輯前的位置。');
+      }
+      layoutEditing = false;
+      if (layoutSelectionRing) layoutSelectionRing.visible=false;
+      layoutToolbar.classList.add('hidden');
+      layoutSetSelected(null);
+      layoutSnapshot.clear();
+      layoutUndoHistory=[];
+      layoutHistoryIndex=0;
+      layoutResetRequested=false;
+      layoutUpdateHistoryButtons();
+      isIslandPaused = layoutWasPaused;
+      if (layoutCameraRestore) {
+        sphericalAngle = layoutCameraRestore.angle;
+        targetCamDist = layoutCameraRestore.dist;
+        targetCamLookAt.copy(layoutCameraRestore.look);
+      }
+      layoutCameraRestore = null;
+      updateLayoutEntry();
+      if (typeInput && gameState === 'RUNNING') typeInput.focus();
+    }
+    layoutEnterBtn.addEventListener('click', enterIslandLayoutMode);
+    document.getElementById('layoutSaveBtn').addEventListener('click', () => leaveIslandLayoutMode(true));
+    document.getElementById('layoutCancelBtn').addEventListener('click', () => leaveIslandLayoutMode(false));
+    for (const [id,dir] of [['layoutTurnLeft',-1],['layoutTurnRight',1]]) {
+      document.getElementById(id).addEventListener('click', () => {
+        if (!layoutEditing || !layoutSelectedObject) return;
+        const before=layoutObjectState(layoutSelectedObject);
+        layoutSelectedObject.rotation.y += dir * Math.PI/12;
+        layoutRecordChange(layoutSelectedObject,before);
+      });
+    }
+    document.getElementById('layoutUndoObject').addEventListener('click', () => {
+      if (!layoutEditing || !layoutSelectedObject) return;
+      const p=layoutSnapshot.get(layoutSelectedObject);
+      if(p){
+        const before=layoutObjectState(layoutSelectedObject);
+        layoutRestoreState(layoutSelectedObject,p);
+        layoutRecordChange(layoutSelectedObject,before);
+      }
+    });
+    document.getElementById('layoutResetAll').addEventListener('click', () => {
+      if(!layoutEditing)return;
+      const resetBefore=layoutResetRequested;
+      const changes=[];
+      for(const obj of allLayoutObjects()) {
+        const before=layoutObjectState(obj);
+        const initial=obj.userData.layoutDefault;
+        if(!initial)continue;
+        layoutRestoreState(obj,initial);
+        const after=layoutObjectState(obj);
+        if(!layoutSameState(before,after))changes.push({obj,before,after});
+      }
+      layoutResetRequested=true;
+      layoutSetSelected(null);
+      layoutUndoHistory.length=layoutHistoryIndex;
+      layoutUndoHistory.push({changes,resetBefore,resetAfter:true});
+      if(layoutUndoHistory.length>100)layoutUndoHistory.shift();
+      layoutHistoryIndex=layoutUndoHistory.length;
+      layoutUpdateHistoryButtons();
+      layoutStatus.textContent='已回到本局最初生成的位置；可按「上一步」撤銷，按「完成佈置・儲存」才會正式保存。';
+      layoutStatus.style.color='#a7f3d0';
+    });
+    layoutDeleteTreeBtn.addEventListener('click', () => {
+      const obj=layoutSelectedObject;
+      if(!layoutEditing || !obj || !obj.userData.layoutTree) return;
+      const before=layoutObjectState(obj);
+      obj.userData.layoutDeleted=true;
+      obj.visible=false;
+      layoutRecordChange(obj,before);
+      layoutSetSelected(null);
+      layoutStatus.textContent='樹木已移除。可按「上一步」復原；按「完成佈置・儲存」會記住刪除結果。';
+      layoutStatus.style.color='#a7f3d0';
+    });
+    layoutUndoStepBtn.addEventListener('click', () => {
+      if(!layoutEditing || layoutHistoryIndex===0)return;
+      const action=layoutUndoHistory[--layoutHistoryIndex];
+      if(action.changes){
+        for(const change of action.changes)layoutRestoreState(change.obj,change.before);
+        layoutSetSelected(null);
+      }else{
+        layoutRestoreState(action.obj,action.before);
+        layoutSetSelected(action.obj.userData.layoutDeleted ? null : action.obj);
+      }
+      layoutResetRequested=action.resetBefore;
+      layoutUpdateHistoryButtons();
+    });
+    layoutRedoStepBtn.addEventListener('click', () => {
+      if(!layoutEditing || layoutHistoryIndex===layoutUndoHistory.length)return;
+      const action=layoutUndoHistory[layoutHistoryIndex++];
+      if(action.changes){
+        for(const change of action.changes)layoutRestoreState(change.obj,change.after);
+        layoutSetSelected(null);
+      }else{
+        layoutRestoreState(action.obj,action.after);
+        layoutSetSelected(action.obj.userData.layoutDeleted ? null : action.obj);
+      }
+      layoutResetRequested=action.resetAfter;
+      layoutUpdateHistoryButtons();
+    });
+    function layoutPointerRay(event) {
+      const rect=renderer.domElement.getBoundingClientRect();
+      layoutPointerNDC.set((event.clientX-rect.left)/rect.width*2-1, -(event.clientY-rect.top)/rect.height*2+1);
+      layoutRaycaster.setFromCamera(layoutPointerNDC,camera);
+    }
+    function setupLayoutPointerControls() {
+      const canvas = renderer.domElement;
+      let lastValid = null;
+      let dragStart = null;
+      let dragStateBefore = null;
+      const dragOffset = new THREE.Vector3();
+      canvas.addEventListener('pointerdown',event => {
+        if (!layoutEditing || event.button > 0) return;
+        layoutPointerRay(event);
+        const objects=allEditableLayoutObjects();
+        const hits=layoutRaycaster.intersectObjects(objects,true);
+        const hit=hits.find(h => {
+          let obj=h.object;while(obj && !objects.includes(obj))obj=obj.parent;
+          if(obj){h.layoutRoot=obj;return true;}return false;
+        });
+        if (!hit) {layoutSetSelected(null);return;}
+        const obj=hit.layoutRoot;
+        layoutSetSelected(obj);
+        layoutPointerActive=true;
+        dragStateBefore=layoutObjectState(obj);
+        dragStart={x:obj.position.x,z:obj.position.z};
+        lastValid=layoutCheckPlacement(obj,obj.position.x,obj.position.z) ? {...dragStart} : null;
+        layoutDragPlane.constant=-obj.position.y;
+        if (layoutRaycaster.ray.intersectPlane(layoutDragPlane,layoutIntersection)) {
+          dragOffset.set(obj.position.x-layoutIntersection.x,0,obj.position.z-layoutIntersection.z);
+        } else {
+          dragOffset.set(0,0,0);
+        }
+        canvas.setPointerCapture(event.pointerId);
+        canvas.style.touchAction='none';
+        event.preventDefault();
+      });
+      canvas.addEventListener('pointermove',event => {
+        if (!layoutEditing || !layoutPointerActive || !layoutSelectedObject) return;
+        layoutPointerRay(event);
+        if (!layoutRaycaster.ray.intersectPlane(layoutDragPlane,layoutIntersection)) return;
+        const x=layoutIntersection.x+dragOffset.x,z=layoutIntersection.z+dragOffset.z;
+        // 拖曳期間永遠跟隨滑鼠；合法性只決定能否在放開時留下。
+        layoutSelectedObject.position.x=x;layoutSelectedObject.position.z=z;
+        if (layoutCheckPlacement(layoutSelectedObject,x,z)) {
+          lastValid={x,z};
+          layoutStatus.textContent='位置有效，可以放下物件。';
+          layoutStatus.style.color='#a7f3d0';
+        } else {
+          layoutStatus.textContent='此處沒有可放置的草地（或地標中心重疊）；請拖到綠色草地上。';
+          layoutStatus.style.color='#fda4af';
+        }
+        event.preventDefault();
+      });
+      const end=event=>{
+        if(!layoutPointerActive)return;
+        if(layoutSelectedObject){
+          const position = lastValid || dragStart;
+          if(position){layoutSelectedObject.position.x=position.x;layoutSelectedObject.position.z=position.z;}
+          if(event.type==='pointerup' && dragStateBefore)layoutRecordChange(layoutSelectedObject,dragStateBefore);
+        }
+        layoutPointerActive=false;
+        lastValid=null;
+        dragStart=null;
+        dragStateBefore=null;
+        if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId);
+        canvas.style.touchAction='';
+      };
+      canvas.addEventListener('pointerup',end);
+      canvas.addEventListener('pointercancel',end);
+    }
     const islandNightLights = [];
     // SV.01-125：台北101彩色夜間煙火粒子與夜晚觸發狀態
     const activeFireworkParticles = [];
@@ -6331,6 +6861,8 @@ return {compose, length};
     let starsParticleSystem = null;
     let riverWaterMesh = null;
     let terrainGroup = null;
+    let islandGrassMesh = null;
+    const layoutMountainMeshes = [];
     const concentricSwellRings = [];
 
     // DOM 元素快取
@@ -6555,6 +7087,124 @@ return {compose, length};
     const ambientVolLabel = document.getElementById('ambientVolLabel');
     const screensaverBtn = document.getElementById('screensaverBtn');
     const screensaverExitBadge = document.getElementById('screensaverExitBadge');
+    const screensaverClock = document.getElementById('screensaverClock');
+    let screensaverClockStyle = null; // null、'a'（粗體）、'b'（極細）、'c'（襯線）
+    const isMobileControlLayout = () => document.body.classList.contains('force-mobile-layout') ||
+      (window.matchMedia('(max-width:760px)').matches && !document.body.classList.contains('force-desktop-layout'));
+
+    // 讓三個以上選項共用同一套選單；雙選項開關繼續使用既有按鍵。
+    function makeIslandChoiceMenu(trigger, id, options, onChoose) {
+      const menu = document.createElement('div');
+      menu.id=id; menu.className='island-choice-menu'; menu.hidden=true;
+      menu.setAttribute('role','group');
+      menu.innerHTML=options.map(([value,label]) =>
+        `<button type="button" data-choice="${value}" aria-pressed="false">${label}</button>`).join('');
+      document.body.appendChild(menu);
+      const close = () => { menu.hidden=true;trigger.setAttribute('aria-expanded','false'); };
+      const place = () => {
+        const r=trigger.getBoundingClientRect(),w=Math.max(166,menu.offsetWidth),h=options.length*41+12;
+        menu.style.left=Math.max(6,Math.min(innerWidth-w-6,r.left))+'px';
+        menu.style.top=(r.bottom+h+8<innerHeight?r.bottom+6:Math.max(6,r.top-h-6))+'px';
+      };
+      const open = () => {
+        document.querySelectorAll('.island-choice-menu').forEach(m=>{if(m!==menu){m.hidden=true;document.getElementById(m.id==='bgmChoiceMenu'?'bgmBtn':'screensaverBtn')?.setAttribute('aria-expanded','false');}});
+        menu.hidden=false;place();trigger.setAttribute('aria-expanded','true');
+      };
+      menu.addEventListener('click',e=>{
+        const btn=e.target.closest('[data-choice]');if(!btn)return;
+        onChoose(btn.dataset.choice);close();
+      });
+      document.addEventListener('pointerdown',e=>{if(!menu.hidden&&!menu.contains(e.target)&&!trigger.contains(e.target))close();});
+      document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden)close();});
+      window.addEventListener('resize',()=>{if(!menu.hidden)place();});
+      return {menu,open,close,toggle:()=>menu.hidden?open():close(),mark:value=>menu.querySelectorAll('[data-choice]').forEach(btn=>{
+        const selected=btn.dataset.choice===String(value);btn.setAttribute('aria-pressed',String(selected));
+        btn.textContent=(selected?'✓ ':'')+options.find(item=>item[0]===btn.dataset.choice)[1];
+      })};
+    }
+    function renderScreensaverClock() {
+      if (!screensaverClock) return;
+      const date=new Date();let hour=date.getHours();
+      const suffix=hour>=12?'pm':'am';hour=hour%12||12;
+      const digits=String(hour).padStart(2,'0')+':'+String(date.getMinutes()).padStart(2,'0');
+      const period=screensaverClockStyle==='c'?suffix.toUpperCase():suffix;
+      let digitsEl=screensaverClock.querySelector('.clock-digits');
+      let periodEl=screensaverClock.querySelector('.clock-period');
+      if(!digitsEl||!periodEl){
+        screensaverClock.innerHTML='<span class="clock-digits"></span><span class="clock-period"></span><span class="clock-drag-hint">可自行拖曳時鐘位置</span>';
+        digitsEl=screensaverClock.querySelector('.clock-digits');
+        periodEl=screensaverClock.querySelector('.clock-period');
+      }
+      digitsEl.textContent=digits;periodEl.textContent=period;
+      screensaverClock.setAttribute('aria-label','現在時間 '+hour+' 點 '+String(date.getMinutes()).padStart(2,'0')+' 分 '+suffix);
+    }
+    renderScreensaverClock();setInterval(renderScreensaverClock,1000);
+    let clockHintTimer=null;
+    function showClockDragHint(){
+      if(clockHintTimer)clearTimeout(clockHintTimer);
+      const hint=screensaverClock?.querySelector('.clock-drag-hint');
+      if(!hint)return;
+      hint.classList.add('visible');
+      clockHintTimer=setTimeout(()=>{hint.classList.remove('visible');clockHintTimer=null;},5000);
+    }
+    function hideClockDragHint(){
+      if(clockHintTimer)clearTimeout(clockHintTimer);
+      clockHintTimer=null;
+      screensaverClock?.querySelector('.clock-drag-hint')?.classList.remove('visible');
+    }
+    // 時鐘 A / B / C 共用座標；手機及電腦各自記憶，不需要登入與載入。
+    const clockStorageKey=()=>isMobileControlLayout()?'island.screensaverClockPosition.mobile':'island.screensaverClockPosition.desktop';
+    const clockPositions={desktop:{x:.5,y:.18},mobile:{x:.5,y:.18}};
+    for (const mode of ['desktop','mobile']) {
+      try {
+        const saved=JSON.parse(localStorage.getItem('island.screensaverClockPosition.'+mode)||'null');
+        if(saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.y))
+          clockPositions[mode]={x:Math.max(0,Math.min(1,saved.x)),y:Math.max(0,Math.min(1,saved.y))};
+      } catch(e) { /* 無法讀取時使用預設位置 */ }
+    }
+    function positionScreensaverClock() {
+      const pos=clockPositions[isMobileControlLayout()?'mobile':'desktop'];
+      screensaverClock.style.left=(pos.x*100)+'%';
+      screensaverClock.style.top=(pos.y*100)+'%';
+    }
+    let clockDrag=null;
+    function stopClockCameraEvent(e) {e.stopPropagation();}
+    ['mousedown','mousemove','mouseup','touchstart','touchmove','touchend','wheel'].forEach(type=>
+      screensaverClock.addEventListener(type,stopClockCameraEvent,{passive:false}));
+    screensaverClock.addEventListener('pointerdown',e=>{
+      if(e.button!==0||!isScreensaverActive||!screensaverClockStyle)return;
+      e.stopPropagation();e.preventDefault();
+      const rect=screensaverClock.getBoundingClientRect();
+      clockDrag={id:e.pointerId,dx:e.clientX-(rect.left+rect.width/2),dy:e.clientY-(rect.top+rect.height/2)};
+      screensaverClock.classList.add('dragging');
+      screensaverClock.setPointerCapture(e.pointerId);
+    });
+    screensaverClock.addEventListener('pointermove',e=>{
+      if(!clockDrag||e.pointerId!==clockDrag.id)return;
+      e.stopPropagation();e.preventDefault();
+      const halfW=screensaverClock.offsetWidth/2, halfH=screensaverClock.offsetHeight/2;
+      const x=Math.max(halfW,Math.min(innerWidth-halfW,e.clientX-clockDrag.dx));
+      const y=Math.max(halfH,Math.min(innerHeight-halfH,e.clientY-clockDrag.dy));
+      clockPositions[isMobileControlLayout()?'mobile':'desktop']={x:x/innerWidth,y:y/innerHeight};
+      positionScreensaverClock();
+    });
+    function finishClockDrag(e) {
+      if(!clockDrag||e.pointerId!==clockDrag.id)return;
+      e.stopPropagation();screensaverClock.classList.remove('dragging');
+      clockDrag=null;
+      try {localStorage.setItem(clockStorageKey(),JSON.stringify(clockPositions[isMobileControlLayout()?'mobile':'desktop']));}catch(err){}
+    }
+    screensaverClock.addEventListener('pointerup',finishClockDrag);
+    screensaverClock.addEventListener('pointercancel',finishClockDrag);
+    window.addEventListener('resize',positionScreensaverClock);
+    new MutationObserver(positionScreensaverClock).observe(document.body,{attributes:true,attributeFilter:['class']});
+    positionScreensaverClock();
+    const screensaverChoices=makeIslandChoiceMenu(screensaverBtn,'screensaverChoiceMenu',[
+      ['normal','螢幕保護開'],['a','螢幕保護時鐘 A'],['b','螢幕保護時鐘 B'],['c','螢幕保護時鐘 C'],['off','螢幕保護關']
+    ],value=>{
+      screensaverClockStyle=['a','b','c'].includes(value)?value:null;
+      toggleScreensaver(value!=='off');
+    });
 
     // 展覽館 DOM
     const inspectorBtn = document.getElementById('inspectorBtn');
@@ -6677,6 +7327,7 @@ return {compose, length};
         createInitialNature();
         createAquaticLife();
         setupCameraControls();
+        setupLayoutPointerControls();
 
         window.addEventListener('resize', onWindowResize);
       } catch (err) {
@@ -7039,6 +7690,7 @@ return {compose, length};
       });
       const grassMesh = new THREE.Mesh(grassGeo, grassMat);
       grassMesh.position.set(0, 0.72, 0);
+      islandGrassMesh = grassMesh;
       grassMesh.receiveShadow = true;
       grassMesh.castShadow = true;
       terrainGroup.add(grassMesh);
@@ -7064,6 +7716,7 @@ return {compose, length};
         cone.position.y = m.h / 2;
         cone.castShadow = true;
         cone.receiveShadow = true;
+        layoutMountainMeshes.push(cone);
         mountainGroup.add(cone);
 
         const snowCap = new THREE.Mesh(new THREE.ConeGeometry(m.r * 0.38, m.snow, 14), snowMat);
@@ -7142,9 +7795,13 @@ return {compose, length};
         { x: 2.7, z: -10.2 }, { x: 7.4, z: -7.4 }, { x: 10.2, z: -2.7 }
       ];
 
-      treeCoords.forEach(pos => {
+      treeCoords.forEach((pos,index) => {
         const tree = new THREE.Group();
-        tree.position.set(pos.x, 0.72, pos.z); // SV.01-158：樹幹底部貼合草地表面，避免影子與樹根分離
+        tree.position.set(pos.x, ISLAND_DECOR_BASE_Y, pos.z); // 樹根貼齊草地真正上表面，不再被草地厚度埋住
+        tree.userData.layoutKey = `initial-tree-${index}`;
+        tree.userData.layoutTree = true;
+        tree.userData.layoutLabel = `環島樹木 ${index+1}`;
+        applyStoredLayout(tree);
         const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.26, 1.4, 6), trunkMat);
         trunk.position.y = 0.7;
         trunk.castShadow = true;
@@ -7155,6 +7812,7 @@ return {compose, length};
 
         tree.add(trunk, foliage);
         terrainGroup.add(tree);
+        layoutInitialTrees.push(tree);
       });
     }
 
@@ -7667,6 +8325,9 @@ return {compose, length};
         const radius = Math.sqrt(minRadius * minRadius + rand() * (maxRadius * maxRadius - minRadius * minRadius));
         const candidate = { x: Math.cos(angle) * radius, z: Math.sin(angle) * radius };
 
+        // 答題生成的一般裝飾物與前 49 座地標，都不得搶占中央燈塔的位置。
+        if (!outsideEluanbiSite(candidate.x, candidate.z)) continue;
+
         if (!schoolGateAvoids(candidate.x,candidate.z,2.5,2.5,0,.28)) continue;
 
         // 島面邊緣保留餘裕：圓形半徑之外再以橢圓限制兩軸，避免候選點落到沙灘外或海上。
@@ -7722,6 +8383,14 @@ return {compose, length};
 
       const objGroup = new THREE.Group();
       objGroup.position.set(posX, 1.35, posZ);
+      const layoutIsTree = /^tree_|^cherry_tree$/.test(blueprint.type);
+      const layoutIsDecor = layoutIsTree || blueprint.type === 'flower_patch' || blueprint.type === 'pier_dock';
+      if (layoutIsDecor) {
+        objGroup.position.y = ISLAND_DECOR_BASE_Y;
+        objGroup.userData.layoutKey = `creation-${currentCreationIndex}`;
+        objGroup.userData.layoutLabel = blueprint.name;
+        objGroup.userData.layoutTree = layoutIsTree;
+      }
 
       if (blueprint.type === "animal_cat") {
         // 多種貓咪花色循環 (橘白貓、黑貓、純白貓、三花貓、虎斑灰貓)
@@ -8451,6 +9120,7 @@ return {compose, length};
       objGroup.scale.set(0.01, 0.01, 0.01);
       scene.add(objGroup);
       shiftObjectOutsideSchool(objGroup);
+      if (layoutIsDecor) applyStoredLayout(objGroup);
       spawnedIslandObjects.push(objGroup);
 
       // 每次答對後都會播放的開拓啵聲也會疊在答對提示音上；只將這個常規開拓音降至原本 20%。
@@ -8475,6 +9145,8 @@ return {compose, length};
       let prevPinchDist = null;
 
       function onPointerDown(e) {
+        // 編輯時點到物件由佈置工具拖曳；點到空白處則保留原本的島嶼旋轉。
+        if (layoutEditing && layoutPointerActive) return;
         if (e.target.closest('.side-control-panel') || e.target.closest('input') || e.target.closest('button')) {
           return;
         }
@@ -8491,6 +9163,7 @@ return {compose, length};
       }
 
       function onPointerMove(e) {
+        if (layoutEditing && layoutPointerActive) return;
         if (e.touches && e.touches.length === 2) {
           const currentPinch = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
@@ -8537,7 +9210,7 @@ return {compose, length};
     function applyCameraPosition(angle = 0, dist = 52) {
       if (!camera) return;
       const look = currentCamLookAt;
-      const camHeight = Math.max(1.8, look.y + dist * 0.52);
+      const camHeight = Math.max(1.8, look.y + dist * (0.52 + layoutCameraBlend * 0.63));
 
       camera.position.x = look.x + Math.sin(angle) * dist;
       camera.position.y = camHeight;
@@ -8936,6 +9609,17 @@ return {compose, length};
       const hudLayer = document.querySelector('.hud-layer');
       const mobileDock = document.getElementById('mobileControlDock');
       const mobileVitality = document.getElementById('mobileVitalityBadge');
+      if (!isScreensaverActive) screensaverClockStyle=null;
+      if (screensaverClock) {
+        screensaverClock.classList.toggle('hidden',!isScreensaverActive||!screensaverClockStyle);
+        screensaverClock.classList.toggle('clock-a',screensaverClockStyle==='a');
+        screensaverClock.classList.toggle('clock-b',screensaverClockStyle==='b');
+        screensaverClock.classList.toggle('clock-c',screensaverClockStyle==='c');
+        if (isScreensaverActive&&screensaverClockStyle) {renderScreensaverClock();positionScreensaverClock();showClockDragHint();}
+        else hideClockDragHint();
+      }
+      screensaverChoices.mark(!isScreensaverActive?'off':screensaverClockStyle||'normal');
+      if (screensaverBtn) screensaverBtn.innerHTML='<span>螢幕保護'+(!isScreensaverActive?'：關':screensaverClockStyle?'：時鐘 '+screensaverClockStyle.toUpperCase():'：開')+' ▾</span>';
       document.body.classList.toggle('island-screensaver-active', isScreensaverActive);
       if (isScreensaverActive) {
         if (hudLayer) hudLayer.classList.add('hidden');
@@ -8952,10 +9636,12 @@ return {compose, length};
           typeInput.focus();
         }
       }
+      // 觀賞螢幕保護時，不顯示「開始佈置」；結束後再依解鎖狀態恢復。
+      updateLayoutEntry();
     }
 
     if (screensaverBtn) {
-      screensaverBtn.addEventListener('click', () => toggleScreensaver(true));
+      screensaverBtn.addEventListener('click', () => screensaverChoices.toggle());
     }
     if (screensaverExitBadge) {
       screensaverExitBadge.addEventListener('click', () => toggleScreensaver(false));
@@ -8983,11 +9669,15 @@ return {compose, length};
       // 若燈塔已經存在，就不重複生成；仍將鏡頭帶到島中央。
       let existing = spawnedIslandObjects.find(obj => obj.userData && obj.userData.isEluanbiLighthouse);
       if (!existing) {
-        existing = lighthouse.build(new THREE.Vector3(0, 1.35, 0));
+        existing = lighthouse.build(new THREE.Vector3(ELUANBI_SITE.x, ISLAND_DECOR_BASE_Y, ELUANBI_SITE.z));
         existing.userData.isEluanbiLighthouse = true;
+        existing.userData.layoutKey = `monument-${SPECIAL_MONUMENTS.findIndex(item => item.name === '鵝鑾鼻燈塔')}`;
+        existing.userData.layoutLabel = '鵝鑾鼻燈塔';
+        existing.userData.layoutRadius = 2.15;
         existing.userData.targetScale = 1.0;
         existing.scale.set(0.01, 0.01, 0.01);
-        existing.position.set(0, 1.35, 0);
+        existing.position.set(ELUANBI_SITE.x, ISLAND_DECOR_BASE_Y, ELUANBI_SITE.z);
+        applyStoredLayout(existing);
         existing.rotation.y = 0;
         scene.add(existing);
         spawnedIslandObjects.push(existing);
@@ -9008,7 +9698,7 @@ return {compose, length};
       }
 
       // 這是「提前欣賞」秘技：不修改正式地標進度、不解鎖彩虹，也不觸發其他里程碑。
-      targetCamLookAt.set(0, 3.0, 0);
+      targetCamLookAt.set(ELUANBI_SITE.x, 3.0, ELUANBI_SITE.z);
       targetCamDist = 20;
       sphericalAngle = 0;
 
@@ -9166,16 +9856,16 @@ return {compose, length};
 
       // 只有正式第 50 座地標「鵝鑾鼻燈塔」固定在中央；其他名稱含「燈塔」的地標照一般規則分散，避免模型重疊。
       if (monument.name === "鵝鑾鼻燈塔" || specialMonumentsSpawned === 50) {
-        posX = 0;
-        posZ = 0;
-        posY = 1.35;
+        posX = ELUANBI_SITE.x;
+        posZ = ELUANBI_SITE.z;
+        posY = ISLAND_DECOR_BASE_Y;
         angle = 0;
       } else if (monument.name === "安平古堡") {
         // SV.01-158：安平古堡固定在島嶼左側紅圈草地區，填補島邊空間；不再使用隨機地標選址。
         // 固定座標靠近島嶼左側，並朝向島心／主要觀景方向，讓白塔與寬闊紅磚建築群容易辨識。
         posX = -10.2;
         posZ = 1.2;
-        posY = 1.35;
+        posY = ISLAND_DECOR_BASE_Y;
         angle = Math.atan2(posZ, posX) + Math.PI;
       } else if (monument.name.includes("淡江大橋")) {
         // 淡江大橋固定放在遠洋大漁船的正對面，與島嶼距離接近；船在 11 點方向，橋就在 5 點方向。
@@ -9235,7 +9925,7 @@ return {compose, length};
         posX = placement.x;
         posZ = placement.z;
         angle = Math.atan2(posZ, posX);
-        posY = 1.35;
+        posY = ISLAND_DECOR_BASE_Y;
       }
 
       const monumentObj = monument.build(new THREE.Vector3(posX, posY, posZ));
@@ -9246,6 +9936,13 @@ return {compose, length};
       const finalMonumentScale = monumentObj.userData.fixedMonumentWidth
         ? monumentObj.userData.canonicalScale
         : (monumentObj.userData.fixedTowerHeight ? monumentObj.userData.canonicalScale : scaleVariation);
+      // S.V01-186：淡江大橋模型橋面局部高度為 1.72、內層比例 22/46。
+      // 舊版以 -1.0 為群組高度，縮放後橋面落到海平面以下。
+      // 只調整整座橋的 Y 位置，讓橋面固定在世界高度 0.55（海面約 0.02），橋墩繼續入水。
+      // 不使用 Box3，避免更動 22 單位橋長、既有比例與夜間光雕設定。
+      if (monument.name.includes('淡江大橋')) {
+        monumentObj.position.y = 0.55 - 1.72 * (22 / 46) * finalMonumentScale;
+      }
       monumentObj.userData.targetScale = finalMonumentScale;
       monumentObj.scale.set(0.01, 0.01, 0.01);
 
@@ -9256,10 +9953,16 @@ return {compose, length};
         // 橋身與已找到的外海船隻平行；若船隻尚未生成，使用水平預設方向。
         monumentObj.rotation.y = bridgeShipRotation !== null ? bridgeShipRotation : 0;
       } else {
-        monumentObj.rotation.y = Math.random() * Math.PI * 2;
+        monumentObj.rotation.y = monument.name === '鵝鑾鼻燈塔' ? 0 : Math.random() * Math.PI * 2;
       }
 
-      shiftObjectOutsideSchool(monumentObj, finalMonumentScale);
+      if (monument.name === '鵝鑾鼻燈塔') monumentObj.userData.isEluanbiLighthouse = true;
+      else shiftObjectOutsideSchool(monumentObj, finalMonumentScale);
+      monumentObj.userData.layoutKey = `monument-${monumentIndex}`;
+      monumentObj.userData.layoutLabel = monument.name;
+      monumentObj.userData.layoutSea = monument.name.includes('淡江大橋') || monument.name.includes('大商船');
+      monumentObj.userData.layoutRadius = monument.name.includes('淡江大橋') ? 3.0 : (monument.name.includes('安平古堡') ? 3.0 : 1.4);
+      applyStoredLayout(monumentObj);
       scene.add(monumentObj);
       spawnedIslandObjects.push(monumentObj);
 
@@ -10075,6 +10778,7 @@ return {compose, length};
       // 若剛剛完成的是隱藏人物試煉題
       if (activeTrial) {
         const trialFinished = activeTrial;
+        completedLayoutTrials.add(trialFinished.charName);
         activeTrial = null;
         pendingTrialMilestone = null;
 
@@ -10117,6 +10821,7 @@ return {compose, length};
       scoreEl.textContent = score;
 
       advanceWord();
+      evaluateLayoutUnlock();
     }
 
     // SV.01-83 算圖模式：自動答對、持續生成一般物件與人物，直到第 50 座地標／永恆綠洲。
@@ -10230,6 +10935,12 @@ return {compose, length};
             triggerAllMilestonesCheat();
             checkEternalVitality();
             if (milestoneCounter) milestoneCounter.textContent = '50 / 50';
+            if (layoutDebugPending) {
+              layoutDebugPending = false;
+              layoutUnlocked = true; // 只讓本局能測試佈置，不偽造答題紀錄。
+              updateLayoutEntry();
+              enterIslandLayoutMode();
+            }
             upgradeBanner.textContent = 'FULL 完成：250 個一般物件、50 座地標與全部人物已自然登場！';
             upgradeBanner.classList.remove('hidden');
             setTimeout(() => upgradeBanner.classList.add('hidden'), 5000);
@@ -10247,7 +10958,7 @@ return {compose, length};
     }
 
     function checkTypingMatch(isExplicitSubmit = false) {
-      if (gameState !== 'RUNNING') return;
+      if (gameState !== 'RUNNING' || layoutEditing) return;
       const target = activeTrial
         ? activeTrial.word
         : (activeStormChallenge
@@ -10312,6 +11023,22 @@ return {compose, length};
 
         if (code === 'full') {
           startFullIslandCheat();
+          typeInput.value = '';
+          return;
+        }
+
+        // 開發者測試專用：快速生成所有建築與樹木後自動進入佈置模式。
+        // 不登記真人答題試煉；不會解鎖正式遊玩進度。
+        if (code === 'layout') {
+          layoutDebugPending = true;
+          if (specialMonumentsSpawned >= 50) {
+            layoutUnlocked = true;
+            updateLayoutEntry();
+            layoutDebugPending = false;
+            enterIslandLayoutMode();
+          } else if (fullModeTimer === null) {
+            startFullIslandCheat();
+          }
           typeInput.value = '';
           return;
         }
@@ -10780,6 +11507,11 @@ return {compose, length};
     }
 
     function startGame() {
+      if (layoutEditing) leaveIslandLayoutMode(false);
+      layoutUnlocked = false;
+      layoutDebugPending = false;
+      completedLayoutTrials.clear();
+      updateLayoutEntry();
       sound.init();
       // 每次進入遊戲皆預設開啟背景音樂、遊戲音效與環境音效。
       sound.muted = false;
@@ -10936,13 +11668,17 @@ return {compose, length};
       let existingObj = spawnedIslandObjects.find(obj => obj.userData && obj.userData.monumentIndex === idx);
 
       if (!existingObj) {
+        const isEluanbi = monument.name === '鵝鑾鼻燈塔';
         const inspectorX=schoolGateAvoids(0,4,3,3) ? 0 : -5;
-        const pos = new THREE.Vector3(inspectorX, 1.35, 4.0);
+        const pos = isEluanbi
+          ? new THREE.Vector3(ELUANBI_SITE.x, 1.35, ELUANBI_SITE.z)
+          : new THREE.Vector3(inspectorX, 1.35, 4.0);
         existingObj = monument.build(pos);
         const inspectionScale = (existingObj.userData.fixedTowerHeight || existingObj.userData.fixedMonumentWidth) ? existingObj.userData.canonicalScale : 1.2;
         Object.assign(existingObj.userData, { targetScale: inspectionScale, monumentIndex: idx });
         existingObj.scale.setScalar(inspectionScale);
-        shiftObjectOutsideSchool(existingObj);
+        if (isEluanbi) existingObj.userData.isEluanbiLighthouse = true;
+        else shiftObjectOutsideSchool(existingObj);
         scene.add(existingObj);
         spawnedIslandObjects.push(existingObj);
       }
@@ -10979,6 +11715,7 @@ return {compose, length};
       const startZ = -5.5;
 
       SPECIAL_MONUMENTS.forEach((monument, idx) => {
+        const isEluanbi = monument.name === '鵝鑾鼻燈塔';
         const c = idx % cols;
         const r = Math.floor(idx / cols);
         let posX = startX + c * spacingX;
@@ -10989,12 +11726,19 @@ return {compose, length};
           }
         }
 
+        // 排列展示也保留燈塔底座周圍的空地；僅調整會侵入保留區的其他地標。
+        if (!isEluanbi && !outsideEluanbiSite(posX, posZ, 1.3)) {
+          const side = posX < 0 ? -1 : 1;
+          posX = side * Math.max(8.0, Math.abs(posX));
+        }
+        if (isEluanbi) { posX = ELUANBI_SITE.x; posZ = ELUANBI_SITE.z; }
         const pos = new THREE.Vector3(posX, 1.35, posZ);
         const obj = monument.build(pos);
         const gridScale = (obj.userData.fixedTowerHeight || obj.userData.fixedMonumentWidth) ? obj.userData.canonicalScale : 0.75;
         Object.assign(obj.userData, { targetScale: gridScale, monumentIndex: idx });
         obj.scale.setScalar(gridScale);
-        shiftObjectOutsideSchool(obj);
+        if (isEluanbi) obj.userData.isEluanbiLighthouse = true;
+        else shiftObjectOutsideSchool(obj);
         scene.add(obj);
         spawnedIslandObjects.push(obj);
       });
@@ -11128,18 +11872,33 @@ return {compose, length};
         bgmBtn.className = 'glass-hud px-3 py-2 rounded-2xl text-xs font-bold ' + (sound.clubMusicOn ? 'text-emerald-300' : 'text-slate-400') + ' hover:text-white hover:bg-slate-700/60 transition active:scale-95';
       } else {
         const names = ['音樂關','音樂1','音樂2','音樂3'];
-        bgmBtn.textContent = names[sound.bgmMode];
+        bgmBtn.textContent = names[sound.bgmMode]+(isMobileControlLayout()?'':' ▾');
         const colors = ['text-slate-400','text-emerald-300','text-amber-300','text-cyan-300'];
         bgmBtn.className = 'glass-hud px-3 py-2 rounded-2xl text-xs font-bold ' + colors[sound.bgmMode] + ' hover:text-white hover:bg-slate-700/60 transition active:scale-95';
       }
+      if (typeof bgmChoices !== 'undefined') bgmChoices.mark(String(sound.bgmMode));
     }
 
-    // 背景音樂按鈕：依序四段循環切換（音樂1 → 音樂2 → 音樂3 → 音樂關 → 音樂1）
+    const bgmChoices=makeIslandChoiceMenu(bgmBtn,'bgmChoiceMenu',[
+      ['1','音樂1'],['2','音樂2'],['3','音樂3'],['0','音樂關']
+    ],value=>{
+      const mode=Number(value);
+      if (mode===0) {sound.bgmMode=0;sound.stopBGM();}
+      else sound.startBGM(mode);
+      updateClubMusicButton173();
+    });
+    bgmChoices.mark(String(sound.bgmMode));
+    // 桌機版音樂使用四選一下拉；手機版維持原先循環切換。
     bgmBtn.addEventListener('click', () => {
       if (clubMode) {
         sound.clubMusicOn = !sound.clubMusicOn;
         if (sound.clubMusicOn) sound.startClubMusic(); else sound.stopClubMusic();
         updateClubMusicButton173();
+        return;
+      }
+      if (!isMobileControlLayout()) {
+        bgmChoices.mark(String(sound.bgmMode));
+        bgmChoices.toggle();
         return;
       }
       const mode = sound.cycleBGM();
@@ -11157,6 +11916,8 @@ return {compose, length};
         bgmBtn.className = "glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-700/60 transition active:scale-95";
       }
     });
+    // 電腦版初次顯示時也提示有下拉選項。
+    updateClubMusicButton173();
 
     let lastTime = performance.now();
 
@@ -11521,7 +12282,12 @@ return {compose, length};
       // 因此暫停時仍可拖曳旋轉視角、滾輪或雙指縮放，也可平移到不同觀賞角度。
       currentCamLookAt.lerp(targetCamLookAt, 0.08);
       currentCamDist += (targetCamDist - currentCamDist) * 0.12;
+      layoutCameraBlend += ((layoutEditing ? 1 : 0) - layoutCameraBlend) * 0.08;
       applyCameraPosition(sphericalAngle, currentCamDist);
+      if (layoutSelectionRing && layoutSelectedObject && layoutEditing) {
+        layoutSelectionRing.position.set(layoutSelectedObject.position.x, layoutSelectedObject.userData.layoutSea ? 0.18 : ISLAND_GRASS_SURFACE_Y + 0.07, layoutSelectedObject.position.z);
+        layoutSelectionRing.scale.setScalar(layoutSelectedObject.userData.layoutTree ? 0.8 : 1.45);
+      }
 
       if (renderer && scene && camera) {
         renderer.render(scene, camera);
