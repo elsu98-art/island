@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>我的夢想島：中文打字開拓記（S.V02 - 07）</title>
+  <title>我的夢想島：中文打字開拓記（S.V02 - 08）</title>
   <script data-goatcounter="https://elsu.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
   <!-- 版本：SV.01-158｜安平古堡防重疊並調至第35位 -->
   <!-- Tailwind CSS CDN -->
@@ -707,6 +707,33 @@ function buildDreamRiver(terrainGroup, options = {}){
         text-align: center;
       }
     }
+    /* S.V02 - 08：固定底框先出現，僅文字以柔和光暈呼吸五次；退出提示稍後轉淡。 */
+    #screensaverExitBadge {
+      background:rgba(15,41,59,.83);
+      border-color:rgba(134,239,172,.36);
+      transition:opacity 2.8s ease-in-out;
+      opacity:1;
+    }
+    #screensaverExitBadge.screensaver-hint-dim {opacity:.10;}
+    /* 閒置時同時隱藏指標；活動時由程式恢復正常游標。 */
+    body.island-screensaver-active.screensaver-cursor-hidden,
+    body.island-screensaver-active.screensaver-cursor-hidden * {
+      cursor:none !important;
+    }
+    #screensaverExitBadge.screensaver-hint-dim:hover,
+    #screensaverExitBadge.screensaver-hint-dim:focus-within {opacity:1;}
+    #screensaverExitBadge .screensaver-message {
+      display:inline-block;
+      opacity:1;
+      white-space:normal;
+    }
+    @keyframes islandPauseTextBreath {
+      0%, 100% {opacity:0; text-shadow:0 0 0 rgba(167,243,208,0);}
+      45%, 55% {opacity:1; text-shadow:0 0 7px rgba(167,243,208,.65),0 0 16px rgba(110,231,183,.34);}
+    }
+    #screensaverExitBadge .screensaver-message.screensaver-text-breathe {
+      animation:islandPauseTextBreath 1.55s ease-in-out 5 both;
+    }
     @media (max-width: 420px) {
       .hud-layer > header > div:nth-child(3) > div {
         padding-left: 8px;
@@ -1059,7 +1086,7 @@ function buildDreamRiver(terrainGroup, options = {}){
     }
   }
 
-    /* S.V02 - 07 公開展示版：佈置模式入口及工具列一律隱藏。 */
+    /* S.V02 - 08 公開展示版：佈置模式入口及工具列一律隱藏。 */
     #layoutEnterBtn, #layoutToolbar { display:none !important; visibility:hidden !important; pointer-events:none !important; }
   </style>
 
@@ -1089,7 +1116,7 @@ function buildDreamRiver(terrainGroup, options = {}){
       font-family:'Bodoni Moda',Didot,'Bodoni MT',serif;
       font-weight:400; letter-spacing:-.035em; font-size:clamp(48px,7.6vw,130px);
     }
-    /* S.V02-07：時鐘 C 全部數字統一使用 Bodoni Moda，不再對 7 個別指定字型。 */
+    /* S.V02-08：時鐘 C 全部數字統一使用 Bodoni Moda，不再對 7 個別指定字型。 */
     #screensaverClock .clock-period {display:inline-block; vertical-align:baseline;}
     #screensaverClock.clock-b .clock-period {
       position:absolute; display:block;
@@ -1970,7 +1997,7 @@ function createCurvedSchoolGate(pos,options={}){
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
       <div class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 flex flex-col items-start gap-0.5 text-slate-400 select-none pointer-events-none">
-        <span id="gameVersionBadge" class="font-mono font-medium">(S.V02 - 07)</span>
+        <span id="gameVersionBadge" class="font-mono font-medium">(S.V02 - 08)</span>
         <span id="gameVisitCount" aria-live="polite">累積瀏覽次數：讀取中</span>
       </div>
       <script>
@@ -2035,8 +2062,8 @@ function createCurvedSchoolGate(pos,options={}){
     </div>
     <div id="layoutStatus">拖曳物件可移動；在空白處拖曳可旋轉島嶼；只有樹木可以刪除。</div>
   </div>
-  <div id="screensaverExitBadge" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-full glass-hud text-xs sm:text-sm font-bold text-white shadow-2xl cursor-pointer hover:bg-slate-800/90 transition active:scale-95 border border-emerald-400/40 animate-pulse">
-    ✨ 螢幕保護觀賞中 ‧ 點擊此處或按 ESC 退出
+  <div id="screensaverExitBadge" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-full glass-hud text-xs sm:text-sm font-bold text-white shadow-2xl cursor-pointer hover:bg-slate-800/90 transition active:scale-95 border border-emerald-400/40">
+    <span class="screensaver-message">螢幕保護模式執行中，按此或按下Esc退出</span>
   </div>
 
   <!-- 秘技一覽面板 (Cheat Sheet Modal，按下 0 鍵或輸入 00000 快速切換) -->
@@ -6785,7 +6812,7 @@ return {compose, length};
       obj.position.z = saved.z;
       obj.rotation.y = saved.yaw;
     }
-    // S.V02 - 07：僅關閉佈置功能入口，保留資料結構以便未來恢復。
+    // S.V02 - 08：僅關閉佈置功能入口，保留資料結構以便未來恢復。
     const ISLAND_LAYOUT_RELEASE_LOCKED = true;
     function updateLayoutEntry() {
       if (ISLAND_LAYOUT_RELEASE_LOCKED) {
@@ -7151,7 +7178,7 @@ return {compose, length};
     const scoreEl = document.getElementById('scoreEl');
     const milestoneCounter = document.getElementById('milestoneCounter');
     const generalRewardCounter = document.getElementById('generalRewardCounter');
-    // S.V02 - 07：顯示島上「現存」的一般獎勵，不再使用累積發放次數。
+    // S.V02 - 08：顯示島上「現存」的一般獎勵，不再使用累積發放次數。
     // 地標、登島角色、初始樹木與彩蛋物件均不納入。
     function updateGeneralRewardCounter() {
       if (!generalRewardCounter) return;
@@ -7441,6 +7468,72 @@ return {compose, length};
       if(clockHintTimer)clearTimeout(clockHintTimer);
       clockHintTimer=null;
       screensaverClock?.querySelector('.clock-drag-hint')?.classList.remove('visible');
+    }
+    // S.V02 - 08：藥丸底框保持固定，只讓文字柔和亮起、淡出五次。
+    const screensaverExitText = '螢幕保護模式執行中，按此或按下Esc退出';
+    const screensaverPauseText = '螢幕保護程式啟動，島嶼活力暫時停止耗損';
+    const screensaverBadgeText = screensaverExitBadge?.querySelector('.screensaver-message');
+    let screensaverPauseNoticeTimers=[];
+    let screensaverExitReady=false;
+    let screensaverIdleTimer=null;
+    function clearScreensaverIdleTimer(){
+      if(screensaverIdleTimer!==null)clearTimeout(screensaverIdleTimer);
+      screensaverIdleTimer=null;
+    }
+    function scheduleScreensaverDim(delay=5000){
+      clearScreensaverIdleTimer();
+      screensaverIdleTimer=setTimeout(()=>{
+        screensaverIdleTimer=null;
+        if(isScreensaverActive&&screensaverExitReady&&screensaverExitBadge){
+          screensaverExitBadge.classList.add('screensaver-hint-dim');
+          document.body.classList.add('screensaver-cursor-hidden');
+        }
+      },delay);
+    }
+    function wakeScreensaverExitBadge(){
+      // 五次提示結束前，不干擾原來的光暈動畫。
+      if(!isScreensaverActive||!screensaverExitReady||!screensaverExitBadge)return;
+      screensaverExitBadge.classList.remove('screensaver-hint-dim');
+      document.body.classList.remove('screensaver-cursor-hidden');
+      scheduleScreensaverDim();
+    }
+    document.addEventListener('pointermove',e=>{
+      if(e.pointerType==='mouse'||e.pointerType==='pen')wakeScreensaverExitBadge();
+    },{passive:true});
+    // 手機與平板沒有滑鼠，觸碰時也可喚醒退出按鈕。
+    document.addEventListener('touchstart',wakeScreensaverExitBadge,{passive:true});
+    function clearScreensaverNoticeTimers(){
+      screensaverPauseNoticeTimers.forEach(clearTimeout);
+      screensaverPauseNoticeTimers=[];
+      clearScreensaverIdleTimer();
+    }
+    function showScreensaverPauseNotice(){
+      if(!screensaverExitBadge||!screensaverBadgeText)return;
+      clearScreensaverNoticeTimers();
+      screensaverExitReady=false;
+      document.body.classList.remove('screensaver-cursor-hidden');
+      screensaverExitBadge.classList.remove('screensaver-hint-dim');
+      screensaverBadgeText.classList.remove('screensaver-text-breathe');
+      screensaverBadgeText.textContent=screensaverPauseText;
+      void screensaverBadgeText.offsetWidth; // 重新進入螢幕保護時，重播完整五次呼吸效果
+      screensaverBadgeText.classList.add('screensaver-text-breathe');
+      screensaverPauseNoticeTimers.push(setTimeout(()=>{
+        screensaverBadgeText.classList.remove('screensaver-text-breathe');
+        screensaverBadgeText.textContent=screensaverExitText;
+        screensaverExitReady=true;
+        // 原句出現後，閒置數秒淡到接近透明；滑鼠移動會再次喚醒。
+        scheduleScreensaverDim(4500);
+      },7750));
+    }
+    function hideScreensaverPauseNotice(){
+      clearScreensaverNoticeTimers();
+      screensaverExitReady=false;
+      document.body.classList.remove('screensaver-cursor-hidden');
+      if(screensaverExitBadge) screensaverExitBadge.classList.remove('screensaver-hint-dim');
+      if(screensaverBadgeText){
+        screensaverBadgeText.classList.remove('screensaver-text-breathe');
+        screensaverBadgeText.textContent=screensaverExitText;
+      }
     }
     // 時鐘 A / B / C 共用座標；手機及電腦各自記憶，不需要登入與載入。
     const clockStorageKey=()=>isMobileControlLayout()?'island.screensaverClockPosition.mobile':'island.screensaverClockPosition.desktop';
@@ -9935,11 +10028,13 @@ return {compose, length};
         if (mobileDock) mobileDock.classList.add('screensaver-hidden');
         if (mobileVitality) mobileVitality.classList.add('screensaver-hidden');
         if (screensaverExitBadge) screensaverExitBadge.classList.remove('hidden');
+        showScreensaverPauseNotice();
       } else {
         if (hudLayer) hudLayer.classList.remove('hidden');
         if (mobileDock) mobileDock.classList.remove('screensaver-hidden');
         if (mobileVitality) mobileVitality.classList.remove('screensaver-hidden');
         if (screensaverExitBadge) screensaverExitBadge.classList.add('hidden');
+        hideScreensaverPauseNotice();
         if (gameState === 'RUNNING' && typeInput) {
           typeInput.focus();
         }
@@ -11066,7 +11161,7 @@ return {compose, length};
     function onWordCorrect() {
       sound.correctChime();
 
-      // S.V02 - 07：閃電防護題為獨立挑戰，只啟動防護罩。
+      // S.V02 - 08：閃電防護題為獨立挑戰，只啟動防護罩。
       // 不增加 correctCount、生命值、分數，也不觸發一般獎勵／地標／人物召喚。
       // 必須先處理此分支，再進入一般答題的計數及獎勵流程。
       if (lightningStormActive && activeStormChallenge) {
@@ -11347,7 +11442,7 @@ return {compose, length};
         // 開發者測試專用：快速生成所有建築與樹木後自動進入佈置模式。
         // 不登記真人答題試煉；不會解鎖正式遊玩進度。
         if (code === 'layout') {
-          // S.V02 - 07 公開版：禁止以祕技開啟佈置模式。
+          // S.V02 - 08 公開版：禁止以祕技開啟佈置模式。
           typeInput.value = '';
           return;
           layoutDebugPending = true;
@@ -12612,7 +12707,11 @@ return {compose, length};
           vitalityPercent.textContent = '✨ 永恆綠洲';
           return;
         }
-        vitality = Math.max(0, vitality - 0.7);
+        // S.V02 - 08：活力調整為約 180 秒歸零；螢幕保護啟動時暫停耗損。
+        if (isScreensaverActive) {
+          return;
+        }
+        vitality = Math.max(0, vitality - 0.28);
         vitalityBar.style.width = `${vitality}%`;
         vitalityPercent.textContent = `${Math.round(vitality)}%`;
         if (vitality <= 0) {
