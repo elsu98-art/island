@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>我的夢想島：中文打字開拓記（S.V02 - 08）</title>
+  <title>我的夢想島：中文打字開拓記（S.V02 - 09）</title>
   <script data-goatcounter="https://elsu.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
   <!-- 版本：SV.01-158｜安平古堡防重疊並調至第35位 -->
   <!-- Tailwind CSS CDN -->
@@ -1997,7 +1997,7 @@ function createCurvedSchoolGate(pos,options={}){
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
       <div class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 flex flex-col items-start gap-0.5 text-slate-400 select-none pointer-events-none">
-        <span id="gameVersionBadge" class="font-mono font-medium">(S.V02 - 08)</span>
+        <span id="gameVersionBadge" class="font-mono font-medium">(S.V02 - 09)</span>
         <span id="gameVisitCount" aria-live="polite">累積瀏覽次數：讀取中</span>
       </div>
       <script>
@@ -7664,7 +7664,7 @@ return {compose, length};
       try {
         const canvasWrapper = document.getElementById('threeCanvasWrapper');
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x38bdf8);
+        scene.background = new THREE.Color(0x003e97);
         scene.fog = new THREE.FogExp2(0x38bdf8, 0.007);
 
         const aspect = window.innerWidth / window.innerHeight;
@@ -9750,7 +9750,7 @@ return {compose, length};
 
     function updateDayNightCycle(dt) {
       let p = 1;
-      let skyCol = new THREE.Color(0x38bdf8);
+      let skyCol = new THREE.Color(0x003e97);
       let sunIntensity = 0.95;
       let starOpacity = 0.0;
       let isNight = false;
@@ -9790,13 +9790,13 @@ return {compose, length};
           starOpacity = Math.max(0, 1.0 - alpha * 2.0);
         } else if (timeCycle < 0.5) {
           p = 1;
-          skyCol = new THREE.Color(0x38bdf8);
+          skyCol = new THREE.Color(0x003e97);
           sunIntensity = 0.95;
           starOpacity = 0.0;
         } else if (timeCycle < 0.75) {
           p = 2;
           const alpha = (timeCycle - 0.5) / 0.25;
-          skyCol = new THREE.Color(0x38bdf8).lerp(new THREE.Color(0xf43f5e), alpha);
+          skyCol = new THREE.Color(0x003e97).lerp(new THREE.Color(0xf43f5e), alpha);
           sunIntensity = 0.95 - alpha * 0.5;
           starOpacity = 0.0;
         } else {
