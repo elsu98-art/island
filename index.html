@@ -6607,48 +6607,50 @@ global.DreamIslandPianoMusic={styles,getEvents,create,beats:64};
 
       // SV.01-125：台北101煙火屬於環境音效，使用環境音量滑桿與開關，不影響答題音效。
       playFireworkBoom(intensity = 1) {
-        // Rainbow 101：每一發煙火同步播放可在一般喇叭辨識的爆裂聲。
-        // 保留原有低頻轟鳴，另加中頻噪聲；遵守遊戲音效 ON/OFF。
-        if (this.muted) return;
+        if (typeof isAmbientSoundActive !== 'undefined' && !isAmbientSoundActive) return;
         this.init();
         if (!this.ctx) return;
-        try {
-          if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
-          const ctx = this.ctx, now = ctx.currentTime + 0.008;
-          const output = this.getSfxOutput();
-          const loudness = Math.max(0.5, Math.min(2.5, Number(intensity) || 1));
-
-          // 低頻轟鳴：延續島嶼原先的煙火效果。
-          const bass = ctx.createOscillator(), bassGain = ctx.createGain();
-          bass.type = 'sine';
-          bass.frequency.setValueAtTime(115, now);
-          bass.frequency.exponentialRampToValueAtTime(42, now + 0.42);
-          bassGain.gain.setValueAtTime(0.0001, now);
-          bassGain.gain.exponentialRampToValueAtTime(0.24 * loudness, now + 0.012);
-          bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.68);
-          bass.connect(bassGain); bassGain.connect(output);
-          bass.start(now); bass.stop(now + 0.70);
-
-          // 真正可聽見的爆裂聲來自寬頻噪聲，不只是超低音。
-          const length = Math.ceil(ctx.sampleRate * 0.75);
-          if (!this.fireworkNoiseBuffer || this.fireworkNoiseBuffer.sampleRate !== ctx.sampleRate) {
-            const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
-            const samples = buffer.getChannelData(0);
-            for (let i = 0; i < length; i++) samples[i] = Math.random() * 2 - 1;
-            this.fireworkNoiseBuffer = buffer;
-          }
-          const crack = ctx.createBufferSource(), filter = ctx.createBiquadFilter(), crackGain = ctx.createGain();
-          crack.buffer = this.fireworkNoiseBuffer;
-          filter.type = 'bandpass'; filter.frequency.value = 1050; filter.Q.value = 0.55;
-          crackGain.gain.setValueAtTime(0.0001, now);
-          crackGain.gain.exponentialRampToValueAtTime(0.37 * loudness, now + 0.008);
-          crackGain.gain.exponentialRampToValueAtTime(0.09 * loudness, now + 0.08);
-          crackGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
-          crack.connect(filter); filter.connect(crackGain); crackGain.connect(output);
-          crack.start(now); crack.stop(now + 0.58);
-        } catch (e) {
-          console.warn('台北101煙火聲音播放失敗：', e);
+        // 確保環境音效總線已建立；煙火不再接到「答題成功音效」總線。
+        if (!this.ambientMasterGain && typeof isAmbientSoundActive !== 'undefined' && isAmbientSoundActive) {
+          this.startAmbient(this.ambientVolume);
         }
+        try {
+          // 瀏覽器切換分頁或音訊尚未啟動時，嘗試喚醒音訊環境。
+          if (this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+          const ctx = this.ctx;
+          const now = ctx.currentTime;
+          const output = this.ambientMasterGain || this.getSfxOutput();
+          const osc = ctx.createOscillator();
+          const lowGain = ctx.createGain();
+          const filter = ctx.createBiquadFilter();
+          const delay = ctx.createDelay(0.8);
+          const feedback = ctx.createGain();
+          const echoGain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(78, now);
+          osc.frequency.exponentialRampToValueAtTime(34, now + 0.42);
+          lowGain.gain.setValueAtTime(0.0001, now);
+          lowGain.gain.exponentialRampToValueAtTime(0.48 * intensity, now + 0.025);
+          lowGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.05);
+          filter.type = 'lowpass';
+          filter.frequency.value = 420;
+          delay.delayTime.value = 0.24;
+          feedback.gain.value = 0.22;
+          echoGain.gain.setValueAtTime(0.34, now);
+          echoGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.45);
+          osc.connect(filter);
+          filter.connect(lowGain);
+          lowGain.connect(output);
+          lowGain.connect(delay);
+          delay.connect(echoGain);
+          echoGain.connect(output);
+          delay.connect(feedback);
+          feedback.connect(delay);
+          osc.start(now);
+          osc.stop(now + 1.1);
+        } catch (e) {}
       }
 
       // 專用樂器 4-A：飽滿低音大鼓 (Kick)
@@ -12718,6 +12720,33 @@ function createFishingBoat(pos,options={}){
         // 秘技一覽面板開啟指令：00000
         if (code === '00000') {
           toggleCheatSheet(true);
+          typeInput.value = '';
+          return;
+        }
+
+        // S.V02 - 12 - rainbow：fire10 留出十秒錄影準備時間；fire 維持立即播放。
+        if (code === 'fire10') {
+          const prideTower = spawnedIslandObjects.find(obj => obj && obj.userData && obj.userData.isTaipei101);
+          if (!prideTower || typeof prideTower.userData.restartPrideShow !== 'function') {
+            showCheatNotice('🌈 台北 101 尚未登島，請先召喚地標。');
+          } else if (!prideTower.userData.taipei101?.night) {
+            showCheatNotice('🌙 請先切換至夜晚，再使用 fire10。');
+          } else {
+            // 再次輸入 fire10 會重新計時，不會堆疊多場燈光秀。
+            if (window.__dreamIslandFire10Timer != null) clearTimeout(window.__dreamIslandFire10Timer);
+            showCheatNotice('🎬 10 秒後開始台北 101 彩虹燈光秀＋煙火，準備錄影！');
+            window.__dreamIslandFire10Timer = setTimeout(() => {
+              window.__dreamIslandFire10Timer = null;
+              // 倒數期間若返回主畫面、切成白天或移除地標，不會錯誤啟動。
+              if (!spawnedIslandObjects.includes(prideTower) || !prideTower.userData.taipei101?.night) return;
+              if (isAmbientSoundActive) {
+                sound.startAmbient(ambientVolume);
+                if (sound.ctx && sound.ctx.state === 'suspended') sound.ctx.resume().catch(() => {});
+              }
+              prideTower.userData.restartPrideShow();
+              showCheatNotice('🌈 台北 101 彩虹燈光秀＋煙火開始！');
+            }, 10000);
+          }
           typeInput.value = '';
           return;
         }
