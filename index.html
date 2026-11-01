@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>我的夢想島：中文打字開拓記（S.V02 - 09）</title>
+  <title>我的夢想島：中文打字開拓記（S.V02 - 12 - rainbow）</title>
   <script data-goatcounter="https://elsu.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
   <!-- 版本：SV.01-158｜安平古堡防重疊並調至第35位 -->
   <!-- Tailwind CSS CDN -->
@@ -166,6 +166,65 @@ global.createWindTurbine=function(THREE,options={}){
  corners.forEach(([sx,sz])=>{const points=levels.map(([y,w])=>new THREE.Vector3(sx*(w+.008),y,sz*(w+.008)));shell.push(mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),40,.012,5,false),gold));});
  const starGeo=new THREE.SphereGeometry(.025,6,4);
  for(let i=0;i<32;i++){const y=.6+((i*17)%31)/31*7.5,w=width(y),side=i%4,t=((i*13)%19)/19;const x=side%2?-w+2*w*t:(side===0?w:-w),z=side%2?(side===1?w:-w):-w+2*w*t;const mat=white.clone();const light=mesh(starGeo,mat);light.position.set(x,y,z);sparkles.push({light,phase:i*2.399});}
+ // S.V02-11 巴黎鐵塔效能實驗：只合併靜態零件；保留 32 顆獨立閃爍星光和原夜間材質。
+ // 各材質分別形成一個 Mesh，頂點在合併時烘焙原始位置／方向／縮放，不改造型及塔高。
+ function batchStaticTowerParts(){
+   const movingLights = new Set(sparkles.map(s => s.light));
+   const buckets = new Map();
+   const originals = [];
+   for (const part of group.children.slice()) {
+     if (!part.isMesh || movingLights.has(part) || !part.geometry || !part.material || Array.isArray(part.material)) continue;
+     if (!buckets.has(part.material)) buckets.set(part.material, []);
+     buckets.get(part.material).push(part);
+   }
+   const sourceGeometries = new Set();
+   for (const [material, parts] of buckets) {
+     if (parts.length < 2) continue;
+     const baked = [];
+     let vertexCount = 0;
+     for (const part of parts) {
+       part.updateMatrix();
+       const geo = part.geometry.index ? part.geometry.toNonIndexed() : part.geometry.clone();
+       geo.applyMatrix4(part.matrix);
+       const pos = geo.getAttribute('position');
+       if (!pos) {geo.dispose();continue;}
+       vertexCount += pos.count;
+       baked.push(geo);
+       sourceGeometries.add(part.geometry);
+       originals.push(part);
+     }
+     if (!vertexCount) continue;
+     const positions = new Float32Array(vertexCount * 3);
+     const normals = new Float32Array(vertexCount * 3);
+     const uvs = new Float32Array(vertexCount * 2);
+     let pOffset = 0, uvOffset = 0;
+     for (const geo of baked) {
+       const p = geo.getAttribute('position');
+       const n = geo.getAttribute('normal');
+       const u = geo.getAttribute('uv');
+       for (let i = 0; i < p.count; i++) {
+         const j = pOffset + i * 3;
+         positions[j] = p.getX(i);positions[j+1] = p.getY(i);positions[j+2] = p.getZ(i);
+         if (n) {normals[j]=n.getX(i);normals[j+1]=n.getY(i);normals[j+2]=n.getZ(i);}
+         if (u) {const k=uvOffset+i*2;uvs[k]=u.getX(i);uvs[k+1]=u.getY(i);}
+       }
+       pOffset += p.count * 3;
+       uvOffset += p.count * 2;
+       geo.dispose();
+     }
+     const merged = new THREE.BufferGeometry();
+     merged.setAttribute('position', new THREE.BufferAttribute(positions,3));
+     merged.setAttribute('normal', new THREE.BufferAttribute(normals,3));
+     merged.setAttribute('uv', new THREE.BufferAttribute(uvs,2));
+     merged.computeBoundingSphere();
+     const mesh = new THREE.Mesh(merged, material);
+     mesh.name='EiffelTower_BatchedStatic';
+     group.add(mesh);
+   }
+   for (const part of originals) group.remove(part);
+   for (const geo of sourceGeometries) geo.dispose();
+ }
+ batchStaticTowerParts();
  let night=0,time=0;
  function setNight(n){night=Math.max(0,Math.min(1,Number(n)||0));gold.opacity=night*.72;white.opacity=night;iron.envMapIntensity=dark.envMapIntensity=1.05*(1-night)+.12*night;}
  function update(dt){time+=Math.max(0,Math.min(.1,dt));sparkles.forEach(({light,phase})=>{const pulse=Math.pow(Math.max(0,Math.sin(time*2.1+phase)),18);light.material.opacity=night*pulse;light.visible=night>.01&&pulse>.03;});}
@@ -786,8 +845,7 @@ function buildDreamRiver(terrainGroup, options = {}){
     @media (max-width: 760px) {
       .hud-layer > header { padding-right: 54px; }
       .hud-layer > header > div:nth-child(3) { gap: 5px; }
-      /* 行動版只保留地標與天色，積分可由遊戲進度需要時再查看，減少頂部擁擠。 */
-      .hud-layer > header > div:nth-child(3) > div:nth-child(3) { display: none !important; }
+      /* 積分已移到左下方 HUD；不再用第幾個元素隱藏工具列。 */
       /* 題目區只保留拖曳列、題目、活力數字與輸入框；移除冗長的獎勵提示與活力長條。 */
       #movableQuestionPanel {
         max-height: 30dvh !important;
@@ -1086,9 +1144,63 @@ function buildDreamRiver(terrainGroup, options = {}){
     }
   }
 
-    /* S.V02 - 08 公開展示版：佈置模式入口及工具列一律隱藏。 */
-    #layoutEnterBtn, #layoutToolbar { display:none !important; visibility:hidden !important; pointer-events:none !important; }
-  </style>
+    /* S.V02 - 11：恢復佈置入口及工具列，由原本的 hidden class 與解鎖判斷控制。 */
+
+    /* S.V02-11：橫式半透明島嶼資訊，白色線條圖示。 */
+    #islandResourceHud{position:fixed;left:var(--island-resource-align-left,16px);bottom:54px;z-index:31;background:rgba(7,32,62,.51);border:1px solid rgba(224,244,255,.38);border-radius:26px;box-shadow:0 9px 22px rgba(1,15,35,.20);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);display:flex;align-items:center;max-width:calc(100vw - 24px);padding:9px 13px;color:white;pointer-events:none;font-family:inherit}
+    #islandResourceHud .island-resource-line{position:relative;display:grid;grid-template-columns:26px auto;grid-template-rows:23px 17px;align-items:center;column-gap:8px;padding:0 15px;white-space:nowrap}
+    #islandResourceHud .island-resource-line:first-child{padding-left:2px}
+    #islandResourceHud .island-resource-line:last-child{padding-right:2px}
+    #islandResourceHud .island-resource-line+.island-resource-line:before{content:"";position:absolute;left:0;top:4px;height:33px;border-left:1px solid rgba(236,249,255,.32)}
+    #islandResourceHud svg{grid-column:1;grid-row:1/3;width:25px;height:25px;fill:none;stroke:#fff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+    #islandResourceHud strong{grid-column:2;grid-row:1;font-size:16px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;text-align:left;position:relative;display:inline-block;overflow:visible}
+    #islandResourceHud span{grid-column:2;grid-row:2;font-size:10px;opacity:.88;font-weight:600}
+    #islandCoinCounter{color:#ffe08b}
+    #islandResourceHud #scoreEl{color:#7dd3fc}
+    /* S.V02-11：+30 白字上浮；+50 黃字柔光上浮，動畫保持輕巧。 */
+    #islandResourceHud .island-resource-line:nth-child(3){overflow:visible}
+    #islandResourceHud .island-coin-bonus{position:absolute;left:50%;bottom:calc(100% + 6px);z-index:3;white-space:nowrap;font-size:15px;font-weight:800;line-height:1;pointer-events:none;transform:translateX(-50%);animation:islandCoinFloat 760ms ease-out forwards}
+    #islandResourceHud .island-coin-bonus.bonus-30{color:#fff;text-shadow:none}
+    #islandResourceHud .island-coin-bonus.bonus-50{color:#fff;text-shadow:none}
+    @keyframes islandCoinFloat{0%{opacity:0;transform:translate(-50%,7px)}25%{opacity:1}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-14px)}}
+    @media(prefers-reduced-motion:reduce){#islandResourceHud .island-coin-bonus{animation-duration:.01ms!important}}
+
+    body.island-screensaver-active #islandResourceHud{display:none!important}
+    @media(max-width:760px){#islandResourceHud{left:var(--island-resource-align-left,8px);bottom:calc(8px + env(safe-area-inset-bottom));padding:6px 7px;max-width:min(365px,calc(100vw - 16px));flex-wrap:wrap;border-radius:16px}#islandResourceHud .island-resource-line{padding:3px 8px;grid-template-columns:19px auto;grid-template-rows:17px 15px;column-gap:4px}#islandResourceHud svg{width:18px;height:18px}#islandResourceHud strong{font-size:12px}#islandResourceHud span{font-size:9px}#islandResourceHud .island-resource-line+.island-resource-line:before{height:25px}body.mobile-keyboard-open #islandResourceHud{display:none!important}}
+  
+    /* S.V02-11 效能診斷工具：按鈕及面板不參與 3D 場景。 */
+    /* 效能診斷按鈕與螢幕保護並排；不再固定在畫面右上角。 */
+    #islandPerfToggle[hidden]{display:none!important}
+    #islandPerfToggle{position:relative;z-index:30;flex-shrink:0;pointer-events:auto;cursor:pointer}
+    #islandPerfPanel{position:fixed;top:138px;right:12px;z-index:90;width:500px;max-width:min(calc(100vw - 24px),500px);padding:12px 13px;border:1px solid rgba(153,215,255,.37);border-radius:13px;background:rgba(7,24,44,.88);color:#eef7ff;box-shadow:0 12px 30px rgba(0,0,0,.28);backdrop-filter:blur(12px);font:12px/1.65 sans-serif;pointer-events:auto}
+
+    /* S.V02-11：效能監控明確亮燈，紅燈為停止、綠燈為監控中。 */
+    .island-perf-controls{display:flex;align-items:center;justify-content:flex-start;gap:16px;margin-bottom:10px;flex-wrap:nowrap}
+    .island-perf-controls button{border:none;min-width:99px;padding:9px 12px;border-radius:9px;color:#fff;font-size:12px;font-weight:800;cursor:pointer}
+    .island-perf-controls button:disabled{cursor:default;filter:saturate(.75)}
+    .island-perf-status{display:inline-flex;align-items:center;justify-content:center;min-width:30px;flex:none}
+    .island-perf-status-light{display:inline-block;flex:none;width:13px;height:13px;border-radius:50%;background:#ef4444;border:1px solid rgba(255,255,255,.45);box-shadow:0 0 0 3px rgba(239,68,68,.16),0 0 11px 3px rgba(239,68,68,.67),inset 0 0 3px rgba(255,255,255,.75)}
+    .island-perf-status.running{color:#bbf7d0}
+    .island-perf-status.running .island-perf-status-light{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.16),0 0 11px 3px rgba(34,197,94,.75),inset 0 0 3px rgba(255,255,255,.75)}
+
+    #islandPerfPanel[hidden]{display:none!important}
+    .island-perf-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .island-perf-heading{font-weight:800;font-size:18px;line-height:1.2;color:#d9f2ff;margin:0}
+    .island-perf-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+    .island-perf-col{min-width:0}
+    .island-perf-row{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,255,255,.08);padding:2px 0}
+    .island-perf-row strong{font-variant-numeric:tabular-nums;color:#fff;font-weight:700;text-align:right}
+    .island-perf-note{font-size:10px;line-height:1.55;color:#b5cce0;margin-top:8px}
+    .island-perf-btn-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+    #islandPerfCopy,#islandObjectAnalyze,#islandObjectCopy{padding:7px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.24);color:#fff;font-weight:700;cursor:pointer}
+    #islandPerfCopy{margin-top:9px;background:rgba(50,110,146,.28)}
+    #islandObjectAnalyze{background:#075985}
+    #islandObjectCopy{background:#334155}
+    #islandObjectStatus{font-size:12px;color:#bae6fd;margin-bottom:6px}
+    #islandObjectReport{max-height:285px;overflow:auto;white-space:pre-wrap;font:11px/1.5 ui-monospace,monospace;color:#e2e8f0;background:rgba(0,0,0,.22);border-radius:9px;padding:8px}
+    body.island-screensaver-active #islandPerfToggle,body.island-screensaver-active #islandPerfPanel{display:none!important}
+    @media(max-width:760px){#islandPerfPanel{top:108px;right:7px;width:min(calc(100vw - 14px),500px)}.island-perf-grid{grid-template-columns:1fr}.island-perf-heading{font-size:16px}#islandObjectReport{max-height:220px}}
+</style>
 
   <style>
     /* S.V01 - 173：左側直式遠近拉桿，只在行動版顯示。 */
@@ -1247,10 +1359,15 @@ function buildDreamRiver(terrainGroup, options = {}){
  * Units: architectural silhouette is 50.8 units before scaling; default height 11.2.
  * Artistic miniature, not a survey/BIM reconstruction.
  */
+/* Taipei 101 Pride 04 • full-photo proportions, external fireworks only.
+ * Compatible API: Three.js r128+ (global THREE). The standalone preview bundles r128.
+ * Units: architectural silhouette is 50.8 units before scaling; default height 11.7; width/depth retain the former 11.2-size footprint.
+ * Artistic miniature, not a survey/BIM reconstruction.
+ */
 function createTaipei101(pos, options = {}) {
   const T = THREE;
-  const root = new T.Group(); root.name = 'Taipei101_Refined';
-  const height = Number.isFinite(options.height) && options.height > 0 ? options.height : 12.0;
+  const root = new T.Group(); root.name = 'Taipei101_PrideEdition';
+  const height = Number.isFinite(options.height) && options.height > 0 ? options.height : 11.7;
   const detail = options.detail === 'low' ? 'low' : 'high';
   const materials = {}, pools = new Map();
   const material = (name, color, roughness=.4, metalness=.25) => {
@@ -1266,8 +1383,13 @@ function createTaipei101(pos, options = {}) {
   const stone=material('podium_stone',0x8f9d9b,.78,.08);
   const paving=material('plaza',0xb8c4bb,.89,.02);
   const windowLit=material('evening_windows',0x7eaaaa,.3,.18);
-  const nightWhite=material('night_white_windows',0xffffff,.8,0);
-  nightWhite.emissive.setHex(0xffffff);nightWhite.emissiveIntensity=1.35;
+  const nightWhite=new T.MeshBasicMaterial({color:0xffffff,toneMapped:false});nightWhite.name='pride_all_windows';materials.pride_all_windows=nightWhite;
+  const prideTrim=new T.MeshBasicMaterial({color:0xffffff,toneMapped:false});prideTrim.name='pride_rainbow_outline';materials.pride_rainbow_outline=prideTrim;
+  const normalWhite=material('night_white_windows',0xffffff,.8,0);normalWhite.emissive.setHex(0xffffff);normalWhite.emissiveIntensity=1.35;
+  let regularWindows=null;
+  let prideWindows=null,prideEdges=null;const windowBands=[],edgeBands=[];
+  const rainbow=[0x8b27ec,0x174cff,0x00cce5,0x12ce4c,0xffd000,0xff7100,0xff1744].map(hex=>{const c=new T.Color(hex);if(Number.parseInt(T.REVISION,10)<152)c.convertSRGBToLinear();return c;});
+  const bandForY=y=>Math.max(0,Math.min(6,Math.floor((y-2.15)/43.7*7)));
   const nightBatches=[];
   const adHeart=new T.MeshBasicMaterial({color:0xff294c,toneMapped:false});adHeart.name='ad_heart_red';materials.ad_heart_red=adHeart;
   const adText=new T.MeshBasicMaterial({color:0xf5ffff,toneMapped:false});adText.name='ad_TW_white';materials.ad_TW_white=adText;
@@ -1323,15 +1445,9 @@ function createTaipei101(pos, options = {}) {
         const hash=(row*17+col*31+side*23+Math.round(y*7))%29;
         if(hash<6)place(u,v,span*.68/columns*.78,h/rows*.65,hash<2?windowLit:hash<4?glassLight:glassDark,side);
       }
-      // Sparse deterministic office lights: moderate irregular distribution, about three times revision 02.
+      // Pride edition: complete window grid; colors are handled by a single instanced batch.
       // Separate batch stays invisible during daytime; no timers or point lights.
       for(let row=0;row<rows;row++)for(let col=0;col<columns;col++){
-        // Avalanche hash avoids repeated diagonal/row patterns from a linear modulo.
-        let seed=(Math.imul(row+1,73856093)^Math.imul(col+1,19349663)^Math.imul(side+1,83492791)^Math.imul(Math.round(y*100),2654435761))>>>0;
-        seed=Math.imul(seed^(seed>>>16),0x7feb352d)>>>0;
-        seed=Math.imul(seed^(seed>>>15),0x846ca68b)>>>0;
-        seed=(seed^(seed>>>16))>>>0;
-        if(seed/4294967296>=.072 || (side===0 && Math.abs(y-28.27)<.01))continue;
         const v=(row+.5)*h/rows,span=bottom+(top-bottom)*v/h;
         const u=(-.34+(col+.5)*.68/columns)*span;
         const q=new T.Vector3(u,y+v,span/2+.045).applyAxisAngle(new T.Vector3(0,1,0),side*Math.PI/2);
@@ -1341,6 +1457,11 @@ function createTaipei101(pos, options = {}) {
         dummy.updateMatrix();let byMat=pools.get(boxGeo);
         if(!byMat){byMat=new Map();pools.set(boxGeo,byMat);}if(!byMat.has(nightWhite))byMat.set(nightWhite,[]);
         byMat.get(nightWhite).push(dummy.matrix.clone());
+        // 原上傳版本的稀疏窗燈：相同hash與❤️TW保留區，位置完全相同。
+        let seed=(Math.imul(row+1,73856093)^Math.imul(col+1,19349663)^Math.imul(side+1,83492791)^Math.imul(Math.round(y*100),2654435761))>>>0;
+        seed=Math.imul(seed^(seed>>>16),0x7feb352d)>>>0;seed=Math.imul(seed^(seed>>>15),0x846ca68b)>>>0;seed=(seed^(seed>>>16))>>>0;
+        if(seed/4294967296<.072&&!(side===0&&Math.abs(y-28.27)<.01)){if(!byMat.has(normalWhite))byMat.set(normalWhite,[]);byMat.get(normalWhite).push(dummy.matrix.clone());}
+
       }
       if(trim){
         const a=octagon(bottom),b=octagon(top);
@@ -1398,13 +1519,24 @@ function createTaipei101(pos, options = {}) {
     // Pixel panels follow the sloping facade; the dark gaps remain visible.
     box(span*.70/19*.78,.20,.025,col<7?adHeart:adText,x,messageY+v,span/2+.16,messageTilt);
   }});
-  // Stepped observation crown and architectural spire (total height 50.8).
-  frustum(4.55,3.95,1.65,44.0,glass);facade(4.55,3.95,1.65,44.0,4,12);
-  frustum(4.15,4.15,.14,45.65,edge);frustum(3.05,2.65,1.25,45.79,glass);
-  facade(3.05,2.65,1.25,45.79,4,8);
-  frustum(2.85,2.85,.12,47.04,edge);frustum(1.65,1.05,.98,47.16,glassDark);
-  frustum(1.10,.40,.65,48.14,edge);frustum(.45,.27,.66,48.79,glassDark);
-  record(new T.CylinderGeometry(.045,.14,1.28,12),edge,[0,50.09,0]);
+  // 依使用者提供照片重做：退縮肩部 → 窄頸 → 向上外展小塔身 → 機房 → 長天線。
+  const crownStone=material('crown_pale_structure',0xa8b7b4,.65,.10);
+  frustum(4.48,2.52,.63,44.0,glassDark);
+  frustum(3.25,3.25,.12,44.63,edge);
+  frustum(1.52,1.65,.50,44.75,glassDark);
+  // 平台周圍斜支架，形態保持簡潔，不再逐層縮成尖錐。
+  for(const sx of [-1,1])for(const sz of [-1,1])beam([sx*1.05,44.76,sz*1.05],[sx*.68,45.25,sz*.68],.065,crownStone);
+  frustum(1.63,2.62,1.77,45.25,glass);
+  facade(1.63,2.62,1.77,45.25,8,detail==='high'?8:6);
+  // 小塔身橫向樓層環，使用共用beam幾何，保持少量批次。
+  for(let row=1;row<=7;row++){const y=45.25+row*1.77/8,width=1.63+(2.62-1.63)*row/8,pts=octagon(width+.045);for(let i=0;i<8;i++){const a=pts[i],b=pts[(i+1)%8];beam([a[0],y,a[1]],[b[0],y,b[1]],.025,edge);}}
+  frustum(2.82,2.82,.10,47.02,edge);frustum(2.35,2.35,.06,47.12,dark);
+  frustum(1.45,1.22,.69,47.18,crownStone);facade(1.45,1.22,.69,47.18,3,6,false);
+  frustum(1.78,1.78,.12,47.87,glassDark);
+  record(new T.CylinderGeometry(.10,.17,.18,10),dark,[0,48.10,0]);
+  record(new T.CylinderGeometry(.025,.08,2.66,10),edge,[0,49.36,0]);
+  const antennaRing=new T.TorusGeometry(.080,.012,4,12);
+  for(let i=0;i<9;i++)record(antennaRing,edge,[0,48.20+i*.27,0],[1,1,1],[Math.PI/2,0,0]);
   record(new T.SphereGeometry(.07,10,8),beacon,[0,50.73,0]);
   const coinGeo=new T.TorusGeometry(.49,.067,6,28);
   for(let side=0;side<4;side++){
@@ -1413,30 +1545,152 @@ function createTaipei101(pos, options = {}) {
     const q=new T.Vector3(0,9.35,2.95).applyAxisAngle(new T.Vector3(0,1,0),angle);
     box(.33,.33,.07,edge,q.x,q.y,q.z,0,angle);
   }
+  // Additional low-cost outline along existing ledges; shared single batch.
+  for(const u of units){const width=5.83-(u.index-1)*.018+.07,points=octagon(width);for(let k=0;k<8;k++){const a=points[k],b=points[(k+1)%8];beam([a[0],u.topY+.075,a[1]],[b[0],u.topY+.075,b[1]],.046,prideTrim);}}
+  // 依全貌照重分配垂直比例，保持原生總高度50.8及外部height不變。
+  // 基座/下段約21%、八節主塔約56%、塔冠與天線約23%。
+  const mapHeight=y=>y<=12.55?y*(10.7/12.55):y<=44?10.7+(y-12.55)*(28.5/31.45):39.2+(y-44)*(11.6/6.8);
+  const heightSlope=y=>y<12.55?10.7/12.55:y<44?28.5/31.45:11.6/6.8;
+  const centerLocal=new T.Vector3(),centerWorld=new T.Vector3();
+  for(const[geometry,byMat]of pools){geometry.computeBoundingBox();geometry.boundingBox.getCenter(centerLocal);
+    for(const matrices of byMat.values())for(const matrix of matrices){centerWorld.copy(centerLocal).applyMatrix4(matrix);const y=centerWorld.y,k=heightSlope(y),translation=matrix.elements[13];
+      // 左乘Y向仿射變換，連斜窗、斜樑與文字一起貼合，不只拉長外層Group。
+      matrix.elements[1]*=k;matrix.elements[5]*=k;matrix.elements[9]*=k;matrix.elements[13]=mapHeight(y)+(translation-y)*k;
+      // 照片中的上部小塔也較纖細，只收窄小塔與天線，保留下方肩部平台。
+      if(y>=45.25){for(const index of [0,4,8,12,2,6,10,14])matrix.elements[index]*=.84;}
+    }
+  }
+  units.forEach(u=>{u.bottomY=mapHeight(u.bottomY);u.topY=mapHeight(u.topY);});
   // One InstancedMesh per geometry/material pair: thousands of facade details, few draw calls.
-  const content=new T.Group();content.name="Taipei101_Geometry";content.scale.setScalar(height/50.8);root.add(content);
+  const content=new T.Group();content.name="Taipei101_Geometry";content.scale.set(11.2/50.8,height/50.8,11.2/50.8); // 僅改內層垂直高度，寬深固定為05版尺寸
+  root.add(content);
   let instances=0;
   for(const [geo,byMat] of pools)for(const [mat,matrices] of byMat){
+    // 白光用高度排序；常駐窗用固定打散排序，恢復時呈現零星點燈。
+    if(mat===nightWhite||mat===prideTrim)matrices.sort((a,b)=>a.elements[13]-b.elements[13]);
+    if(mat===normalWhite){const hash=i=>{let x=Math.imul(i+1,0x9e3779b1)>>>0;x=Math.imul(x^(x>>>16),0x85ebca6b)>>>0;return(x^(x>>>13))>>>0;};const order=matrices.map((m,i)=>({m,key:hash(i)})).sort((a,b)=>a.key-b.key);matrices.splice(0,matrices.length,...order.map(o=>o.m));}
     const batch=new T.InstancedMesh(geo,mat,matrices.length);batch.name=mat.name;
     matrices.forEach((matrix,i)=>batch.setMatrixAt(i,matrix));batch.instanceMatrix.needsUpdate=true;
     batch.castShadow=options.shadows!==false;batch.receiveShadow=options.shadows!==false;
     // r128 computes bounds from the untransformed source geometry; avoid incorrect culling.
-    if(mat===nightWhite || mat===adHeart || mat===adText){batch.visible=false;batch.castShadow=false;batch.receiveShadow=false;nightBatches.push(batch);}
+    if(mat===nightWhite || mat===normalWhite || mat===adHeart || mat===adText){batch.visible=false;batch.castShadow=false;batch.receiveShadow=false;nightBatches.push(batch);}
+    if(mat===normalWhite)regularWindows=batch;
+    if(mat===nightWhite){prideWindows=batch;matrices.forEach((m,i)=>{windowBands.push(bandForY(m.elements[13]));batch.setColorAt(i,new T.Color(0xffffff));});batch.instanceColor.setUsage(T.DynamicDrawUsage);}
+    if(mat===prideTrim){prideEdges=batch;batch.visible=false;batch.castShadow=false;batch.receiveShadow=false;matrices.forEach((m,i)=>{edgeBands.push(bandForY(m.elements[13]));batch.setColorAt(i,new T.Color(0xffffff));});batch.instanceColor.setUsage(T.DynamicDrawUsage);}
     batch.frustumCulled=false;content.add(batch);instances+=matrices.length;
   }
   if(pos)root.position.copy(pos);
-  root.userData.taipei101={height,detail,units,materials,instances,drawCalls:content.children.length};
-  root.userData.setNight=(enabled)=>{
-    glass.emissive.setHex(0x000000);glass.emissiveIntensity=0;
-    windowLit.color.setHex(enabled?0x306873:0x7eaaaa);windowLit.emissive.setHex(0x000000);windowLit.emissiveIntensity=0;
-    nightBatches.forEach(batch=>{batch.visible=!!enabled;});
-    root.userData.taipei101.night=!!enabled;
-    edge.emissive.setHex(0x000000);edge.emissiveIntensity=0;
-    beacon.emissive.setHex(enabled?0xe54b40:0x000000);beacon.emissiveIntensity=enabled?2:0;
+  root.userData.taipei101={height,detail,units,materials,instances,drawCalls:content.children.length,crownVersion:'full_photo_proportions',proportions:{nativeHeight:50.8,lowerEnd:10.7,mainTowerTop:39.2,crownHeight:11.6,upperCrownWidthScale:.84}};
+
+
+
+  // 07：逐層白光 → 彩虹 → 精確12發煙火 → 突然全暗只留❤️TW → 零星恢復。
+  const defaults={normal:8,blackout:2,whiteRise:10,whiteHold:1.5,fill:7,ready:1,suddenDark:1.5,restore:3};
+  const durations=Object.fromEntries(Object.entries(defaults).map(([k,v])=>[k,Number.isFinite(options.showTimings?.[k])&&options.showTimings[k]>0?options.showTimings[k]:v]));
+  const burstTotal=12,burstGap=Number.isFinite(options.fireworkGap)&&options.fireworkGap>=.35?options.fireworkGap:.75;
+  durations.fireworks=(burstTotal-1)*burstGap+2.5;
+  const names=['blackout','whiteRise','whiteHold','fill','ready','fireworks','suddenDark','restore'];
+  const labels={day:'白天待機',normal:'常駐模式・零星窗燈＋❤️TW',blackout:'塔身全暗',whiteRise:'白色窗燈逐層往上',whiteHold:'塔頂已亮・全白',fill:'由下點亮七段彩虹',ready:'七彩全亮',fireworks:'彩虹全亮・12發煙火',suddenDark:'突然熄燈・只留❤️TW',restore:'零星窗燈恢復',cooldown:'常駐模式・等待下一輪'};
+  const showSeconds=names.reduce((sum,k)=>sum+durations[k],0),totalWindows=prideWindows.count,totalNormal=regularWindows.count,totalEdges=prideEdges.count;
+  // 彩虹版：每180秒開始一輪燈光秀（包含煙火）；扣掉演出時間，其餘作為休息間隔。
+  const interval=Math.max(0,180-showSeconds);
+  // 依實際窗口高度歸層，控制實例count即可，不需每幀重寫全窗色。
+  const layerHeights=[],layerCounts=[],edgeHeights=[],matrixAt=new T.Matrix4();let lastHeight=-Infinity;
+  for(let i=0;i<totalWindows;i++){prideWindows.getMatrixAt(i,matrixAt);const y=Math.round(matrixAt.elements[13]*1000)/1000;if(y!==lastHeight){lastHeight=y;layerHeights.push(y);layerCounts.push(i+1);}else layerCounts[layerCounts.length-1]=i+1;}
+  for(let i=0;i<totalEdges;i++){prideEdges.getMatrixAt(i,matrixAt);edgeHeights.push(matrixAt.elements[13]);}
+  const internalMode=options.fireworksMode==='internal';
+  let night=false,clock=0,lastKey='',lastStage='day',disposed=false,paused=false,forceShow=false,nextBurst=0;
+  root.userData.taipei101.pride={edition:'rainbow_pride',cycleSeconds:showSeconds+interval,repeatInterval:interval,showSeconds,windowCount:totalWindows,normalWindowCount:totalNormal,timings:durations,stage:'day',stageLabel:labels.day,litBands:0,whiteLayerCount:layerHeights.length,whiteLayersLit:0,fireworksRequestSerial:0,burstsThisShow:0,burstTotal,internalFireworks:internalMode,soundReady:false};
+  const meta=root.userData.taipei101.pride,white=new T.Color(0xffffff),black=new T.Color(0x000000);
+  function lights(mode,bands=0,amount=1){
+    const active=['whiteBuild','white','rainbow'].includes(mode),normal=['normal','restore'].includes(mode);
+    regularWindows.count=mode==='restore'?Math.min(totalNormal,Math.floor(totalNormal*amount)):totalNormal;regularWindows.visible=night&&normal&&regularWindows.count>0;
+    prideWindows.count=mode==='whiteBuild'?(amount>0?layerCounts[Math.min(layerCounts.length-1,amount-1)]:0):totalWindows;
+    let outlineCount=totalEdges;if(mode==='whiteBuild'){const top=amount>0?layerHeights[Math.min(layerHeights.length-1,amount-1)]:-Infinity;outlineCount=0;while(outlineCount<totalEdges&&edgeHeights[outlineCount]<=top)outlineCount++;}
+    prideEdges.count=outlineCount;prideWindows.visible=night&&active&&prideWindows.count>0;prideEdges.visible=night&&active&&prideEdges.count>0;
+    const showAd=night&&['normal','restore','heart'].includes(mode);nightBatches.forEach(batch=>{if(batch.material===adHeart||batch.material===adText)batch.visible=showAd;});
+    beacon.emissiveIntensity=night&&(normal||active)?2:0;
+    const key=mode+':'+bands;if(key!==lastKey){lastKey=key;if(active){for(let i=0;i<totalWindows;i++)prideWindows.setColorAt(i,mode!=='rainbow'||windowBands[i]>=bands?white:rainbow[windowBands[i]]);for(let i=0;i<totalEdges;i++)prideEdges.setColorAt(i,mode!=='rainbow'?white:edgeBands[i]<bands?rainbow[edgeBands[i]]:white);prideWindows.instanceColor.needsUpdate=true;prideEdges.instanceColor.needsUpdate=true;}}
+    nightWhite.color.setScalar(1);prideTrim.color.setScalar(.85);meta.litBands=mode==='rainbow'?bands:0;meta.whiteLayersLit=mode==='whiteBuild'?amount:mode==='white'?layerHeights.length:0;
+    meta.normalWindowsVisible=regularWindows.visible?regularWindows.count:0;
+  }
+  // 外部模式不建立Points、光暈貼圖或音訊；預覽才明確啟用內建模式。
+  function createInternalFireworks(){
+  // 使用遊戲共用AudioContext；僅在同一個爆炸事件觸發聲音，不使用計時器。
+  let audio=null;const audioSources=new Set();
+  function stopFireworkSound(){for(const source of audioSources){try{source.stop();}catch(e){}}audioSources.clear();}
+  root.userData.setFireworksAudio=(settings={})=>{
+    stopFireworkSound();if(audio)audio.master.disconnect();audio=null;meta.soundReady=false;
+    const ctx=settings.context;if(!ctx)return;
+    const master=ctx.createGain();master.gain.value=Math.max(0,Math.min(1,settings.volume??.38));master.connect(settings.destination||ctx.destination);
+    const noise=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*.8),ctx.sampleRate),data=noise.getChannelData(0);let seed=101;
+    for(let i=0;i<data.length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;data[i]=seed/2147483648-1;}
+    audio={ctx,master,noise,enabled:settings.enabled!==false};meta.soundReady=audio.enabled&&ctx.state==='running';
   };
+  root.userData.setFireworksSoundEnabled=enabled=>{if(audio)audio.enabled=!!enabled;if(!enabled)stopFireworkSound();meta.soundReady=!!audio&&audio.enabled&&audio.ctx.state==='running';};
+  function trackSound(source,nodes){audioSources.add(source);source.onended=()=>{audioSources.delete(source);source.disconnect();nodes.forEach(n=>n.disconnect());};}
+  function fireworkSound(){if(!audio||!audio.enabled||audio.ctx.state!=='running')return;
+    const ctx=audio.ctx,t=ctx.currentTime+.015,boom=ctx.createOscillator(),g=ctx.createGain();boom.type='sine';boom.frequency.setValueAtTime(100,t);boom.frequency.exponentialRampToValueAtTime(35,t+.28);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.30,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+.62);boom.connect(g);g.connect(audio.master);trackSound(boom,[g]);boom.start(t);boom.stop(t+.66);
+    for(let i=0;i<4;i++){const start=t+(i===0?0:.08+i*.055),source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();source.buffer=audio.noise;filter.type=i===0?'lowpass':'highpass';filter.frequency.value=i===0?1150:1600+i*550;const duration=i===0?.52:.12;gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(i===0?.25:.065,start+.004);gain.gain.exponentialRampToValueAtTime(.0001,start+duration);source.connect(filter);filter.connect(gain);gain.connect(audio.master);trackSound(source,[filter,gain]);source.start(start);source.stop(start+duration+.015);}
+  }
+  let burstClock=0;
+  // One points object with fixed buffers; three light points per spark simulate a short trail.
+  const CAP=256,positions=new Float32Array(CAP*9),colors=new Float32Array(CAP*9),px=new Float32Array(CAP*3),velocity=new Float32Array(CAP*3),ages=new Float32Array(CAP),lives=new Float32Array(CAP),sparkColors=new Float32Array(CAP*3);
+  ages.fill(99);let cursor=0,seed=1012026,burstCount=0;
+  function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;}
+  const glowPixels=new Uint8Array(16*16*4);for(let y=0;y<16;y++)for(let x=0;x<16;x++){const i=(y*16+x)*4,r=Math.hypot((x-7.5)/7.5,(y-7.5)/7.5);glowPixels[i]=glowPixels[i+1]=glowPixels[i+2]=255;glowPixels[i+3]=Math.round(255*Math.pow(Math.max(0,1-r),1.6));}
+  const glowTexture=new T.DataTexture(glowPixels,16,16,T.RGBAFormat);glowTexture.needsUpdate=true;
+  const sparkGeo=new T.BufferGeometry();sparkGeo.setAttribute('position',new T.BufferAttribute(positions,3).setUsage(T.DynamicDrawUsage));sparkGeo.setAttribute('color',new T.BufferAttribute(colors,3).setUsage(T.DynamicDrawUsage));
+  const sparkMat=new T.PointsMaterial({size:.48,map:glowTexture,transparent:true,vertexColors:true,blending:T.AdditiveBlending,depthWrite:false,toneMapped:false});
+  const sparks=new T.Points(sparkGeo,sparkMat);sparks.name='Pride_Fireworks_VisualOnly';sparks.frustumCulled=false;sparks.visible=false;sparks.userData.excludeFromPlacementBounds=true;content.add(sparks);
+  function clearFireworks(){ages.fill(99);colors.fill(0);sparkGeo.attributes.color.needsUpdate=true;sparks.visible=false;burstClock=0;}
+  function burst(){fireworkSound();const side=burstCount++%2?1:-1,cx=side*(7+rand()*5),cy=45+rand()*12,cz=-4+rand()*8;
+    for(let n=0;n<58;n++){const i=cursor++%CAP,k=i*3,a=rand()*Math.PI*2,z=rand()*2-1,r=Math.sqrt(Math.max(0,1-z*z)),speed=8+rand()*9;px[k]=cx;px[k+1]=cy;px[k+2]=cz;velocity[k]=Math.cos(a)*r*speed;velocity[k+1]=z*speed*.85+3;velocity[k+2]=Math.sin(a)*r*speed;ages[i]=0;lives[i]=1.65+rand()*.8;const c=rainbow[(n+burstCount)%7];sparkColors[k]=c.r;sparkColors[k+1]=c.g;sparkColors[k+2]=c.b;}
+  }
+  function updateFireworks(dt,launch){if(launch){burstClock-=dt;if(burstClock<=0){burst();burstClock+=1.15;}}let any=false;
+    for(let i=0;i<CAP;i++){ages[i]+=dt;const k=i*3;if(ages[i]>=lives[i]){for(let t=0;t<3;t++){const b=i*9+t*3;colors[b]=colors[b+1]=colors[b+2]=0;}continue;}any=true;velocity[k+1]-=5*dt;for(let a=0;a<3;a++)px[k+a]+=velocity[k+a]*dt;const fade=Math.pow(1-ages[i]/lives[i],1.45);
+      for(let t=0;t<3;t++){const b=i*9+t*3;for(let a=0;a<3;a++){positions[b+a]=px[k+a]-velocity[k+a]*t*.025;colors[b+a]=sparkColors[k+a]*fade*(1-t*.25);}}
+    }sparks.visible=night&&any;sparkGeo.attributes.position.needsUpdate=true;sparkGeo.attributes.color.needsUpdate=true;
+  }
+
+
+  return {burst,update:dt=>updateFireworks(dt,false),clear:()=>{clearFireworks();stopFireworkSound();},dispose:()=>{clearFireworks();stopFireworkSound();if(audio)audio.master.disconnect();content.remove(sparks);sparkGeo.dispose();sparkMat.dispose();glowTexture.dispose();}};
+
+  }
+  const fx=internalMode?createInternalFireworks():null;
+  let externalHandler=typeof options.onFireworksRequest==='function'?options.onFireworksRequest:null;
+  root.userData.setPrideFireworksHandler=handler=>{if(handler!==null&&typeof handler!=='function')throw Error('handler須為函式或null');externalHandler=handler;};
+  function launchOne(){meta.fireworksRequestSerial++;meta.burstsThisShow=nextBurst+1;
+    if(fx)fx.burst();
+    // 內建煙火保留視覺效果，同步通知遊戲音效系統；不重開舊煙火粒子。
+    if(externalHandler){try{externalHandler({type:'taipei101_pride_fireworks',tower:root,count:1,burstIndex:nextBurst+1,burstTotal:12,duration:2.5,showDuration:durations.fireworks,sequence:meta.fireworksRequestSerial,syncSound:true});}catch(e){meta.handlerError=String(e.message||e);}}
+  }
+  function show(dt){let stage,elapsed=0,remaining=0;
+    if(!forceShow&&clock<durations.normal){stage='normal';elapsed=clock;remaining=durations.normal-clock;}
+    else{let t=Math.max(0,clock-(forceShow?0:durations.normal))%(showSeconds+interval);if(t>=showSeconds){stage='cooldown';elapsed=t-showSeconds;remaining=interval-elapsed;}else for(const name of names){if(t<durations[name]){stage=name;elapsed=t;remaining=durations[name]-t;break;}t-=durations[name];}}
+    if(stage!==lastStage){lastStage=stage;if(stage==='blackout')meta.burstsThisShow=0;if(stage==='fireworks'){nextBurst=0;meta.burstsThisShow=0;}if(['normal','blackout','suddenDark','cooldown'].includes(stage)&&fx)fx.clear();}
+    meta.stage=stage;meta.stageLabel=labels[stage];meta.stageRemaining=Math.max(0,remaining);
+    if(stage==='normal'||stage==='cooldown')lights('normal');
+    else if(stage==='blackout')lights('off');
+    else if(stage==='whiteRise'){const level=Math.min(layerHeights.length,Math.floor(elapsed/durations.whiteRise*(layerHeights.length+1)));lights('whiteBuild',0,level);}
+    else if(stage==='whiteHold')lights('white');
+    else if(stage==='fill')lights('rainbow',Math.min(7,Math.floor(elapsed/durations.fill*7)+1));
+    else if(stage==='suddenDark')lights('heart');
+    else if(stage==='restore')lights('restore',0,elapsed/durations.restore);
+    else lights('rainbow',7);
+    if(stage==='fireworks'){while(nextBurst<12&&elapsed+1e-7>=nextBurst*burstGap){launchOne();nextBurst++;}if(fx)fx.update(dt);}
+  }
+  root.userData.setNight=enabled=>{const on=typeof enabled==='number'?enabled>=.5:!!enabled;if(on===night&&meta.stage!=='day')return;
+    glass.emissive.setHex(0);glass.emissiveIntensity=0;edge.emissive.setHex(0);edge.emissiveIntensity=0;windowLit.color.setHex(on?0x306873:0x7eaaaa);windowLit.emissive.setHex(0);windowLit.emissiveIntensity=0;beacon.emissive.setHex(on?0xe54b40:0);
+    if(on!==night){night=on;clock=0;forceShow=false;nextBurst=0;lastStage=on?'normal':'day';if(fx)fx.clear();}root.userData.taipei101.night=night;
+    if(night)show(0);else{lights('off');meta.stage='day';meta.stageLabel=labels.day;meta.stageRemaining=0;}
+  };
+  root.userData.update=(dt=0)=>{if(disposed||!night||paused)return;const step=Math.max(0,Math.min(.1,Number(dt)||0));clock=Math.round((clock+step)*1e9)/1e9;show(step);};
+  root.userData.restartPrideShow=()=>{clock=0;forceShow=true;lastStage='blackout';nextBurst=0;meta.burstsThisShow=0;if(fx)fx.clear();if(night)show(0);};
+  root.userData.setPridePaused=enabled=>{paused=!!enabled;if(paused&&fx)fx.clear();};
+  if(fx&&options.audioContext)root.userData.setFireworksAudio({context:options.audioContext,destination:options.audioDestination,volume:options.soundVolume});
   root.userData.setNight(options.night===true);
-  root.userData.dispose=()=>{for(const geometry of pools.keys())geometry.dispose();Object.values(materials).forEach(m=>m.dispose());};
-  return root;
+  root.userData.dispose=()=>{if(disposed)return;disposed=true;if(fx)fx.dispose();externalHandler=null;for(const geometry of pools.keys())geometry.dispose();Object.values(materials).forEach(m=>m.dispose());content.traverse(o=>{if(o.isInstancedMesh&&typeof o.dispose==='function')o.dispose();});if(root.parent)root.parent.remove(root);};return root;
 }
 </script>
 <script>
@@ -1844,24 +2098,11 @@ function createCurvedSchoolGate(pos,options={}){
 
       <!-- 狀態欄：行動版保留地標數量、天色、積分；控制按鈕由 SV.01-133 側欄承載 -->
       <div class="flex items-center gap-2 sm:gap-3">
-        <!-- 100 種特殊紀念地標進度 -->
-        <div class="glass-hud px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-2xl text-center">
-          <span class="text-[10px] text-slate-400 block leading-tight">紀念地標</span>
-          <span id="milestoneCounter" class="font-bold text-cyan-300 text-xs sm:text-sm">0 / 100</span>
-        </div>
-        <div class="glass-hud px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-2xl text-center">
-          <span class="text-[10px] text-slate-400 block leading-tight">一般獎勵</span>
-          <span id="generalRewardCounter" class="font-bold text-cyan-300 text-xs sm:text-sm">0 / 250</span>
-        </div>
+        <!-- 地標與一般獎勵已整合於左下角 HUD -->
 
-        <div class="glass-hud px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-2xl text-center">
-          <span class="text-[10px] text-slate-400 block leading-tight">天色</span>
+        <div class="glass-hud px-3.5 py-1.5 rounded-2xl flex items-center gap-2">
+          <span class="text-[10px] text-slate-400 font-bold block leading-tight">天色</span>
           <span id="dayTimeBadge" class="font-bold text-amber-300 text-xs sm:text-sm">中午</span>
-        </div>
-
-        <div class="glass-hud px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-2xl text-center">
-          <span class="text-[10px] text-slate-400 block leading-tight">開拓積分</span>
-          <span id="scoreEl" class="font-black text-emerald-400 text-xs sm:text-sm">0</span>
         </div>
 
         <!-- 桌機四選一下拉；行動版仍保留原按鍵操作。 -->
@@ -1910,6 +2151,7 @@ function createCurvedSchoolGate(pos,options={}){
         <button id="screensaverBtn" aria-haspopup="true" aria-expanded="false" aria-controls="screensaverChoiceMenu" class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95 flex items-center gap-1">
           <span>螢幕保護 ▾</span>
         </button>
+        <button id="islandPerfToggle" type="button" hidden aria-controls="islandPerfPanel" aria-expanded="false" aria-pressed="false" class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-700/60 transition active:scale-95 whitespace-nowrap">效能診斷 OFF</button>
       </div>
     </header>
 
@@ -1997,7 +2239,7 @@ function createCurvedSchoolGate(pos,options={}){
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
       <div class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 flex flex-col items-start gap-0.5 text-slate-400 select-none pointer-events-none">
-        <span id="gameVersionBadge" class="font-mono font-medium">(S.V02 - 09)</span>
+        <span id="gameVersionBadge" class="font-mono font-medium">(S.V02 - 12 - rainbow)</span>
         <span id="gameVisitCount" aria-live="polite">累積瀏覽次數：讀取中</span>
       </div>
       <script>
@@ -2035,7 +2277,7 @@ function createCurvedSchoolGate(pos,options={}){
 
   <!-- 螢幕保護模式退出提示浮標 -->
   <!-- 完成全部地標與人物試煉後才顯示；開發祕技 layout 可直接測試。 -->
-  <button id="layoutEnterBtn" type="button" disabled class="hidden z-40 interactive" aria-label="開始佈置"><span>開始</span><span>佈置</span></button>
+  <button id="layoutEnterBtn" type="button" class="hidden z-40 interactive" aria-label="開始佈置"><span>開始</span><span>佈置</span></button>
   <div id="layoutToolbar" class="hidden fixed z-40 left-1/2 -translate-x-1/2 top-3 text-white interactive">
     <div class="layout-toolbar-heading">
       <span class="layout-toolbar-title">島嶼佈置</span>
@@ -2119,7 +2361,7 @@ function createCurvedSchoolGate(pos,options={}){
               <span class="font-mono font-bold text-fuchsia-400 bg-slate-950 px-2 py-0.5 rounded">people</span>
             </div>
             <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
-              <span class="text-slate-300">台北 101 播放一輪煙火（含音效）</span>
+              <span class="text-slate-300">台北 101 彩虹燈光秀（煙火同步音效）</span>
               <span class="font-mono font-bold text-rose-300 bg-slate-950 px-2 py-0.5 rounded">fire</span>
             </div>
             <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
@@ -2346,7 +2588,202 @@ function createCurvedSchoolGate(pos,options={}){
     </div>
   </div>
 
+  
+  <!-- 遊戲主程式執行前建立全部計分 DOM，避免讀取 null -->
+  <aside id="islandResourceHud" aria-label="島嶼資訊" role="status">
+    <div class="island-resource-line">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18M5 10V20M10 10V20M14 10V20M19 10V20M2 21h20M3 8 12 3l9 5"/></svg>
+      <span>紀念地標</span><strong id="milestoneCounter">0 / 50</strong>
+    </div>
+    <div class="island-resource-line">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22v-6M9 18h6M8 16a5 5 0 0 1-2-9 6 6 0 0 1 12 0 5 5 0 0 1-2 9Z"/></svg>
+      <span>一般獎勵</span><strong id="generalRewardCounter">0 / 250</strong>
+    </div>
+    <div class="island-resource-line">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 8.5c-1.2-1.3-5.6-1.5-5.6 1.3 0 2.7 5.2 1.1 5.2 4.1 0 2.6-4.2 3-6 1.5M12 5.5v13"/></svg>
+      <span>島嶼幣</span><strong id="islandCoinCounter" aria-live="polite">0</strong>
+    </div>
+    <div class="island-resource-line">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 13 3 3 5-7"/><path d="M12 3v3M12 18v3"/></svg>
+      <span>開拓積分</span><strong id="scoreEl">0</strong>
+    </div>
+  </aside>
+
+  <script id="resourceHudTitleAlignment">
+    // S.V02-11：方案 B 資訊列左緣對齊「我的夢想島」標題第一字。
+    (() => {
+      const align = () => {
+        const title = document.querySelector('#dreamIslandTitleStack h1');
+        const panel = document.getElementById('islandResourceHud');
+        if (!title || !panel) return;
+        const x = title.getBoundingClientRect().left;
+        const safeMin = window.innerWidth <= 760 ? 8 : 12;
+        const maxLeft = Math.max(safeMin, window.innerWidth - panel.offsetWidth - safeMin);
+        const left = Math.max(safeMin, Math.min(x, maxLeft));
+        panel.style.setProperty('--island-resource-align-left', left.toFixed(1) + 'px');
+      };
+      window.addEventListener('resize', align, { passive: true });
+      window.addEventListener('load', align, { once: true });
+      if (window.ResizeObserver) {
+        const titleRoot = document.getElementById('dreamIslandTitleStack');
+        if (titleRoot) {
+          const ro = new ResizeObserver(align);
+          ro.observe(titleRoot);
+        }
+      }
+      requestAnimationFrame(align);
+      setTimeout(align, 120);
+    })();
+  </script>
+
+
   <script>
+  // S.V02-11：算圖模式、效能診斷面板拖曳（僅標題區可拖曳）。
+  window.islandMakeDraggablePanel = function(panel, handle){
+    if (!panel || !handle || panel.dataset.islandDragReady === '1') return;
+    panel.dataset.islandDragReady = '1';
+    handle.classList.add('island-panel-drag-handle');
+    handle.title = '按住拖曳面板位置';
+    let pointerId = null, startX = 0, startY = 0, originX = 0, originY = 0;
+    const clamp = (v,lo,hi) => Math.min(Math.max(v,lo),Math.max(lo,hi));
+    const onDown = (e) => {
+      if (e.button !== undefined && e.button !== 0) return;
+      if (e.target.closest('button,a,input,select,textarea')) return;
+      const rect = panel.getBoundingClientRect();
+      originX = rect.left; originY = rect.top;
+      startX = e.clientX; startY = e.clientY; pointerId = e.pointerId;
+      panel.style.left = `${rect.left}px`;
+      panel.style.top = `${rect.top}px`;
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+      handle.setPointerCapture(e.pointerId);
+      handle.classList.add('island-panel-dragging');
+      e.preventDefault();
+    };
+    handle.addEventListener('pointerdown', onDown);
+    handle.addEventListener('pointermove', (e) => {
+      if (pointerId !== e.pointerId) return;
+      const maxX = innerWidth - panel.offsetWidth - 4;
+      const maxY = innerHeight - Math.min(panel.offsetHeight,innerHeight - 8) - 4;
+      panel.style.left = `${clamp(originX + e.clientX - startX,4,maxX)}px`;
+      panel.style.top = `${clamp(originY + e.clientY - startY,4,maxY)}px`;
+    });
+    const stop = (e) => {
+      if (pointerId !== e.pointerId) return;
+      pointerId = null;
+      handle.classList.remove('island-panel-dragging');
+      if (handle.hasPointerCapture(e.pointerId)) handle.releasePointerCapture(e.pointerId);
+    };
+    handle.addEventListener('pointerup',stop);
+    handle.addEventListener('pointercancel',stop);
+  };
+  </script>
+  <style>
+    .island-panel-drag-handle{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+    .island-panel-drag-handle.island-panel-dragging{cursor:grabbing}
+  </style>
+  <!-- S.V02-11：可關閉的效能診斷，不更動正常遊戲計分及獎勵 -->
+  <section id="islandPerfPanel" hidden aria-label="效能診斷數據">
+    <div class="island-perf-topbar island-panel-drag-handle">
+      <div class="island-perf-heading">3D 效能診斷</div>
+    </div>
+    <div class="island-perf-controls">
+      <button id="islandPerfStart" type="button" style="background:#059669">監控開始</button>
+      <span id="islandPerfMonitorStatus" class="island-perf-status stopped" role="status" aria-live="polite" aria-label="監控已停止" title="監控已停止"><span class="island-perf-status-light" aria-hidden="true"></span></span>
+      <button id="islandPerfStop" type="button" disabled style="background:#dc2626">監控停止</button>
+    </div>
+    <div class="island-perf-grid">
+      <div class="island-perf-col island-perf-metrics">
+        <div class="island-perf-row"><span>FPS（近 1 秒）</span><strong id="perfFps">--</strong></div>
+        <div class="island-perf-row"><span>幀時間（平均）</span><strong id="perfFrameMs">--</strong></div>
+        <div class="island-perf-row"><span>繪圖呼叫 / 幀</span><strong id="perfCalls">--</strong></div>
+        <div class="island-perf-row"><span>三角面 / 幀</span><strong id="perfTriangles">--</strong></div>
+        <div class="island-perf-row"><span>場景 3D 物件</span><strong id="perfObjects">--</strong></div>
+        <div class="island-perf-row"><span>可見 Mesh</span><strong id="perfMeshes">--</strong></div>
+        <div class="island-perf-row"><span>幾何體（GPU）</span><strong id="perfGeometries">--</strong></div>
+        <div class="island-perf-row"><span>材質貼圖（GPU）</span><strong id="perfTextures">--</strong></div>
+        <div class="island-perf-row"><span>WebGL 繪製（毫秒）</span><strong id="perfRenderMs">--</strong></div>
+        <div class="island-perf-note">請執行 99999，等物件停止生成後再觀察。FPS 低可能與 CPU、GPU 或背景執行限制有關；WebGL 繪製時間是 CPU 提交時間，不等於 GPU 耗時。若能同時觀察高畫質／普通／省電，更容易定位瓶頸。</div>
+        <button id="islandPerfCopy" type="button">複製數據</button>
+      </div>
+      <div class="island-perf-col island-perf-analysis">
+        <div class="island-perf-note" style="margin-top:0">物件分析：完成 FULL／99999 後，按「分析島嶼物件」。測試會逐幀短暫隱藏物件群組，完成即恢復；建議期間不要操作鏡頭。</div>
+        <div class="island-perf-btn-row">
+          <button id="islandObjectAnalyze" type="button">分析島嶼物件</button>
+          <button id="islandObjectCopy" type="button">複製物件報告</button>
+        </div>
+        <div id="islandObjectStatus">尚未分析</div>
+        <div id="islandObjectReport">等待分析</div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // 地標18：使用者提供的吉薩金字塔模型，保留原始生成邏輯及座標。
+/* 吉薩金字塔18 · Three.js r128+ · +Y朝上，底面Y=0。無外部貼圖。 */
+(function(global){
+ global.createGizaPyramid=function(THREE,options={}){
+ const group=new THREE.Group();group.name='吉薩金字塔18';
+ const width=options.width??4.4,height=options.height??2.8;
+ if(!(width>0&&height>0))throw new Error('width與height必須大於0');
+ // 單張程序砂岩貼圖；交錯砌縫、石塊色差和風化斑點，無數百個獨立石塊。
+ const size=512,pixels=new Uint8Array(size*size*4);let seed=18518;
+ function random(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;}
+ const shades=[];for(let row=0;row<12;row++){shades[row]=[];for(let col=0;col<10;col++)shades[row][col]=(random()-.5)*8;}
+ for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+ const row=Math.floor(y/48),ly=y%48,offset=row%2?42:0,col=Math.floor((x+offset)/84),lx=(x+offset)%84;
+ // 大石塊、低對比接縫，去除細碎顆粒與髒污斑點。
+ const seam=(ly<2||lx<2)?-11:ly===2?-4:ly>45?2:0;
+ const oldChip=(row===2&&col===1&&ly<5&&lx<15)||(row===6&&col===4&&ly<4&&lx>64)?-9:0;
+ const variation=shades[row][col]+seam+oldChip;
+ const i=(y*size+x)*4;pixels[i]=224+variation;pixels[i+1]=187+variation;pixels[i+2]=125+variation;pixels[i+3]=255;
+ }
+ const texture=new THREE.DataTexture(pixels,size,size,THREE.RGBAFormat);texture.encoding=THREE.sRGBEncoding;texture.magFilter=THREE.LinearFilter;texture.minFilter=THREE.LinearMipmapLinearFilter;texture.generateMipmaps=true;texture.needsUpdate=true;
+ const stone=new THREE.MeshStandardMaterial({color:0xffffff,map:texture,roughness:.94,metalness:0});
+ const cutStone=new THREE.MeshStandardMaterial({color:0xc6a46b,roughness:1});
+ const recess=new THREE.MeshStandardMaterial({color:0x51412c,roughness:1});
+ const w=width/2,corners=[[-w,0,w],[w,0,w],[w,0,-w],[-w,0,-w]],vertices=[],uv=[];
+ // 以共用環狀頂點建立細微缺角；四面共用角點，避免破洞。
+ const rows=12,columns=8,points=[];
+ function chip(row,col,side){return ((row*37+col*19+side*29)%97)/97;}
+ for(let row=0;row<=rows;row++){
+   const t=row/rows,ring=[];
+   for(let side=0;side<4;side++)for(let col=0;col<columns;col++){
+     const u=col/columns,a=corners[side],b=corners[(side+1)%4];
+     const edge=col===0;
+     const amount=(edge&&((row===2&&side===0)||(row===5&&side===2)))?.024*(width/4.4):0;
+     const factor=1-t;
+     const x=(a[0]+(b[0]-a[0])*u)*factor,z=(a[2]+(b[2]-a[2])*u)*factor;
+     const len=Math.hypot(x,z)||1;
+     ring.push([x-x/len*amount,height*t,z-z/len*amount]);
+   }
+   points.push(ring);
+ }
+ function tri(a,b,c,ua,ub,uc){vertices.push(...a,...b,...c);uv.push(...ua,...ub,...uc);}
+ for(let row=0;row<rows;row++)for(let side=0;side<4;side++)for(let col=0;col<columns;col++){
+   const i=side*columns+col,j=(i+1)%(4*columns),t=row/rows,tn=(row+1)/rows;
+   const u=col/columns,un=(col+1)/columns;
+   const A=[.5+(u-.5)*(1-t),t],B=[.5+(un-.5)*(1-t),t],C=[.5+(u-.5)*(1-tn),tn],D=[.5+(un-.5)*(1-tn),tn];
+   tri(points[row][i],points[row][j],points[row+1][i],A,B,C);
+   if(row<rows-1)tri(points[row][j],points[row+1][j],points[row+1][i],B,D,C);
+ }
+ const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geometry.computeVertexNormals();
+ const body=new THREE.Mesh(geometry,stone);body.name='四面砂岩金字塔';group.add(body);
+ const bottom=new THREE.Mesh(new THREE.PlaneGeometry(width,width),cutStone);bottom.rotation.x=Math.PI/2;group.add(bottom);
+ // 北面一處小型凹暗入口，入口上方有簡潔的人字形石楣。
+ const entrance=new THREE.Group();entrance.position.set(0,height*.17,w*(1-.17)+.006);entrance.rotation.x=-Math.atan(w/height);group.add(entrance);
+ function block(a,b,c,x,y,z,mat){const m=new THREE.Mesh(new THREE.BoxGeometry(a,b,c),mat);m.position.set(x,y,z);entrance.add(m);return m;}
+ block(width*.064,height*.07,.012,0,0,.006,recess);
+ for(const side of [-1,1]){block(width*.013,height*.09,.025,side*width*.039,0,.018,cutStone);const lintel=block(width*.057,height*.021,.035,side*width*.021,height*.065,.022,cutStone);lintel.rotation.z=-side*.48;}
+ let disposed=false;
+ function setNight(n){/* 砂岩不自行發光，跟隨遊戲原本日夜照明。 */}
+ function update(dt){} // 靜態地標，無須每幀呼叫。
+ function dispose(){if(disposed)return;disposed=true;const gs=new Set(),ms=new Set();group.traverse(o=>{if(o.geometry)gs.add(o.geometry);if(o.material)ms.add(o.material);});gs.forEach(g=>g.dispose());ms.forEach(m=>m.dispose());texture.dispose();if(group.parent)group.parent.remove(group);}
+ return {group,width,height,setNight,update,dispose};
+ };
+})(typeof window!=='undefined'?window:globalThis);
+
+
     // 300+ 豐富詞彙庫 (嚴格注音校準、涵蓋台灣地名名產、景點成語)
     const WORD_DB = {
       superEasy: [
@@ -2703,8 +3140,8 @@ function createCurvedSchoolGate(pos,options={}){
     let targetCamLookAt = getDefaultLookAt();
 
     const REPEATABLE_PROTOTYPES = [
-      { type: "sailboat", name: "巡航小帆船" },
       { type: "cherry_tree", name: "盛開粉櫻樹" },
+      { type: "sailboat", name: "巡航小帆船" },
       { type: "hot_air_balloon", name: "繽紛夢想熱氣球" },
       { type: "animal_cat", name: "元氣小花貓" },
       { type: "tree_ginkgo", name: "金黃銀杏樹" },
@@ -2737,8 +3174,8 @@ function createCurvedSchoolGate(pos,options={}){
     ];
     // 一般獎勵專用 250 格表：全新開局答題及 FULL 同一順序，數量精確。
     const GENERAL_REWARD_SEQUENCE = [
-      { type: "sailboat", name: "巡航小帆船" },
       { type: "cherry_tree", name: "盛開粉櫻樹" },
+      { type: "sailboat", name: "巡航小帆船" },
       { type: "hot_air_balloon", name: "繽紛夢想熱氣球" },
       { type: "animal_cat", name: "元氣小花貓" },
       { type: "tree_ginkgo", name: "金黃銀杏樹" },
@@ -3184,6 +3621,55 @@ function createDanjiangBridge(pos, options = {}) {
  return root;
 }
 
+    // S.V02-11：僅合併指定靜態地標內同材質 Mesh；不修改位置、比例及原有 group 控制。
+    function optimizeStaticMonumentParts(root, label) {
+      const buckets = new Map();
+      for (const part of root.children.slice()) {
+        if (!part.isMesh || !part.geometry || !part.material || Array.isArray(part.material)) continue;
+        if (!buckets.has(part.material)) buckets.set(part.material, []);
+        buckets.get(part.material).push(part);
+      }
+      for (const [material, parts] of buckets) {
+        if (parts.length < 2) continue;
+        const geometries = [];
+        let vertices = 0;
+        let valid = true;
+        for (const part of parts) {
+          part.updateMatrix();
+          const geo = part.geometry.index ? part.geometry.toNonIndexed() : part.geometry.clone();
+          geo.applyMatrix4(part.matrix);
+          if (!geo.getAttribute('position') || !geo.getAttribute('normal')) { valid=false; geo.dispose(); break; }
+          vertices += geo.getAttribute('position').count;
+          geometries.push(geo);
+        }
+        if (!valid) {geometries.forEach(x=>x.dispose());continue;}
+        const pos=new Float32Array(vertices*3), norms=new Float32Array(vertices*3), uv=new Float32Array(vertices*2);
+        let offset=0;
+        for (const geo of geometries) {
+          const p=geo.getAttribute('position'), n=geo.getAttribute('normal'), u=geo.getAttribute('uv');
+          for (let i=0;i<p.count;i++) {
+            const k=(offset+i)*3, t=(offset+i)*2;
+            pos[k]=p.getX(i);pos[k+1]=p.getY(i);pos[k+2]=p.getZ(i);
+            norms[k]=n.getX(i);norms[k+1]=n.getY(i);norms[k+2]=n.getZ(i);
+            if(u){uv[t]=u.getX(i);uv[t+1]=u.getY(i);}
+          }
+          offset+=p.count;
+          geo.dispose();
+        }
+        const merged=new THREE.BufferGeometry();
+        merged.setAttribute('position',new THREE.BufferAttribute(pos,3));
+        merged.setAttribute('normal',new THREE.BufferAttribute(norms,3));
+        merged.setAttribute('uv',new THREE.BufferAttribute(uv,2));
+        merged.computeBoundingSphere();
+        const combined=new THREE.Mesh(merged,material);
+        combined.name=label+'_BatchedStatic';
+        combined.castShadow=parts.some(x=>x.castShadow);
+        combined.receiveShadow=parts.some(x=>x.receiveShadow);
+        for (const part of parts) root.remove(part);
+        root.add(combined);
+      }
+    }
+
     const SPECIAL_MONUMENTS = [
       {
         name: "童話紅磚學校",
@@ -3206,16 +3692,16 @@ function createDanjiangBridge(pos, options = {}) {
         name: "海港深水大碼頭",
         build: (pos) => {
           const g = new THREE.Group(); g.position.copy(pos);
-          const d = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.28, 2.2), new THREE.MeshStandardMaterial({ color: 0x854d0e }));
-          d.position.y = 0.5;
-          [-1.5, 0, 1.5].forEach(px => {
-            [-0.8, 0.8].forEach(pz => {
-              const p = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.2, 6), new THREE.MeshStandardMaterial({ color: 0x5a2d0c }));
-              p.position.set(px, 0.0, pz); g.add(p);
+          const d = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.18, 1.2), new THREE.MeshStandardMaterial({ color: 0x854d0e }));
+          d.position.y = 0.16;
+          [0.9].forEach(px => {
+            [-0.45, 0.45].forEach(pz => {
+              const p = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.85, 6), new THREE.MeshStandardMaterial({ color: 0x5a2d0c }));
+              p.position.set(px, 0.35, pz); g.add(p);
             });
           });
           const b = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.16, 0.45, 8), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
-          b.position.set(1.8, 0.8, 0.8);
+          b.position.set(0.85, 0.42, 0.40);
           g.add(d, b); return g;
         }
       },
@@ -3649,6 +4135,7 @@ function createDanjiangBridge(pos, options = {}) {
           topCornice.position.y = 5.22;
 
           towerGroup.add(bellFloor, bell, topCornice);
+          optimizeStaticMonumentParts(towerGroup, 'PisaTower');
           g.add(towerGroup);
           g.updateMatrixWorld(true);
           const pisaHeight = new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3()).y;
@@ -3768,19 +4255,13 @@ function createDanjiangBridge(pos, options = {}) {
       {
         name: "吉薩金字塔",
         build: (pos) => {
-          const g = new THREE.Group(); g.position.copy(pos);
-          const pyrMat = new THREE.MeshStandardMaterial({ color: 0xd4a373, roughness: 0.9 });
-          const capMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8, roughness: 0.2 });
-
-          for (let i = 0; i < 4; i++) {
-            const w = 3.6 - i * 0.75;
-            const step = new THREE.Mesh(new THREE.BoxGeometry(w, 0.45, w), pyrMat);
-            step.position.y = i * 0.45 + 0.225;
-            g.add(step);
-          }
-          const peak = new THREE.Mesh(new THREE.ConeGeometry(0.9, 0.8, 4), capMat);
-          peak.rotation.y = Math.PI / 4; peak.position.y = 2.15;
-          g.add(peak); return g;
+          // 地標18：僅替換可視模型，沿用原有座標、生成與佈置機制。
+          const model = window.createGizaPyramid(THREE);
+          const g = model.group;
+          g.position.copy(pos);
+          // 保留模型提供的夜間色彩接口，以便日後需要時使用。
+          g.userData.gizaModel = model;
+          return g;
         }
       },
       {
@@ -3877,6 +4358,7 @@ function createDanjiangBridge(pos, options = {}) {
           }
 
           g.add(base, arena, mazeWall);
+          optimizeStaticMonumentParts(g, 'RomanColosseum');
           // S.V02-05：依模型實際包圍盒校正固定高度 1.6，避免隨機縮放。
           g.updateMatrixWorld(true);
           const arenaHeight = new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3()).y;
@@ -3908,7 +4390,12 @@ function createDanjiangBridge(pos, options = {}) {
           // S.V01-179：模型自身已按 height/50.8 縮放。不要再以 Box3
           // 測量 InstancedMesh 的包圍盒後二次放大，否則會變成巨塔。
           // 兩座塔固定高度：巴黎鐵塔 10，101 11.5；不以 r128 Box3 再校正。
-          const g = createTaipei101(pos, { height: 11.5, detail: 'high' });
+          const g = createTaipei101(pos, { height: 11.5, detail: 'high', fireworksMode: 'internal',
+             onFireworksRequest: () => {
+               // 使用夢想島既有爆炸音效；遵守遊戲「音效 ON/OFF」，不受環境音關閉影響。
+               if (typeof sound !== 'undefined' && sound && typeof sound.playFireworkBoom === 'function') sound.playFireworkBoom(1.55);
+             }
+           });
           g.name = "台北一零一摩天大樓";
           g.userData.isTaipei101 = true;
           g.userData.fixedTowerHeight = 11.5;
@@ -5501,6 +5988,65 @@ function compose(ctx, start, cycles, dest){
 return {compose, length};
 })();
 
+/*
+ * 01－清亮鋼琴全曲｜單曲獨立版
+ * 來源：小貨船全曲編曲－三種音色伴奏交付包02／01清亮鋼琴。
+ * 保留原版旋律、104 BPM、音色、伴奏與混音；不含木琴／簧片曲目。
+ * 完整64拍（約36.92秒，加自然尾音約38秒），播放一次，不循環。
+ * Web Audio，無外部音檔、無外部依賴。
+ *
+ * 載入本檔後：
+ *   const music = DreamIslandPianoMusic.create({context: audioCtx, volume: .6});
+ *   // 可加 destination: bgmGain 接遊戲音樂總線。
+ *   // 必須先由玩家按開始遊戲等操作解鎖AudioContext：
+ *   await music.play();
+ *   music.setVolume(.4);
+ *   music.stop();
+ *   // 永久離開時：await music.dispose();
+ *
+ * create只需建立一次，不要每幀play；重播會停止本播放器上一段。
+ * 傳入共用context時dispose不關閉遊戲的共用AudioContext。
+ * 此檔為原版清亮鋼琴，不是118 BPM活力鼓點版。
+ */
+
+(function(global){'use strict';
+const styles={
+ piano:{name:'清亮鋼琴・流動分解和弦',bpm:104,melody:[1,.36,.16,.07,.025],arp:[1,.21,.06],bass:[1,.13],attack:.008,tail:.38,gate:.86,cut:4200}
+};
+const bars=[[[1,1],[1,1],[1,1],[3,1]],[[5,.5],[5,.5],[5,.5],[5,.5],[5,1],[3,.5],[3,.5]],[[2,1],[2,.5],[3,.5],[2,1],[1,1]],[[6,3,-1],[5,1,-1]],[[1,1],[1,1],[1,1],[3,1]],[[5,.5],[5,.5],[5,.5],[5,.5],[5,1],[3,.5],[3,.5]],[[2,1],[2,.5],[3,.5],[2,1],[1,1]],[[5,3],[5,1,-1]],[[1,1],[1,1],[1,1],[3,1]],[[5,.5],[5,.5],[5,.5],[5,.5],[5,1],[3,1]],[[2,1],[2,.5],[3,.5],[2,1],[1,1]],[[6,3,-1],[5,1,-1]],[[5,.5],[5,.5],[5,.5],[5,.5],[5,1],[5,1,-1]],[[5,.5],[5,.5],[5,.5],[5,.5],[5,1],[5,1,-1]],[[5,.5],[5,.5],[5,.5],[5,.5],[5,1],[2,.5],[3,.5]],[[1,3]]];
+const chords=[[51,55,58,62],[51,55,58,62],[46,50,53,58],[48,51,55,58],[51,55,58,62],[55,58,63,65],[46,50,53,58],[46,50,53,56],[51,55,58,62],[51,55,58,62],[46,50,53,58],[48,51,55,58],[56,60,63,67],[51,55,58,62],[46,50,53,56],[51,55,58,62]];
+const scale=[0,2,4,5,7,9,11];
+function getEvents(style='piano'){
+ if(!styles[style])throw Error('未知風格');const notes=[{midi:58,beat:0,duration:1,kind:'melody',velocity:.78}];let beat=1;
+ bars.forEach((bar,barIndex)=>{const start=beat,c=chords[barIndex];bar.forEach(([degree,duration,oct=0],i)=>{notes.push({midi:63+scale[degree-1]+oct*12,beat,duration,kind:'melody',velocity:i===0?.90:.80});beat+=duration;});const len=beat-start;
+ if(style==='piano'){
+   for(let b=0;b<len;b+=.5){const pattern=[0,2,1,3,2,1,3,2];notes.push({beat:start+b,midi:c[pattern[(b*2)%8]]+12,duration:.8,kind:'arp',velocity:b%1===0?.42:.32});}
+   for(const b of [0,2])if(b<len)notes.push({beat:start+b,midi:c[0]-12,duration:1.65,kind:'bass',velocity:.57});
+   if(barIndex%4===3)c.slice(0,3).forEach((n,i)=>notes.push({beat:start+i*.035,midi:n+12,duration:1.8,kind:'pad',velocity:.15}));
+
+ }
+ });
+ // 最後一小節以完整主和弦收尾；不截斷原譜主旋律。
+ chords[15].slice(0,3).forEach((n,i)=>notes.push({beat:61+i*.025,midi:n+12,duration:2.7,kind:'pad',velocity:.22}));return notes.sort((a,b)=>a.beat-b.beat);
+}
+function create(options={}){const AC=global.AudioContext||global.webkitAudioContext;if(!options.context&&!AC)throw Error('瀏覽器不支援Web Audio');const ctx=options.context||new AC(),owns=!options.context;const output=ctx.createGain(),compressor=ctx.createDynamicsCompressor();let volume=options.volume??.7;
+output.gain.value=volume;compressor.threshold.value=-15;compressor.knee.value=15;compressor.ratio.value=3;compressor.attack.value=.008;compressor.release.value=.14;output.connect(compressor);compressor.connect(options.destination||ctx.destination);
+const active=new Set();let token=0,disposed=false,timer=null;
+function stop(){if(timer!==null)clearInterval(timer);timer=null;token++;for(const o of active){try{o.stop(ctx.currentTime+.035);}catch(e){}}output.gain.cancelScheduledValues(ctx.currentTime);output.gain.setTargetAtTime(0,ctx.currentTime,.01);}
+function tone(e,when,s){const d=e.duration*60/s.bpm,kind=e.kind,isMel=kind==='melody';let partials=kind==='bass'?s.bass:kind==='arp'?s.arp:kind==='spark'?[1,.16]:kind==='pad'?[1,.10]:s.melody;
+const amp=e.velocity*(isMel?.15:kind==='bass'?.12:kind==='spark'?.07:kind==='pad'?.055:.075),attack=s.attack;
+const decay=Math.max(attack+.015,d*s.gate),end=decay+s.tail;
+const gain=ctx.createGain(),filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=kind==='bass'?650:s.cut;filter.Q.value=.5;
+gain.gain.setValueAtTime(.00001,when);gain.gain.exponentialRampToValueAtTime(amp,when+attack);gain.gain.exponentialRampToValueAtTime(amp*.20,when+decay);gain.gain.exponentialRampToValueAtTime(.00001,when+end);filter.connect(gain);gain.connect(output);let remaining=partials.length;
+partials.forEach((level,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=440*Math.pow(2,(e.midi-69)/12)*(i+1);g.gain.setValueAtTime(level,when);if(s===styles.piano&&i>0)g.gain.exponentialRampToValueAtTime(Math.max(.0001,level*.08),when+Math.max(.12,decay));o.connect(g);g.connect(filter);active.add(o);o.onended=()=>{active.delete(o);o.disconnect();g.disconnect();if(--remaining===0){gain.disconnect();filter.disconnect();}};o.start(when);o.stop(when+end+.02);});}
+async function play(style='piano'){if(disposed)throw Error('播放器已釋放');const s=styles[style];if(!s)throw Error('未知音樂風格');stop();const request=token;await ctx.resume();if(request!==token||disposed)return;output.gain.cancelScheduledValues(ctx.currentTime);output.gain.setValueAtTime(volume,ctx.currentTime);const start=ctx.currentTime+.06;const events=getEvents(style);let next=0;function schedule(){while(next<events.length&&start+events[next].beat*60/s.bpm<ctx.currentTime+.22){const e=events[next++];tone(e,Math.max(ctx.currentTime+.005,start+e.beat*60/s.bpm),s);}if(next===events.length&&timer!==null){clearInterval(timer);timer=null;}}schedule();if(next<events.length)timer=setInterval(schedule,50);}
+function setVolume(v){volume=Math.max(0,Math.min(1,v));output.gain.setTargetAtTime(volume,ctx.currentTime,.03);}
+async function dispose(){if(disposed)return;stop();disposed=true;if(owns)await ctx.close();else setTimeout(()=>{output.disconnect();compressor.disconnect();},250);}
+return {play,stop,setVolume,dispose,context:ctx};}
+global.DreamIslandPianoMusic={styles,getEvents,create,beats:64};
+})(typeof window!=='undefined'?window:globalThis);
+
+
     class SoundEngine {
       constructor() {
         this.ctx = null;
@@ -6061,50 +6607,48 @@ return {compose, length};
 
       // SV.01-125：台北101煙火屬於環境音效，使用環境音量滑桿與開關，不影響答題音效。
       playFireworkBoom(intensity = 1) {
-        if (typeof isAmbientSoundActive !== 'undefined' && !isAmbientSoundActive) return;
+        // Rainbow 101：每一發煙火同步播放可在一般喇叭辨識的爆裂聲。
+        // 保留原有低頻轟鳴，另加中頻噪聲；遵守遊戲音效 ON/OFF。
+        if (this.muted) return;
         this.init();
         if (!this.ctx) return;
-        // 確保環境音效總線已建立；煙火不再接到「答題成功音效」總線。
-        if (!this.ambientMasterGain && typeof isAmbientSoundActive !== 'undefined' && isAmbientSoundActive) {
-          this.startAmbient(this.ambientVolume);
-        }
         try {
-          // 瀏覽器切換分頁或音訊尚未啟動時，嘗試喚醒音訊環境。
-          if (this.ctx.state === 'suspended') {
-            this.ctx.resume().catch(() => {});
+          if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+          const ctx = this.ctx, now = ctx.currentTime + 0.008;
+          const output = this.getSfxOutput();
+          const loudness = Math.max(0.5, Math.min(2.5, Number(intensity) || 1));
+
+          // 低頻轟鳴：延續島嶼原先的煙火效果。
+          const bass = ctx.createOscillator(), bassGain = ctx.createGain();
+          bass.type = 'sine';
+          bass.frequency.setValueAtTime(115, now);
+          bass.frequency.exponentialRampToValueAtTime(42, now + 0.42);
+          bassGain.gain.setValueAtTime(0.0001, now);
+          bassGain.gain.exponentialRampToValueAtTime(0.24 * loudness, now + 0.012);
+          bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.68);
+          bass.connect(bassGain); bassGain.connect(output);
+          bass.start(now); bass.stop(now + 0.70);
+
+          // 真正可聽見的爆裂聲來自寬頻噪聲，不只是超低音。
+          const length = Math.ceil(ctx.sampleRate * 0.75);
+          if (!this.fireworkNoiseBuffer || this.fireworkNoiseBuffer.sampleRate !== ctx.sampleRate) {
+            const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+            const samples = buffer.getChannelData(0);
+            for (let i = 0; i < length; i++) samples[i] = Math.random() * 2 - 1;
+            this.fireworkNoiseBuffer = buffer;
           }
-          const ctx = this.ctx;
-          const now = ctx.currentTime;
-          const output = this.ambientMasterGain || this.getSfxOutput();
-          const osc = ctx.createOscillator();
-          const lowGain = ctx.createGain();
-          const filter = ctx.createBiquadFilter();
-          const delay = ctx.createDelay(0.8);
-          const feedback = ctx.createGain();
-          const echoGain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(78, now);
-          osc.frequency.exponentialRampToValueAtTime(34, now + 0.42);
-          lowGain.gain.setValueAtTime(0.0001, now);
-          lowGain.gain.exponentialRampToValueAtTime(0.48 * intensity, now + 0.025);
-          lowGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.05);
-          filter.type = 'lowpass';
-          filter.frequency.value = 420;
-          delay.delayTime.value = 0.24;
-          feedback.gain.value = 0.22;
-          echoGain.gain.setValueAtTime(0.34, now);
-          echoGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.45);
-          osc.connect(filter);
-          filter.connect(lowGain);
-          lowGain.connect(output);
-          lowGain.connect(delay);
-          delay.connect(echoGain);
-          echoGain.connect(output);
-          delay.connect(feedback);
-          feedback.connect(delay);
-          osc.start(now);
-          osc.stop(now + 1.1);
-        } catch (e) {}
+          const crack = ctx.createBufferSource(), filter = ctx.createBiquadFilter(), crackGain = ctx.createGain();
+          crack.buffer = this.fireworkNoiseBuffer;
+          filter.type = 'bandpass'; filter.frequency.value = 1050; filter.Q.value = 0.55;
+          crackGain.gain.setValueAtTime(0.0001, now);
+          crackGain.gain.exponentialRampToValueAtTime(0.37 * loudness, now + 0.008);
+          crackGain.gain.exponentialRampToValueAtTime(0.09 * loudness, now + 0.08);
+          crackGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+          crack.connect(filter); filter.connect(crackGain); crackGain.connect(output);
+          crack.start(now); crack.stop(now + 0.58);
+        } catch (e) {
+          console.warn('台北101煙火聲音播放失敗：', e);
+        }
       }
 
       // 專用樂器 4-A：飽滿低音大鼓 (Kick)
@@ -6753,7 +7297,397 @@ return {compose, length};
     }
 
     const spawnedIslandObjects = [];
+/* Dream Island landmark 04: curved cartoon fishing vessel.
+ * Global THREE r128+. Original procedural geometry. No textures/assets.
+ * Preserve the game's original landmark name/index when integrating.
+ */
+function createFishingBoat(pos,options={}){
+ const T=THREE,root=new T.Group();root.name='CurvedFishingBoat';if(pos)root.position.copy(pos);
+ const length=Number.isFinite(options.length)&&options.length>0?options.length:5.6;
+ const body=new T.Group();body.name='FishingBoat_Geometry';body.scale.setScalar(length/6.35);root.add(body);
+ const mat=(name,color,roughness=.88)=>{const m=new T.MeshStandardMaterial({color,roughness,metalness:0});m.name=name;return m;};
+ const blue=mat('hull_blue',0x598ca6),coral=mat('hull_coral',0xd97d65),cream=mat('cream_trim',0xffe7bd),wood=mat('deck',0xd7bc8c),glass=mat('windows',0x365f76),dark=mat('dark_blue',0x41657b),net=mat('fishing_gear',0x8eaa86),light=mat('navigation_light',0xffcf81);
+ const materials={blue,coral,cream,wood,glass,dark,net,light};
+ const add=(geometry,m,x=0,y=0,z=0)=>{const mesh=new T.Mesh(geometry,m);mesh.position.set(x,y,z);mesh.castShadow=options.shadows!==false;mesh.receiveShadow=options.shadows!==false;body.add(mesh);return mesh;};
+ const profiles=[[-3,.90,.10,1.68],[-2.85,1.12,.02,1.66],[-2.2,1.24,0,1.62],[-1.2,1.25,0,1.62],[0,1.23,0,1.65],[1.2,1.12,.06,1.74],[2.25,.86,.22,1.95],[2.95,.44,.55,2.12],[3.35,.005,1.05,2.20]];
+ const sample=t=>{const f=t*(profiles.length-1),i=Math.min(profiles.length-2,Math.floor(f)),u=f-i,a=profiles[i],b=profiles[i+1],p=profiles[Math.max(0,i-1)],q=profiles[Math.min(profiles.length-1,i+2)];return a.map((_,k)=>k===0?a[k]+(b[k]-a[k])*u:.5*(2*a[k]+(-p[k]+b[k])*u+(2*p[k]-5*a[k]+4*b[k]-q[k])*u*u+(-p[k]+3*a[k]-3*b[k]+q[k])*u*u*u));};
+ const point=(t,angle)=>{const [x,w,lo,hi]=sample(t);return [x,Math.max(0,lo)+(hi-Math.max(0,lo))*Math.pow(1-Math.cos(angle),.65),Math.max(.004,w)*Math.sin(angle)];};
+ function surface(from,to,m){const nx=48,ny=12,v=[],indices=[];for(let i=0;i<=nx;i++)for(let j=0;j<=ny;j++)v.push(...point(i/nx,from+(to-from)*j/ny));for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){const a=i*(ny+1)+j,b=a+ny+1;indices.push(a,b,a+1,b,b+1,a+1);}const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(v,3));geo.setIndex(indices);geo.computeVertexNormals();add(geo,m);}
+ // A smoothly lofted hull: rounded belly, curved sides, raised and tapered bow.
+ surface(-.62,.62,coral);
+ for(const sign of [-1,1]){const a=sign<0?-1.41:.62,b=sign<0?-.62:1.41;surface(a,b,blue);}
+ for(const sign of [-1,1]){const a=sign<0?-Math.PI/2:1.41,b=sign<0?-1.41:Math.PI/2;surface(a,b,cream);}
+ const deckVertices=[],deckIndices=[];
+ for(let i=0;i<=48;i++){const [x,w,,y]=sample(i/48);deckVertices.push(x,y+.012,-w,x,y+.012,w);if(i<48){const a=i*2;deckIndices.push(a,a+1,a+2,a+1,a+3,a+2);}}
+ const deckGeo=new T.BufferGeometry();deckGeo.setAttribute('position',new T.Float32BufferAttribute(deckVertices,3));deckGeo.setIndex(deckIndices);deckGeo.computeVertexNormals();add(deckGeo,wood);
+ for(const sign of [-1,1]){const pts=[];for(let i=0;i<=48;i++){const [x,w,,y]=sample(i/48);pts.push(new T.Vector3(x,y+.04,sign*w));}add(new T.TubeGeometry(new T.CatmullRomCurve3(pts),64,.038,6,false),cream);}
+ // Close the transom; the pointed bow closes to a tiny rounded tip.
+ for(const t of [0,1]){const [x,,lo,hi]=sample(t),v=[x,(lo+hi)/2,0],indices=[];for(let j=0;j<=24;j++)v.push(...point(t,-Math.PI/2+j*Math.PI/24));for(let j=1;j<=24;j++)if(t===0)indices.push(0,j,j+1);else indices.push(0,j+1,j);const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setIndex(indices);g.computeVertexNormals();add(g,blue);}
+ // Rounded wheelhouse and roof: shared bevel-box shape, no dense decoration.
+ const rounded=new T.Shape(),r=.10;rounded.moveTo(-.5+r,-.5);rounded.lineTo(.5-r,-.5);rounded.quadraticCurveTo(.5,-.5,.5,-.5+r);rounded.lineTo(.5,.5-r);rounded.quadraticCurveTo(.5,.5,.5-r,.5);rounded.lineTo(-.5+r,.5);rounded.quadraticCurveTo(-.5,.5,-.5,.5-r);rounded.lineTo(-.5,-.5+r);rounded.quadraticCurveTo(-.5,-.5,-.5+r,-.5);
+ const boxGeo=new T.ExtrudeGeometry(rounded,{depth:.88,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.055,bevelThickness:.06,curveSegments:3});boxGeo.computeBoundingBox();const bb=boxGeo.boundingBox,size=new T.Vector3();bb.getSize(size);boxGeo.translate(-(bb.min.x+bb.max.x)/2,-(bb.min.y+bb.max.y)/2,-(bb.min.z+bb.max.z)/2);boxGeo.scale(1/size.x,1/size.y,1/size.z);
+ const box=(w,h,d,m,x,y,z)=>{const mesh=add(boxGeo,m,x,y,z);mesh.scale.set(w,h,d);return mesh;};
+ // Larger commercial fishing silhouette: forward two-tier wheelhouse and aft working deck.
+ box(1.90,1.03,1.83,cream,1.30,2.18,0);
+ box(2.03,.15,1.97,dark,1.30,2.75,0);
+ box(1.60,.70,1.61,cream,1.46,3.11,0);
+ box(1.83,.17,1.86,dark,1.46,3.51,0);
+ box(.045,.36,1.35,glass,2.275,3.17,0);
+ for(const z of [-.823,.823])box(1.18,.34,.035,glass,1.46,3.17,z);
+ for(const z of [-.928,.928])box(.62,.35,.035,glass,1.33,2.32,z);
+ add(new T.CylinderGeometry(.19,.22,.62,12),cream,.55,3.74,0);add(new T.CylinderGeometry(.20,.20,.13,12),coral,.55,4.10,0);
+ const rod=(a,b,r,m)=>{const p=new T.Vector3(...a),q=new T.Vector3(...b),v=q.clone().sub(p),mesh=add(new T.CylinderGeometry(r,r,v.length(),8),m);mesh.position.copy(p).add(q).multiplyScalar(.5);mesh.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),v.normalize());return mesh;};
+ rod([1.55,3.57,0],[1.55,4.45,0],.025,cream);rod([1.20,4.12,0],[1.92,4.12,0],.025,cream);
+ // Large stern gantry, two broad winch drums and one simple net bundle.
+ for(const z of [-.93,.93])rod([-2.60,1.67,z],[-2.30,3.08,z*.90],.085,cream);
+ rod([-2.30,3.08,-.84],[-2.30,3.08,.84],.09,cream);
+ rod([-1.45,1.67,-.73],[-1.45,2.11,-.73],.09,dark);rod([-1.45,1.67,.73],[-1.45,2.11,.73],.09,dark);
+ const winch=add(new T.CylinderGeometry(.34,.34,1.34,16),net,-1.45,2.10,0);winch.rotation.x=Math.PI/2;
+ for(const z of [-.69,.69]){const disk=add(new T.CylinderGeometry(.41,.41,.09,16),dark,-1.45,2.10,z);disk.rotation.x=Math.PI/2;}
+ box(.92,.40,1.12,net,-.40,1.88,0);
+ for(const z of [-.95,.95]){const ring=add(new T.TorusGeometry(.24,.07,6,20),coral,1.05,2.13,z);}
+ add(new T.SphereGeometry(.075,10,8),light,1.55,4.48,0);
+ body.scale.setScalar(1);root.updateMatrixWorld(true);const bounds=new T.Box3().setFromObject(body);body.scale.setScalar(length/(bounds.max.x-bounds.min.x));
+ root.userData.setNight=on=>{glass.emissive.setHex(on?0xffc987:0);glass.emissiveIntensity=on?.8:0;light.emissive.setHex(on?0xffcc76:0);light.emissiveIntensity=on?1.8:0;};
+ root.userData.update=()=>{};
+ root.userData.boat={length,materials,style:'simple_cartoon',bowDirection:'+X',index:4};
+ root.userData.dispose=()=>{const gs=new Set(),ms=new Set();root.traverse(m=>{if(m.geometry)gs.add(m.geometry);if(m.material)ms.add(m.material);});gs.forEach(g=>g.dispose());ms.forEach(m=>m.dispose());};
+ return root;
+}
+
+
+    // === S.V02-14：島嶼小貨船來訪（不列入一般獎勵／不參與佈置選取） ===
+    // 佈置功能一旦存在，小貨船就會定時登場，不要求玩家正處於佈置畫面。
+    // 船舶使用啟程當下的鏡頭方位，依左側→較遠停泊→12點→3點→右側航行。
+    const CARGO_VISIT_INTERVAL = 300; // 船完全離開後，等待五分鐘再登場
+    const CARGO_INBOUND_SECONDS = 42;
+    const CARGO_DOCK_SECONDS = 120;
+    const CARGO_OUTBOUND_SECONDS = 75;
+    let cargoVisitElapsed = -1; // -1 = 尚未解鎖佈置功能
+    let cargoBoat = null;
+    let cargoMusic = null;
+    let cargoVisitRight = null, cargoVisitToward = null;
+    let cargoMusicWarned = false;
+    let cargoWake = null;
+    let cargoWakeMaterial = null;
+    function cargoEase(t) { t=Math.max(0,Math.min(1,t)); return t*t*(3-2*t); }
+    function cargoPoint(rightDist,towardDist) {
+      return new THREE.Vector3(
+        cargoVisitRight.x*rightDist+cargoVisitToward.x*towardDist,
+        0.32,
+        cargoVisitRight.z*rightDist+cargoVisitToward.z*towardDist
+      );
+    }
+    function cargoStopMusic() {
+      if (cargoMusic) { try { cargoMusic.stop(); } catch(e) {} }
+    }
+    function cargoRemoveBoat() {
+      if (!cargoBoat) return;
+      scene.remove(cargoBoat);
+      if (cargoWake) cargoWake.traverse(o=>{ if(o.isMesh){o.geometry.dispose();o.material.dispose();} });
+      if (cargoBoat.userData && cargoBoat.userData.dispose) cargoBoat.userData.dispose();
+      cargoBoat = null;
+      cargoWake = null;
+      cargoWakeMaterial = null;
+    }
+    function cargoResetVisit() {
+      cargoVisitElapsed = -1;
+      cargoRemoveBoat();
+      cargoStopMusic();
+    }
+    function cargoStartVisit() {
+      cargoRemoveBoat();
+      if (!scene || !camera || !layoutUnlocked || ISLAND_LAYOUT_RELEASE_LOCKED) return;
+      // 船模型的船頭指向 +X；建立路徑後會根據速度方向決定轉角。
+      cargoVisitRight = new THREE.Vector3(Math.cos(sphericalAngle),0,-Math.sin(sphericalAngle));
+      cargoVisitToward = new THREE.Vector3(Math.sin(sphericalAngle),0,Math.cos(sphericalAngle));
+      cargoBoat = createFishingBoat(null, {length:5.6,shadows:false});
+      cargoBoat.name='LayoutGuest_CargoBoat';
+      cargoBoat.userData.layoutGuestCargo = true;
+      // S.V02-12：低調的狹長曲線船波，完全貼合水平海面，不再使用白色圓面片。
+      cargoWake = new THREE.Group();
+      cargoWake.name='CargoBoat_SeaSurfaceWake';
+      const foamMaterials = [];
+      function wakeRibbon(points, width, opacity) {
+        const vertices=[], indices=[];
+        for (let i=0;i<points.length;i++) {
+          const pt=points[i], prev=points[Math.max(0,i-1)], next=points[Math.min(points.length-1,i+1)];
+          const dx=next[0]-prev[0], dz=next[1]-prev[1];
+          const n=Math.hypot(dx,dz)||1, half=width*Math.sin(Math.PI*i/(points.length-1))*.5;
+          vertices.push(pt[0]-dz/n*half,-.277,pt[1]+dx/n*half,pt[0]+dz/n*half,-.277,pt[1]-dx/n*half);
+          if(i<points.length-1){const j=i*2;indices.push(j,j+1,j+2,j+1,j+3,j+2);}
+        }
+        const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));geo.setIndex(indices);geo.computeVertexNormals();
+        const mat=new THREE.MeshBasicMaterial({color:0xd7f5f5,transparent:true,opacity,depthWrite:false,side:THREE.DoubleSide});
+        const mesh=new THREE.Mesh(geo,mat);mesh.renderOrder=5;mesh.userData.baseOpacity=opacity;
+        cargoWake.add(mesh);foamMaterials.push(mat);
+      }
+      // 船體沿 +X 前進；尾部在 -X。兩側細波與 V 字形尾流。
+      for(const side of [-1,1]) {
+        wakeRibbon([[2.8,side*.15],[2.0,side*.85],[.9,side*1.17],[-.4,side*1.27],[-2.0,side*1.38],[-3.4,side*1.7]],.13,.40);
+        wakeRibbon([[-2.35,side*1.05],[-3.5,side*1.45],[-4.9,side*2.0],[-6.5,side*2.65],[-8.3,side*3.25]],.20,.33);
+        wakeRibbon([[-3.3,side*.55],[-4.5,side*.84],[-5.8,side*1.17],[-7.0,side*1.48]],.10,.22);
+      }
+      cargoBoat.add(cargoWake);
+      cargoBoat.userData.cargoWakeMaterials=foamMaterials;
+      cargoBoat.userData.cargoHull=cargoBoat.getObjectByName('FishingBoat_Geometry');
+      cargoBoat.position.copy(cargoPoint(-62,6));
+      cargoBoat.rotation.y = -sphericalAngle;
+      scene.add(cargoBoat);
+      // 每次小貨船出現，播放使用者提供的清亮鋼琴單曲（不循環）。
+      try {
+        if (!cargoMusic && window.DreamIslandPianoMusic) {
+          cargoMusic = window.DreamIslandPianoMusic.create({volume:0.48});
+        }
+        if (cargoMusic) cargoMusic.play().catch(err => {
+          if (!cargoMusicWarned) { console.warn('小貨船音樂未能播放，可能需要瀏覽器互動解鎖音訊：',err); cargoMusicWarned=true; }
+        });
+      } catch(err) {
+        if(!cargoMusicWarned) { console.warn('小貨船音樂初始化失敗：',err); cargoMusicWarned=true; }
+      }
+    }
+    function cargoSetPosition(pos, direction) {
+      if (!cargoBoat) return;
+      cargoBoat.position.copy(pos);
+      // THREE 模型船頭 +X，yaw = atan2(-dz,dx)；海面上平穩航行。
+      if (direction.lengthSq()>0.00001) cargoBoat.rotation.y = Math.atan2(-direction.z,direction.x);
+      // 小幅漂浮、前後俯仰及左右微晃，保持低幅度避免暈眩。
+      cargoBoat.position.y += Math.sin(cargoVisitElapsed*1.55)*0.032;
+      const hull = cargoBoat.userData.cargoHull;
+      if (hull) {
+        hull.rotation.z = Math.sin(cargoVisitElapsed*1.10)*0.012;
+        hull.rotation.x = Math.sin(cargoVisitElapsed*1.38+0.7)*0.009;
+      }
+      if (cargoWake) {
+        const cycle=cargoVisitElapsed % CARGO_CYCLE_SECONDS;
+        const sailing=cycle<CARGO_INBOUND_SECONDS || cycle>=CARGO_INBOUND_SECONDS+CARGO_DOCK_SECONDS;
+        cargoWake.visible=true;
+        cargoWake.userData.sailing=sailing;
+        cargoWake.children.forEach((m,i)=>{
+          m.material.opacity=m.userData.baseOpacity*(sailing ? 1 : .35)*(0.9+.10*Math.sin(cargoVisitElapsed*1.8+i*.7));
+        });
+      }
+      if (cargoBoat.userData.setNight) cargoBoat.userData.setNight(timePhase===2 || timePhase===3);
+    }
+    const CARGO_ACTIVE_SECONDS = CARGO_INBOUND_SECONDS + CARGO_DOCK_SECONDS + CARGO_OUTBOUND_SECONDS;
+    const CARGO_CYCLE_SECONDS = CARGO_ACTIVE_SECONDS + CARGO_VISIT_INTERVAL;
+    function cargoUpdateVisit(dt) {
+      if (!scene || !layoutUnlocked || ISLAND_LAYOUT_RELEASE_LOCKED) return;
+      if(!cargoRestoreDone){cargoRestoreDone=true;cargoRestorePlaced();}
+      // 首次解鎖佈置模式即可迎接小貨船，不要求玩家進入編輯畫面。
+      if (cargoVisitElapsed < 0) {
+        cargoVisitElapsed = 0;
+        cargoStartVisit();
+      } else {
+        cargoVisitElapsed += Math.max(0,Math.min(dt,0.12));
+      }
+      const cycle = cargoVisitElapsed % CARGO_CYCLE_SECONDS;
+      if (!cargoBoat && cycle < CARGO_ACTIVE_SECONDS) cargoStartVisit();
+      if (!cargoBoat) return; // 離港後的完整五分鐘休息期
+      const leftStart=cargoPoint(-62,6), dock=cargoPoint(-30,4);
+      const top=cargoPoint(-5,-31), east=cargoPoint(30,-22), exit=cargoPoint(74,-18);
+      let pos,dir;
+      if (cycle < CARGO_INBOUND_SECONDS) {
+        const t=cargoEase(cycle/CARGO_INBOUND_SECONDS);
+        pos=leftStart.clone().lerp(dock,t);
+        dir=dock.clone().sub(leftStart);
+      } else if (cycle < CARGO_INBOUND_SECONDS+CARGO_DOCK_SECONDS) {
+        pos=dock.clone(); dir=dock.clone().sub(leftStart);
+      } else if (cycle < CARGO_ACTIVE_SECONDS) {
+        const t=(cycle-CARGO_INBOUND_SECONDS-CARGO_DOCK_SECONDS)/CARGO_OUTBOUND_SECONDS;
+        const curve=new THREE.CatmullRomCurve3([dock, top, east, exit],false,'centripetal');
+        pos=curve.getPoint(cargoEase(t));
+        dir=curve.getTangent(cargoEase(t));
+      } else {
+        cargoRemoveBoat();
+        cargoStopMusic();
+        return;
+      }
+      cargoSetPosition(pos,dir);
+    }
+
+    // S.V02-12：商品放置測試，使用遊戲原本的 Three.js 場景／相機。
+    const cargoShopPlaced=[];
+    let cargoShopPending=null;
+    const CARGO_PLACED_KEY='dream-island-cargo-shop-test-placements-v1';
+    function cargoMakeTestModel(kind,color){
+      const g=new THREE.Group(), mat=new THREE.MeshStandardMaterial({color,roughness:.74});
+      let geo;
+      if(kind==='figure'){
+        const bodyMat=new THREE.MeshStandardMaterial({color,roughness:.8}), faceMat=new THREE.MeshStandardMaterial({color:0xffe7cd,roughness:.9});
+        const append=(geometry,material,x,y,z,rx=0,rz=0)=>{const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.rotation.x=rx;mesh.rotation.z=rz;mesh.castShadow=true;g.add(mesh);return mesh;};
+        append(new THREE.SphereGeometry(.29,12,10),faceMat,0,1.57,0);
+        append(new THREE.CapsuleGeometry(.35,.68,4,10),bodyMat,0,.91,0);
+        [-1,1].forEach(k=>{append(new THREE.CapsuleGeometry(.115,.43,3,8),bodyMat,k*.22,.32,0,0,k*.08);append(new THREE.CapsuleGeometry(.105,.42,3,8),bodyMat,k*.49,1.0,0,0,k*.58);});
+        g.userData.cargoShopTest=true;return g;
+      }
+      if(kind==='sphere')geo=new THREE.SphereGeometry(.58,20,12);
+      else if(kind==='cube')geo=new THREE.BoxGeometry(1.10,1.10,1.10);
+      else if(kind==='pyramid')geo=new THREE.ConeGeometry(.83,1.4,3);
+      else geo=new THREE.ConeGeometry(.64,1.4,20);
+      const mesh=new THREE.Mesh(geo,mat);mesh.position.y=kind==='sphere'?.6:kind==='cube'?.56:.70;mesh.castShadow=true;mesh.receiveShadow=true;g.add(mesh);
+      g.userData.cargoShopTest=true;return g;
+    }
+    function cargoPersistPlaced(){
+      try{localStorage.setItem(CARGO_PLACED_KEY,JSON.stringify(cargoShopPlaced.filter(x=>x.group.parent).map(x=>({id:x.item.id,category:x.item.category||'decor',color:x.item.color,kind:x.item.kind,name:x.item.name,x:x.group.position.x,y:x.group.position.y,z:x.group.position.z,yaw:x.group.rotation.y,deleted:!!x.group.userData.layoutDeleted,height:x.item.height||0,groundOffset:Number(x.item.groundOffset)||0,effect:x.item.effect||'none',effectAmount:x.item.effectAmount||0,effectUsed:!!x.group.userData.cargoEffectUsed,walkMode:x.item.walkMode||'walk',walkRadius:Number(x.item.walkRadius)||4,walkSpeed:x.item.walkSpeed||'normal',homeX:Number.isFinite(x.group.userData.cargoHomeX)?x.group.userData.cargoHomeX:x.group.position.x,homeZ:Number.isFinite(x.group.userData.cargoHomeZ)?x.group.userData.cargoHomeZ:x.group.position.z}))));}catch(e){console.warn('商城展示紀錄無法儲存',e);}
+    }
+    function cargoAddPlaced(item,pos,save=true){
+      if(!scene)return;
+      let model;
+      if(item.modelSource&&item.modelFactory){try{model=window.islandCreateJsModel(item,THREE);}catch(err){console.error('佈置 JS 模型建立失敗：'+(item.name||''),err);showCheatNotice('商品模型建立失敗：'+err.message);return;}}
+      else model=cargoMakeTestModel(item.kind,item.color);
+      model.name='商城商品｜'+item.name;
+      if(Number(item.height)>0){model.updateMatrixWorld(true);const b=window.islandJsModelBounds(model,THREE),h=b.max.y-b.min.y;if(h>0&&Number.isFinite(h))model.scale.multiplyScalar(Number(item.height)/h);}
+      // 模型本身總高度與離地偏移分開計算：以真正底部貼齊放置平面，再套用偏移。
+      model.updateMatrixWorld(true);
+      const groundBounds=window.islandJsModelBounds(model,THREE);
+      if(!groundBounds.isEmpty()&&Number.isFinite(groundBounds.min.y))model.position.y+=pos.y-groundBounds.min.y;
+      else model.position.y=pos.y;
+      model.position.y+=Number(item.groundOffset)||0;
+      model.position.x=pos.x;model.position.z=pos.z;scene.add(model);
+      model.userData.cargoShopPlaced=true;
+      model.userData.cargoHomeX=pos.x;model.userData.cargoHomeZ=pos.z;model.userData.cargoWalkPhase=Math.random()*Math.PI*2;
+      model.userData.layoutLabel=item.name || '商城商品';
+      model.userData.layoutKey='cargo-shop-'+(item.id||'item')+'-'+cargoShopPlaced.length+'-'+Math.round(Math.random()*1e8);
+      model.userData.layoutDefault={x:pos.x,z:pos.z,yaw:0,deleted:false};
+      cargoShopPlaced.push({item,group:model});
+      if(save)cargoPersistPlaced();
+    }
+    function cargoRestorePlaced(){
+      try{const items=JSON.parse(localStorage.getItem(CARGO_PLACED_KEY)||'[]');if(Array.isArray(items))items.forEach(item=>{
+        const published=window.islandShopGetProducts?.().find(p=>p.id===item.id);if(!published&&item.id&&String(item.id).startsWith('custom-')){console.warn('已佈置商城商品不在目前上架清單，略過：',item.id);return;}const info={...(published||{}),id:item.id,category:item.category||published?.category||'decor',name:item.name||published?.name||'試購展示物',color:item.color||published?.color,kind:item.kind||published?.kind,height:Number(item.height)||Number(published?.height)||0,groundOffset:Number(item.groundOffset??published?.groundOffset)||0,walkMode:item.walkMode||published?.walkMode||'walk',walkRadius:Number(item.walkRadius)||Number(published?.walkRadius)||4,walkSpeed:item.walkSpeed||published?.walkSpeed||'normal',effect:item.effect||published?.effect||'none',effectAmount:Number(item.effectAmount)||Number(published?.effectAmount)||0};
+        if(Number.isFinite(item.x)&&Number.isFinite(item.z)){const before=cargoShopPlaced.length;cargoAddPlaced(info,new THREE.Vector3(item.x,item.y||1.3,item.z),false);if(cargoShopPlaced.length===before)return;const restored=cargoShopPlaced[cargoShopPlaced.length-1].group;restored.rotation.y=Number.isFinite(item.yaw)?item.yaw:0;restored.userData.layoutDeleted=!!item.deleted;restored.userData.cargoEffectUsed=!!item.effectUsed;restored.visible=!item.deleted;restored.userData.cargoHomeX=Number.isFinite(item.homeX)?item.homeX:item.x;restored.userData.cargoHomeZ=Number.isFinite(item.homeZ)?item.homeZ:item.z;restored.position.x=restored.userData.cargoHomeX;restored.position.z=restored.userData.cargoHomeZ;}
+      });}catch(e){console.warn('商城佈置存檔讀取失敗',e);}
+    }
+    let cargoRestoreDone=false;
+    // S.V02-12：購買後的明確落點引導（只在等待放置時顯示，不影響場景射線）。
+    let cargoPlaceGuide=null;
+    let cargoPlaceGhost=null;
+    function cargoGuideClear(){
+      if(cargoPlaceGuide){cargoPlaceGuide.remove();cargoPlaceGuide=null;}
+      if(cargoPlaceGhost){cargoPlaceGhost.remove();cargoPlaceGhost=null;}
+    }
+    function cargoGuideShow(item){
+      cargoGuideClear();
+      cargoPlaceGhost=document.createElement('div');
+      cargoPlaceGhost.id='cargoPlacementGhost';
+      cargoPlaceGhost.innerHTML='<span class="cargo-drop-indicator" aria-hidden="true"></span>';
+      document.body.appendChild(cargoPlaceGhost);
+    }
+    document.addEventListener('pointermove',e=>{
+      if(!cargoShopPending||!cargoPlaceGhost)return;
+      cargoPlaceGhost.style.left=e.clientX+'px';
+      cargoPlaceGhost.style.top=e.clientY+'px';
+    },{passive:true});
+    window.cargoShopStartPlacement = item => {
+      if(!layoutUnlocked || ISLAND_LAYOUT_RELEASE_LOCKED){showCheatNotice('請先解鎖佈置功能，再擺放購買商品。');return false;}
+      if(!layoutEditing)enterIslandLayoutMode();
+      if(!layoutEditing)return false;
+      cargoShopPending=item;
+      cargoGuideShow(item);
+      if(layoutStatus)layoutStatus.textContent='商城佈置：點選島上想擺放的位置；按 Esc 可以取消此次擺放（商品保留）。';
+      return true;
+    };
+    window.cargoShopApplyPlacedEffects=()=>{
+      let total=0;
+      for(const entry of cargoShopPlaced){
+        const group=entry.group,item=entry.item;
+        if(!group.parent||group.userData.layoutDeleted||group.userData.cargoEffectUsed)continue;
+        group.userData.cargoEffectUsed=true;
+        if(item.effect==='add_coins')total+=Math.max(0,Math.min(100000,Math.floor(Number(item.effectAmount)||0)));
+      }
+      for(const entry of cargoShopPlaced){const o=entry.group;if(o.parent&&!o.userData.layoutDeleted){o.userData.cargoHomeX=o.position.x;o.userData.cargoHomeZ=o.position.z;o.userData.cargoWalkPhase=Math.random()*Math.PI*2;}}
+      if(total>0 && typeof window.cargoShopRefund==='function')window.cargoShopRefund(total);
+      cargoPersistPlaced();
+    };
+    // 商城人物：遵循模型作者提供的動畫 API（setAction / update(dt)）。
+    // 只有完成佈置、且遊戲正在進行時，才讓人物沿軌道移動。
+    let cargoWalkerLast=0;
+    function cargoWalkerTick(now){
+      requestAnimationFrame(cargoWalkerTick);
+      const dt=Math.min(.06,Math.max(0,(now-(cargoWalkerLast||now))/1000));cargoWalkerLast=now;
+      const running=!layoutEditing&&gameState==='RUNNING';
+      for(const entry of cargoShopPlaced){
+        const o=entry.group,p=entry.item;
+        if(!o.parent||o.userData.layoutDeleted||p.category!=='person')continue;
+        const enabled=running&&!!o.userData.cargoEffectUsed;
+        const walking=enabled&&(p.walkMode||'walk')==='walk';
+        const action=walking?'walk':'idle';
+        // 只在動作改變時切換，避免重複初始化作者的步態系統。
+        if(o.userData.cargoShopAction!==action){
+          if(typeof o.userData.setAction==='function'){
+            try{o.userData.setAction(action);}catch(error){console.warn('商城人物切換動畫失敗：',p.name,error);}
+          }
+          o.userData.cargoShopAction=action;
+        }
+        // 作者的 update 接收每幀「秒數差」，不能傳入累積時間戳。
+        if(typeof o.userData.update==='function'){
+          try{o.userData.update(dt);}catch(error){if(!o.userData.cargoAnimationWarned){console.warn('商城人物動畫更新失敗：',p.name,error);o.userData.cargoAnimationWarned=true;}}
+        }
+        if(!walking)continue;
+        const radius=Math.max(.5,Math.min(10,Number(p.walkRadius)||4));
+        const speed=({slow:.20,normal:.38,fast:.64})[p.walkSpeed]||.38;
+        const homeX=Number.isFinite(o.userData.cargoHomeX)?o.userData.cargoHomeX:o.position.x;
+        const homeZ=Number.isFinite(o.userData.cargoHomeZ)?o.userData.cargoHomeZ:o.position.z;
+        // 依原版規則，行走中心在島內側，保持先前已測試的路徑行為。
+        const r=Math.min(radius,6.8);
+        const safeCenter=15-r;
+        const homeDist=Math.hypot(homeX,homeZ);
+        const shift=homeDist>safeCenter&&homeDist>0?safeCenter/homeDist:1;
+        const centerX=homeX*shift,centerZ=homeZ*shift;
+        const a=(o.userData.cargoWalkPhase||0)+dt*speed;
+        o.userData.cargoWalkPhase=a;
+        o.position.x=centerX+Math.cos(a)*r;
+        o.position.z=centerZ+Math.sin(a)*r;
+        o.rotation.y=-a;
+      }
+    }
+    requestAnimationFrame(cargoWalkerTick);
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&cargoShopPending){cargoShopPending=null;cargoGuideClear();showCheatNotice('已取消放置；本次購買不退幣。');}},true);
+    // 擺放使用地面交點，並阻止原本的拖曳選取／鏡頭旋轉。
+    document.addEventListener('pointerdown',e=>{
+      if(!cargoShopPending || !layoutEditing || !renderer || e.target!==renderer.domElement || e.button!==0)return;
+      const box=renderer.domElement.getBoundingClientRect();
+      const mouse=new THREE.Vector2((e.clientX-box.left)/box.width*2-1,-(e.clientY-box.top)/box.height*2+1);
+      const ray=new THREE.Raycaster();ray.setFromCamera(mouse,camera);
+      const ground= new THREE.Plane(new THREE.Vector3(0,1,0),-1.35);
+      const hit=new THREE.Vector3();
+      if(ray.ray.intersectPlane(ground,hit) && Math.hypot(hit.x,hit.z)<16){
+        cargoAddPlaced(cargoShopPending,new THREE.Vector3(hit.x,1.35,hit.z));
+        showCheatNotice('✅ 已放置 '+cargoShopPending.name+'！');cargoShopPending=null;cargoGuideClear();
+      }else showCheatNotice('請點選島嶼的陸地範圍。');
+      e.preventDefault();e.stopImmediatePropagation();
+    },true);
+    // 真正的 Three.js 船體射線點擊（與遊戲相同的 scene、camera、renderer 作用域）。
+    const cargoShopRaycaster=new THREE.Raycaster();
+    const cargoShopPointer=new THREE.Vector2();
+    let cargoClickStart=null;
+    document.addEventListener('pointerdown',e=>{
+      if(e.target && e.target===renderer?.domElement) cargoClickStart={x:e.clientX,y:e.clientY};
+      else cargoClickStart=null;
+    },true);
+    document.addEventListener('pointerup',e=>{
+      if(layoutEditing || !cargoBoat || !cargoBoat.parent || !renderer || !camera || !cargoClickStart) return;
+      if(e.target!==renderer.domElement || Math.hypot(e.clientX-cargoClickStart.x,e.clientY-cargoClickStart.y)>7) return;
+      const r=renderer.domElement.getBoundingClientRect();
+      cargoShopPointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
+      cargoShopRaycaster.setFromCamera(cargoShopPointer,camera);
+      if(cargoShopRaycaster.intersectObject(cargoBoat,true).some(h=>!h.object.parent?.name?.includes('Wake'))){
+        if(window.openCargoShopShelf) { e.stopPropagation(); window.openCargoShopShelf(); }
+      }
+    },true);
+
+    // 開啟貨架後仍能點原本船身的位置收起（貨架獨立 WebGL 畫布會攔截原遊戲點擊）。
+    window.cargoShelfHitShipAt=(clientX,clientY)=>{
+      if(!cargoBoat || !cargoBoat.parent || !renderer || !camera) return false;
+      const bounds=renderer.domElement.getBoundingClientRect();
+      const pointer=new THREE.Vector2((clientX-bounds.left)/bounds.width*2-1,-(clientY-bounds.top)/bounds.height*2+1);
+      cargoShopRaycaster.setFromCamera(pointer,camera);
+      return cargoShopRaycaster.intersectObject(cargoBoat,true).some(h=>!h.object.parent?.name?.includes('Wake'));
+    };
+
     // 島嶼佈置模式：僅儲存位置與水平轉角，不儲存答題進度，也不需要登入。
+    window.cargoShopLayoutIsEditing = () => layoutEditing;
     const LAYOUT_STORAGE_KEY = 'elsu-dream-island-layout-v1';
     let savedIslandLayout = {};
     try {
@@ -6790,7 +7724,7 @@ return {compose, length};
       return !!(obj && obj.userData && obj.userData.layoutKey && obj.parent);
     }
     function allLayoutObjects() {
-      return [...layoutInitialTrees, ...spawnedIslandObjects].filter(layoutIsGroundDecoration);
+      return [...layoutInitialTrees, ...spawnedIslandObjects, ...cargoShopPlaced.map(entry=>entry.group)].filter(obj=>layoutIsGroundDecoration(obj)||!!(obj&&obj.userData&&obj.userData.cargoShopPlaced&&obj.parent));
     }
     function allEditableLayoutObjects() {
       return allLayoutObjects().filter(obj => !obj.userData.layoutDeleted && obj.visible);
@@ -6800,10 +7734,13 @@ return {compose, length};
       if (!obj.userData.layoutDefault) {
         obj.userData.layoutDefault={x:obj.position.x,z:obj.position.z,yaw:obj.rotation.y,deleted:false};
       }
+      // 尚未正式開放佈置：不能讓舊存檔中的 deleted 標記隱藏新開局樹木。
+      // 只略過套用，保留儲存資料供日後佈置功能啟用。
+      if (ISLAND_LAYOUT_RELEASE_LOCKED) return;
       const key = obj.userData && obj.userData.layoutKey;
       const saved = key && savedIslandLayout[key];
       if (!saved) return;
-      if (obj.userData.layoutTree && saved.deleted === true) {
+      if ((obj.userData.layoutTree || obj.userData.cargoShopPlaced) && saved.deleted === true) {
         obj.userData.layoutDeleted = true;
         obj.visible = false;
       }
@@ -6813,7 +7750,7 @@ return {compose, length};
       obj.rotation.y = saved.yaw;
     }
     // S.V02 - 08：僅關閉佈置功能入口，保留資料結構以便未來恢復。
-    const ISLAND_LAYOUT_RELEASE_LOCKED = true;
+    const ISLAND_LAYOUT_RELEASE_LOCKED = false;
     function updateLayoutEntry() {
       if (ISLAND_LAYOUT_RELEASE_LOCKED) {
         if (layoutEnterBtn) layoutEnterBtn.classList.add('hidden');
@@ -6830,7 +7767,7 @@ return {compose, length};
     }
     function layoutCheckPlacement(obj, x, z) {
       const isSea = !!obj.userData.layoutSea;
-      const isTree = !!obj.userData.layoutTree;
+      const isTree = !!(obj.userData.layoutTree || obj.userData.cargoShopPlaced);
       const radial = Math.hypot(x, z);
       if (isSea) {
         if (radial < 13.8 || radial > 34) return false;
@@ -6867,8 +7804,9 @@ return {compose, length};
     function layoutRestoreState(obj,state) {
       if (!obj || !state) return;
       obj.position.x=state.x;obj.position.z=state.z;obj.rotation.y=state.yaw;
-      obj.userData.layoutDeleted=!!(obj.userData.layoutTree && state.deleted);
+      obj.userData.layoutDeleted=!!((obj.userData.layoutTree || obj.userData.cargoShopPlaced) && state.deleted);
       obj.visible=!obj.userData.layoutDeleted;
+      updateGeneralRewardCounter();
     }
     function layoutSameState(a,b) {
       return a && b && a.x===b.x && a.z===b.z && a.yaw===b.yaw && a.deleted===b.deleted;
@@ -6898,6 +7836,11 @@ return {compose, length};
       if (lightningStormActive) { showCheatNotice('請等待本次閃電結束，再開始佈置。'); return; }
       if (renderModeActive) stopRenderMode('已進入島嶼佈置模式。');
       layoutEditing = true;
+      // 進入俯視佈置時，商城貨架一律關閉；完成佈置後須重新點船才能購買。
+      if (typeof window.closeCargoShopShelf === 'function') window.closeCargoShopShelf();
+      // 佈置中暫時隱藏整組答題字卡與輸入框；離開時還原原本 display 值。
+      const questionPanelForLayout = document.getElementById('movableQuestionPanel');
+      if (questionPanelForLayout) { questionPanelForLayout.dataset.layoutPreviousDisplay = questionPanelForLayout.style.display; questionPanelForLayout.style.setProperty('display','none','important'); }
       layoutWasPaused = isIslandPaused;
       isIslandPaused = true;
       layoutCameraRestore = { angle:sphericalAngle, dist:targetCamDist, look:targetCamLookAt.clone() };
@@ -6918,7 +7861,7 @@ return {compose, length};
       layoutToolbar.classList.remove('hidden');
       if (layoutEnterBtn) layoutEnterBtn.classList.add('hidden');
       if (typeInput) typeInput.blur();
-      if (layoutStatus) { layoutStatus.textContent = '拖曳物件可移動；在空白處拖曳可旋轉島嶼。只有樹木可刪除。'; layoutStatus.style.color='#cbd5e1'; }
+      if (layoutStatus) { layoutStatus.textContent = '拖曳物件可移動；在空白處拖曳可旋轉島嶼。樹木與商城商品可刪除。'; layoutStatus.style.color='#cbd5e1'; }
     }
     function leaveIslandLayoutMode(save) {
       if (!layoutEditing) return;
@@ -6931,11 +7874,12 @@ return {compose, length};
           const current=layoutObjectState(obj);
           // 重設後若沒有再編輯，該物件恢復日後正常隨機生成，不鎖定這一局的初始座標。
           if (layoutResetRequested && layoutSameState(current,obj.userData.layoutDefault)) continue;
-          next[obj.userData.layoutKey] = current;
+          if(!obj.userData.cargoShopPlaced)next[obj.userData.layoutKey] = current;
         }
         try {
           localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(next));
           savedIslandLayout = next;
+          cargoPersistPlaced();
           showCheatNotice('🏝️ 島嶼佈置已儲存！下次遊玩會依照這份配置建造。');
         } catch (error) {
           console.warn('無法儲存島嶼佈置：', error);
@@ -6948,7 +7892,11 @@ return {compose, length};
         }
         showCheatNotice('已取消本次佈置，恢復編輯前的位置。');
       }
+      cargoPersistPlaced();
+      updateGeneralRewardCounter();
       layoutEditing = false;
+      const questionPanelAfterLayout = document.getElementById('movableQuestionPanel');
+      if (questionPanelAfterLayout) { questionPanelAfterLayout.style.removeProperty('display'); if (questionPanelAfterLayout.dataset.layoutPreviousDisplay) questionPanelAfterLayout.style.display = questionPanelAfterLayout.dataset.layoutPreviousDisplay; delete questionPanelAfterLayout.dataset.layoutPreviousDisplay; }
       if (layoutSelectionRing) layoutSelectionRing.visible=false;
       layoutToolbar.classList.add('hidden');
       layoutSetSelected(null);
@@ -6968,7 +7916,11 @@ return {compose, length};
       if (typeInput && gameState === 'RUNNING') typeInput.focus();
     }
     layoutEnterBtn.addEventListener('click', enterIslandLayoutMode);
-    document.getElementById('layoutSaveBtn').addEventListener('click', () => leaveIslandLayoutMode(true));
+    document.getElementById('layoutSaveBtn').addEventListener('click', () => {
+      if (typeof window.closeCargoShopShelf === 'function') window.closeCargoShopShelf();
+      if(typeof window.cargoShopApplyPlacedEffects==='function')window.cargoShopApplyPlacedEffects();
+      leaveIslandLayoutMode(true);
+    });
     document.getElementById('layoutCancelBtn').addEventListener('click', () => leaveIslandLayoutMode(false));
     for (const [id,dir] of [['layoutTurnLeft',-1],['layoutTurnRight',1]]) {
       document.getElementById(id).addEventListener('click', () => {
@@ -7011,10 +7963,11 @@ return {compose, length};
     });
     layoutDeleteTreeBtn.addEventListener('click', () => {
       const obj=layoutSelectedObject;
-      if(!layoutEditing || !obj || !obj.userData.layoutTree) return;
+      if(!layoutEditing || !obj || !(obj.userData.layoutTree || obj.userData.cargoShopPlaced)) return;
       const before=layoutObjectState(obj);
       obj.userData.layoutDeleted=true;
       obj.visible=false;
+      updateGeneralRewardCounter();
       layoutRecordChange(obj,before);
       layoutSetSelected(null);
       layoutStatus.textContent='樹木已移除。可按「上一步」復原；按「完成佈置・儲存」會記住刪除結果。';
@@ -7131,6 +8084,7 @@ return {compose, length};
     const animalCreatures = [];
     const floatingClouds = [];
     const animatedFlowers = [];
+    const sunflowerBatches = [];
     let animatedWindows = [];
     let aquaticCreatures = [];
     const cruisingSailboats = [];
@@ -7178,12 +8132,49 @@ return {compose, length};
     const scoreEl = document.getElementById('scoreEl');
     const milestoneCounter = document.getElementById('milestoneCounter');
     const generalRewardCounter = document.getElementById('generalRewardCounter');
+    const islandCoinCounter = document.getElementById('islandCoinCounter');
+    let islandCoins=0, islandCorrectStreak=0;
+    // S.V02-12：3D 商城測試。沿用原本島嶼幣，購物紀錄與佈置物件獨立管理。
+    window.cargoShopCoins = () => islandCoins;
+    window.cargoShopRefund = price => { islandCoins += price; islandCoinCounter.textContent=islandCoins.toLocaleString('zh-TW'); };
+    window.cargoShopBuy = price => {
+      if (islandCoins < price) return false;
+      islandCoins -= price;
+      islandCoinCounter.textContent=islandCoins.toLocaleString('zh-TW');
+      return true;
+    };
+
+    function showIslandCoinCombo(bonus){
+      if ((bonus !== 30 && bonus !== 50) || !islandCoinCounter) return;
+      islandCoinCounter.querySelectorAll('.island-coin-bonus').forEach(el => el.remove());
+      const bubble = document.createElement('span');
+      bubble.className = 'island-coin-bonus bonus-' + bonus;
+      bubble.textContent = '+' + bonus;
+      bubble.setAttribute('aria-hidden', 'true');
+      islandCoinCounter.appendChild(bubble);
+      bubble.addEventListener('animationend', () => bubble.remove(), { once: true });
+    }
+    function earnIslandCoins(){
+      islandCorrectStreak++;
+      const bonus = islandCorrectStreak>=10 ? 50 : (islandCorrectStreak>=3 ? 30 : 10);
+      islandCoins += bonus;
+      islandCoinCounter.textContent=islandCoins.toLocaleString('zh-TW');
+      showIslandCoinCombo(bonus);
+    }
+    function resetIslandCoins(){
+      islandCoins=0;
+      islandCorrectStreak=0;
+      islandCoinCounter.textContent='0';
+
+      document.querySelectorAll('#islandResourceHud .island-coin-bonus').forEach(el=>el.remove());
+    }
+
     // S.V02 - 08：顯示島上「現存」的一般獎勵，不再使用累積發放次數。
     // 地標、登島角色、初始樹木與彩蛋物件均不納入。
     function updateGeneralRewardCounter() {
       if (!generalRewardCounter) return;
       const aliveRewards = spawnedIslandObjects.reduce((sum, obj) =>
-        sum + (obj && obj.parent && obj.userData && obj.userData.isGeneralReward === true ? 1 : 0), 0);
+        sum + (obj && obj.parent && obj.userData && obj.userData.isGeneralReward === true && !obj.userData.layoutDeleted && obj.visible ? 1 : 0), 0);
       generalRewardCounter.textContent = `${Math.min(aliveRewards, 250)} / 250`;
     }
     const vitalityBar = document.getElementById('vitalityBar');
@@ -9025,6 +10016,59 @@ return {compose, length};
         });
 
       } else if (blueprint.type === "flower_patch") {
+        // S.V02-11 效能實驗：每朵向日葵依材質合併固定零件，保留每朵花的擺動 Group。
+        // 預期大幅減少獨立 Mesh / Draw Calls；不改變花的數量、幾何外形、材質與布局。
+        const mergeSunflowerParts = (flower) => {
+          flower.updateMatrixWorld(true);
+          const invFlower = flower.matrixWorld.clone().invert();
+          const materialBuckets = new Map();
+          const sourceMeshes = [];
+          flower.traverse(child => {
+            if (!child.isMesh || !child.geometry || Array.isArray(child.material)) return;
+            const relative = new THREE.Matrix4().multiplyMatrices(invFlower, child.matrixWorld);
+            const source = child.geometry;
+            const geometry = source.index ? source.toNonIndexed() : source.clone();
+            geometry.applyMatrix4(relative);
+            const material = child.material;
+            if (!materialBuckets.has(material)) materialBuckets.set(material, []);
+            materialBuckets.get(material).push(geometry);
+            sourceMeshes.push(child);
+          });
+          const combinedMeshes = [];
+          for (const [material, pieces] of materialBuckets) {
+            const attributes = ['position', 'normal', 'uv'];
+            const combined = new THREE.BufferGeometry();
+            for (const key of attributes) {
+              const supported = pieces.every(geo => geo.getAttribute(key));
+              if (!supported) continue;
+              const itemSize = pieces[0].getAttribute(key).itemSize;
+              const size = pieces.reduce((sum,geo) => sum + geo.getAttribute(key).array.length, 0);
+              const values = new Float32Array(size);
+              let offset = 0;
+              for (const geo of pieces) {
+                const attr = geo.getAttribute(key);
+                values.set(attr.array, offset);
+                offset += attr.array.length;
+              }
+              combined.setAttribute(key, new THREE.BufferAttribute(values, itemSize));
+            }
+            combined.computeBoundingSphere();
+            const mesh = new THREE.Mesh(combined, material);
+            mesh.castShadow = sourceMeshes.some(part => part.material === material && part.castShadow);
+            mesh.receiveShadow = sourceMeshes.some(part => part.material === material && part.receiveShadow);
+            combinedMeshes.push(mesh);
+            pieces.forEach(geo => geo.dispose());
+          }
+          for (const mesh of sourceMeshes) {
+            if (mesh.parent) mesh.parent.remove(mesh);
+            mesh.geometry.dispose();
+          }
+          for (const child of [...flower.children]) {
+            // Remove emptied sub-groups (such as the flower head) after baking transforms.
+            if (child.isGroup) flower.remove(child);
+          }
+          flower.add(...combinedMeshes);
+        };
         // 精緻立體向日葵：挺直莖葉、雙層花瓣、立體花盤與種子細節
         const sfStemMat = new THREE.MeshStandardMaterial({ color: 0x278044, roughness: 0.82 });
         const sfLeafMat = new THREE.MeshStandardMaterial({ color: 0x2f8b42, roughness: 0.8, side: THREE.DoubleSide });
@@ -9104,9 +10148,49 @@ return {compose, length};
           }
 
           flower.add(head);
+          mergeSunflowerParts(flower);
           objGroup.add(flower);
           animatedFlowers.push({ mesh: flower, speed: 1.25 + i * 0.16, amp: 0.045, offset: i * 0.6 });
         }
+        // S.V02-11 二階段：每個花田內，將兩株同高度的花以 InstancedMesh 繪製。
+        // 這三對花的建模幾何完全相同；保留各花 Group 給原始搖擺動畫更新。
+        // 每組原本 48 次 Mesh 繪製降為約 24 次，花的數量與位置不變。
+        const flowerGroups = objGroup.children.filter(c => c.isGroup && c.children.length > 0);
+        const sunflowerInstances = [];
+        for (let variant = 0; variant < 3; variant++) {
+          const flowerA = flowerGroups[variant];
+          const flowerB = flowerGroups[variant + 3];
+          if (!flowerA || !flowerB) continue;
+          const partsA = flowerA.children.filter(c => c.isMesh);
+          const partsB = flowerB.children.filter(c => c.isMesh);
+          if (partsA.length !== partsB.length) continue;
+          for (let part = 0; part < partsA.length; part++) {
+            const a = partsA[part], b = partsB[part];
+            const batch = new THREE.InstancedMesh(a.geometry, a.material, 2);
+            batch.castShadow = a.castShadow;
+            batch.receiveShadow = a.receiveShadow;
+            batch.frustumCulled = false;
+            objGroup.add(batch);
+            flowerA.remove(a);
+            flowerB.remove(b);
+            // b's geometry is an equivalent independent copy; keep a's shared template.
+            if (b.geometry !== a.geometry) b.geometry.dispose();
+            sunflowerInstances.push({batch, flowers:[flowerA, flowerB]});
+          }
+        }
+        // 每個花田的實例矩陣在原本 animatedFlowers 動畫後更新。
+        objGroup.userData.updateSunflowerInstances = () => {
+          for (const item of sunflowerInstances) {
+            for (let j = 0; j < item.flowers.length; j++) {
+              const flower = item.flowers[j];
+              flower.updateMatrix();
+              item.batch.setMatrixAt(j, flower.matrix);
+            }
+            item.batch.instanceMatrix.needsUpdate = true;
+          }
+        };
+        objGroup.userData.updateSunflowerInstances();
+        sunflowerBatches.push(objGroup);
 
       } else if (blueprint.type === "pier_dock") {
         const woodMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.85 });
@@ -9507,7 +10591,13 @@ return {compose, length};
       shiftObjectOutsideSchool(objGroup);
       if (layoutIsDecor) applyStoredLayout(objGroup);
       objGroup.userData.isGeneralReward = true;
+      // 佈置功能未開放時，獎勵樹木不可被舊佈置紀錄標為刪除。
+      if (layoutIsTree && ISLAND_LAYOUT_RELEASE_LOCKED) {
+        objGroup.userData.layoutDeleted = false;
+        objGroup.visible = true;
+      }
       spawnedIslandObjects.push(objGroup);
+      updateGeneralRewardCounter();
 
       // 每次答對後都會播放的開拓啵聲也會疊在答對提示音上；只將這個常規開拓音降至原本 20%。
       sound.buildPop(0.092);
@@ -9669,6 +10759,8 @@ return {compose, length};
     }
 
     function startTaipei101FireworksShow(force = false) {
+      // Pride 101 已含獨立視覺煙火：關閉舊島嶼煙火及其聲音。
+      return;
       if ((!force && fireworksNightCycleTriggered) || !scene) return;
       const tower = scene.getObjectByName("台北一零一摩天大樓");
       if (!tower) return;
@@ -10263,6 +11355,22 @@ return {compose, length};
         posZ = ELUANBI_SITE.z;
         posY = ISLAND_DECOR_BASE_Y;
         angle = 0;
+      } else if (monument.name === "海港深水大碼頭") {
+        // 專用岸邊選址：沿海岸外緣候選點測試，避開已存在地標；其餘地標不變。
+        const beachCandidates=[];
+        for (let i=0;i<64;i++) {
+          const a=(i*2.399963229728653)%(Math.PI*2);
+          const r=16.1;
+          const x=Math.cos(a)*r,z=Math.sin(a)*r*.83;
+          // 避開島嶼已有物件與校門，並保留靠近水面的視覺位置。
+          if(!schoolGateAvoids(x,z,3.1,3.1))continue;
+          const nearest=spawnedIslandObjects.reduce((m,o)=>o?.position?Math.min(m,Math.hypot(o.position.x-x,o.position.z-z)):m,99);
+          beachCandidates.push({x,z,nearest});
+        }
+        beachCandidates.sort((a,b)=>b.nearest-a.nearest);
+        const site=beachCandidates[0]||{x:14,z:1};
+        posX=site.x;posZ=site.z;posY=ISLAND_DECOR_BASE_Y;
+        angle=Math.atan2(posZ,posX);
       } else if (monument.name === "安平古堡") {
         // SV.01-158：安平古堡固定在島嶼左側紅圈草地區，填補島邊空間；不再使用隨機地標選址。
         // 固定座標靠近島嶼左側，並朝向島心／主要觀景方向，讓白塔與寬闊紅磚建築群容易辨識。
@@ -10336,9 +11444,10 @@ return {compose, length};
       // 大小錯落有致：為不同紀念地標賦予微型、精巧、中型或威嚴等多樣化比例 (0.65 ~ 1.25)
       const scaleVariation = 0.72 + (Math.random() * 0.45);
       // 05 與 09 以原始底座寬度固定外層縮放；塔類維持自身固定高度。
-      const finalMonumentScale = monumentObj.userData.fixedMonumentWidth
+      const finalMonumentScale = monument.name === "海港深水大碼頭" ? 1
+        : (monumentObj.userData.fixedMonumentWidth
         ? monumentObj.userData.canonicalScale
-        : (monumentObj.userData.fixedTowerHeight ? monumentObj.userData.canonicalScale : scaleVariation);
+        : (monumentObj.userData.fixedTowerHeight ? monumentObj.userData.canonicalScale : scaleVariation));
       // S.V01-186：淡江大橋模型橋面局部高度為 1.72、內層比例 22/46。
       // 舊版以 -1.0 為群組高度，縮放後橋面落到海平面以下。
       // 只調整整座橋的 Y 位置，讓橋面固定在世界高度 0.55（海面約 0.02），橋墩繼續入水。
@@ -10533,6 +11642,15 @@ return {compose, length};
 
     // 清除島上所有生成物件 (c / clear)
     function clearAllIslandCreations() {
+      // clear 清除所有已放置的商城裝飾，以及購買放置中的暫存狀態。
+      cargoShopPending=null;cargoGuideClear();
+      if(layoutSelectedObject?.userData?.cargoShopPlaced)layoutSetSelected(null);
+      for(const entry of cargoShopPlaced){
+        if(entry.group.parent)entry.group.parent.remove(entry.group);
+        entry.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.dispose());}});
+      }
+      cargoShopPlaced.length=0;
+      try{localStorage.removeItem(CARGO_PLACED_KEY);}catch(e){console.warn('商城紀錄無法清除',e);}
       sound.init();
 
       if(schoolGateEasterEgg) {
@@ -10553,6 +11671,7 @@ return {compose, length};
       walkingCelebrities.length = 0;
       animalCreatures.length = 0;
       animatedFlowers.length = 0;
+      sunflowerBatches.length = 0;
       animatedWindows.length = 0;
 
       // 清除熱氣球（重置為無熱氣球純淨狀態，後續依答題再行升空）
@@ -10604,6 +11723,7 @@ return {compose, length};
       specialMonumentsSpawned = 0;
       correctCount = 0;
       score = 0;
+      resetIslandCoins();
       vitality = 100;
       isEternalVitality = false;
       numpadLifeShieldMode = false;
@@ -11177,6 +12297,7 @@ return {compose, length};
       // 一般答題才增加答對次數、生命值及依進度召喚物件。
       vitality = Math.min(100, vitality + 30);
       correctCount++;
+      earnIslandCoins();
 
       // 閃電每隔約 7～10 題來襲，暴風期間的加強題優先出現。
       if (lightningSystemEnabled && !lightningStormActive && correctCount >= lightningNextAt) {
@@ -11252,6 +12373,7 @@ return {compose, length};
         <p id="renderModeDetail" class="text-xs leading-5 text-slate-300 mb-3">自動答題與生成物件中…</p>
         <button id="renderModeExit" type="button" class="w-full rounded-xl bg-rose-500 hover:bg-rose-400 px-3 py-2 font-bold text-sm">退出算圖模式</button>`;
       document.body.appendChild(renderModePanel);
+      window.islandMakeDraggablePanel(renderModePanel, renderModePanel.querySelector('.font-black.text-cyan-200'));
       document.getElementById('renderModeExit').addEventListener('click', () => stopRenderMode('已手動退出算圖模式。'));
     }
 
@@ -11346,6 +12468,9 @@ return {compose, length};
             // 沿用既有 people 人物生成及動畫登場流程。
             triggerAllMilestonesCheat();
             checkEternalVitality();
+            // FULL 已完成全部地標與一般物件，可直接開啟佈置功能。
+            layoutUnlocked = true;
+            updateLayoutEntry();
             if (milestoneCounter) milestoneCounter.textContent = '50 / 50';
             if (!ISLAND_LAYOUT_RELEASE_LOCKED && layoutDebugPending) {
               layoutDebugPending = false;
@@ -11433,6 +12558,61 @@ return {compose, length};
           return;
         }
 
+        // 只切換診斷入口；監控必須透過面板內按鈕手動啟動。
+        if (code === 'perf') {
+          toggleIslandPerfSecret();
+          typeInput.value = '';
+          typeInput.dispatchEvent(new Event('input', { bubbles:true }));
+          typeInput.focus();
+          return;
+        }
+
+        if(code === 'supermom'){
+          islandCoins += 100000;
+          islandCoinCounter.textContent=islandCoins.toLocaleString('zh-TW');
+          showCheatNotice('💰 島嶼幣 +100,000');
+          typeInput.value='';return;
+        }
+        if(code === 'space'){
+          // 僅在本局開啟佈置功能，不偽造地標或獎勵數量。
+          layoutUnlocked=true;
+          updateLayoutEntry();
+          showCheatNotice('🏝️ 佈置功能已開啟');
+          typeInput.value='';return;
+        }
+        if(code === 'daddy'){
+          islandCoins += 1000;
+          islandCoinCounter.textContent=islandCoins.toLocaleString('zh-TW');
+          showCheatNotice('💰 島嶼幣 +1,000');
+          typeInput.value='';return;
+        }
+        if(code === 'killtree'){
+          let removed=0;
+          // 僅移除實際樹木：開場12棵和答題獲得的樹；不碰地標、人物、船或其他獎勵。
+          for(const tree of layoutInitialTrees){if(tree.parent&&tree.visible){tree.parent.remove(tree);removed++;}}
+          for(let i=spawnedIslandObjects.length-1;i>=0;i--){
+            const obj=spawnedIslandObjects[i];
+            if(obj?.userData?.layoutTree){
+              if(obj.parent)obj.parent.remove(obj);
+              spawnedIslandObjects.splice(i,1);removed++;
+            }
+          }
+          if(layoutSelectedObject?.userData?.layoutTree)layoutSetSelected(null);
+          updateGeneralRewardCounter();
+          showCheatNotice('🌳 已移除 '+removed+' 棵樹木（保留地標與其他獎勵）');
+          typeInput.value='';return;
+        }
+        if (code === 'buy') {
+          if(!layoutUnlocked || ISLAND_LAYOUT_RELEASE_LOCKED){/* 未解鎖時保持安靜，不提示商城祕密。 */}
+          else {
+            cargoVisitElapsed=0;
+            cargoStartVisit();
+            showCheatNotice('🚢 小貨船已從海上出發！');
+          }
+          typeInput.value='';
+          return;
+        }
+
         if (code === 'full') {
           startFullIslandCheat();
           typeInput.value = '';
@@ -11442,9 +12622,7 @@ return {compose, length};
         // 開發者測試專用：快速生成所有建築與樹木後自動進入佈置模式。
         // 不登記真人答題試煉；不會解鎖正式遊玩進度。
         if (code === 'layout') {
-          // S.V02 - 08 公開版：禁止以祕技開啟佈置模式。
-          typeInput.value = '';
-          return;
+          // S.V02 - 11：恢復舊有 layout 開發測試祕技。
           layoutDebugPending = true;
           if (specialMonumentsSpawned >= 50) {
             layoutUnlocked = true;
@@ -11487,10 +12665,8 @@ return {compose, length};
           if (!islandShieldDome || !islandShieldMagicGroup || !islandShieldRim) createIslandShieldDome();
           // CLUB 模式啟動時先播放一輪，之後每 30 秒再播放一輪。
           startTaipei101FireworksShow(true);
-          clubFireworksInterval = setInterval(() => {
-            if (clubMode && !isIslandPaused) startTaipei101FireworksShow(true);
-          }, 30000);
-          showCheatNotice('💠 CLUB 模式已啟動：夜巡天色循環＋多彩防護罩光球，台北101約每30秒施放煙火！');
+          // Pride 101 自行管理播放週期，不另建立30秒舊煙火計時器。
+          showCheatNotice('💠 CLUB 模式已啟動：夜巡天色循環＋多彩防護罩光球，台北101依自己的燈光秀週期播放！');
           typeInput.value = '';
           typeInput.dispatchEvent(new Event('input', { bubbles: true }));
           typeInput.focus();
@@ -11514,7 +12690,7 @@ return {compose, length};
           if (sound && typeof sound.scheduleNextAmbientShipHorn === 'function' && sound.ambientLargeShipSeen) sound.scheduleNextAmbientShipHorn();
           timePhase = 3;
           if (dayTimeBadge) dayTimeBadge.textContent = '夜巡模式';
-          showCheatNotice('🌙 夜巡模式已啟動：晚霞至深夜色彩循環，台北101每40秒施放煙火！');
+          showCheatNotice('🌙 夜巡模式已啟動：晚霞至深夜色彩循環，台北101依自己的燈光秀週期播放！');
           typeInput.value = '';
           typeInput.dispatchEvent(new Event('input', { bubbles: true }));
           typeInput.focus();
@@ -11554,8 +12730,15 @@ return {compose, length};
               sound.ctx.resume().catch(() => {});
             }
           }
-          startTaipei101FireworksShow(true);
-          showCheatNotice('🎆 秘技生效：台北 101 開始播放一輪煙火！');
+          const prideTower = spawnedIslandObjects.find(obj => obj && obj.userData && obj.userData.isTaipei101);
+          if (prideTower && typeof prideTower.userData.restartPrideShow === 'function') {
+            prideTower.userData.restartPrideShow();
+            showCheatNotice(prideTower.userData.taipei101?.night
+              ? '🌈 台北 101 彩虹燈光秀＋煙火已啟動！'
+              : '🌈 燈光秀須在夜間啟動，請切換至夜晚後再輸入 fire。');
+          } else {
+            showCheatNotice('🌈 台北 101 尚未登島，請先召喚地標。');
+          }
           typeInput.value = '';
           return;
         }
@@ -11711,6 +12894,8 @@ return {compose, length};
         typeInput.dispatchEvent(new Event('input', { bubbles: true }));
         refreshTypingMask();
         typeInput.focus();
+      } else if (isExplicitSubmit && val && val !== target) {
+        islandCorrectStreak=0;
       }
     }
 
@@ -12318,6 +13503,180 @@ return {compose, length};
     // 電腦版初次顯示時也提示有下拉選項。
     updateClubMusicButton173();
 
+
+    // S.V02-11：診斷取樣；關閉面板時不遍歷場景，也不進行繪圖額外工作。
+    const islandPerfToggle = document.getElementById('islandPerfToggle');
+    const islandPerfPanel = document.getElementById('islandPerfPanel');
+    window.islandMakeDraggablePanel(islandPerfPanel, islandPerfPanel.querySelector('.island-perf-topbar'));
+    let perfLastSample = performance.now(), perfFrameCount = 0, perfFrameSum = 0, perfRenderSum = 0;
+    let perfLatestSnapshot = '';
+    let perfMonitoring = false;
+    const perfStartBtn = document.getElementById('islandPerfStart');
+    const perfStopBtn = document.getElementById('islandPerfStop');
+    const perfMonitorStatus = document.getElementById('islandPerfMonitorStatus');
+    function stopIslandPerfMonitoring(){
+      perfMonitoring = false;
+      // 停止監控時同時取消物件分析；避免仍在背景逐幀額外渲染。
+      if (objectTestActive) {
+        objectTestActive = false;
+        objectTestQueue = [];
+        objectAnalyzeBtn.disabled = false;
+        objectAnalyzeBtn.textContent = '分析島嶼物件';
+        objectStatus.textContent = '分析已停止，場景正常顯示';
+      }
+      perfFrameCount=0; perfFrameSum=0; perfRenderSum=0;
+      perfStartBtn.disabled=false; perfStopBtn.disabled=true;
+      perfStartBtn.style.opacity='1'; perfStopBtn.style.opacity='.78';
+      perfMonitorStatus.classList.remove('running');
+      perfMonitorStatus.classList.add('stopped');
+      perfMonitorStatus.setAttribute('aria-label','監控已停止'); perfMonitorStatus.title='監控已停止';
+    }
+    function startIslandPerfMonitoring(){
+      if (islandPerfPanel.hidden) return;
+      perfMonitoring=true;
+      perfLastSample=performance.now();
+      perfFrameCount=0;perfFrameSum=0;perfRenderSum=0;
+      perfStartBtn.disabled=true;perfStopBtn.disabled=false;
+      perfStartBtn.style.opacity='.78';perfStopBtn.style.opacity='1';
+      perfMonitorStatus.classList.remove('stopped');
+      perfMonitorStatus.classList.add('running');
+      perfMonitorStatus.setAttribute('aria-label','監控進行中'); perfMonitorStatus.title='監控進行中';
+    }
+    function setIslandPerfPanel(opening){
+      islandPerfPanel.hidden=!opening;
+      islandPerfToggle.setAttribute('aria-expanded',String(opening));
+      islandPerfToggle.setAttribute('aria-pressed',String(opening));
+      islandPerfToggle.textContent=opening?'效能診斷 ON':'效能診斷 OFF';
+      islandPerfToggle.classList.toggle('text-emerald-300',opening);
+      islandPerfToggle.classList.toggle('text-slate-400',!opening);
+      if(!opening)stopIslandPerfMonitoring();
+    }
+    function toggleIslandPerfSecret(){
+      const showing=islandPerfToggle.hidden;
+      islandPerfToggle.hidden=!showing;
+      if(!showing)setIslandPerfPanel(false);
+    }
+    islandPerfToggle.addEventListener('click',()=>setIslandPerfPanel(islandPerfPanel.hidden));
+    perfStartBtn.addEventListener('click',startIslandPerfMonitoring);
+    perfStopBtn.addEventListener('click',stopIslandPerfMonitoring);
+    document.getElementById('islandPerfCopy').addEventListener('click', () => {
+      const text = perfLatestSnapshot || '尚無效能數據';
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(() => {});
+      else { const temp=document.createElement('textarea');temp.value=text;document.body.appendChild(temp);temp.select();document.execCommand('copy');temp.remove(); }
+    });
+    function sampleIslandPerf(frameMs, renderMs, now) {
+      if (!perfMonitoring || islandPerfPanel.hidden || !renderer || !scene) return;
+      perfFrameCount++;
+      perfFrameSum += frameMs;
+      perfRenderSum += renderMs;
+      const period = now - perfLastSample;
+      if (period < 1000) return;
+      const fps = perfFrameCount * 1000 / period;
+      const avgFrame = perfFrameSum / Math.max(1,perfFrameCount);
+      const avgRender = perfRenderSum / Math.max(1,perfFrameCount);
+      let objects = 0, meshes = 0;
+      scene.traverse(obj => { objects++; if (obj.isMesh && obj.visible) meshes++; });
+      const values = {
+        perfFps:fps.toFixed(1),perfFrameMs:avgFrame.toFixed(1)+' ms',
+        perfCalls:String(renderer.info.render.calls),perfTriangles:renderer.info.render.triangles.toLocaleString('en-US'),
+        perfObjects:objects.toLocaleString('en-US'),perfMeshes:meshes.toLocaleString('en-US'),
+        perfGeometries:String(renderer.info.memory.geometries),perfTextures:String(renderer.info.memory.textures),
+        perfRenderMs:avgRender.toFixed(2)+' ms'
+      };
+      for (const [id,value] of Object.entries(values)) document.getElementById(id).textContent=value;
+      perfLatestSnapshot = '我的夢想島 S.V02-12 效能診斷\n' + Object.entries(values).map(([id,value]) => id+': '+value).join('\n');
+      perfFrameCount=0;perfFrameSum=0;perfRenderSum=0;perfLastSample=now;
+    }
+
+    // S.V02-11 實驗：按「物件名稱」分組，逐幀暫時隱藏並量測 Draw Calls 差值。
+    // 僅測量本次可見場景；不永久更改 visible / 佈置儲存。
+    const objectAnalyzeBtn=document.getElementById('islandObjectAnalyze');
+    const objectCopyBtn=document.getElementById('islandObjectCopy');
+    const objectStatus=document.getElementById('islandObjectStatus');
+    const objectReportBox=document.getElementById('islandObjectReport');
+    let islandObjectReportText='尚未分析', objectTestQueue=[], objectTestRows=[], objectTestBase=0, objectTestActive=false;
+    function islandObjectLabel(root){
+      const u=root.userData||{}, key=String(u.layoutKey||'');
+      if(key.startsWith('monument-')) return '地標｜'+(u.layoutLabel||root.name||key);
+      if(key.startsWith('initial-tree-')) return '初始樹木｜環島樹木';
+      if(key.startsWith('creation-')){
+        const index=Number(key.slice(9));
+        const blueprint=Number.isFinite(index) && typeof GENERAL_REWARD_SEQUENCE!=='undefined' ? GENERAL_REWARD_SEQUENCE[(Math.max(0,index-1))%GENERAL_REWARD_SEQUENCE.length] : null;
+        return '一般獎勵｜'+(u.layoutLabel||(blueprint&&blueprint.name)||'其他');
+      }
+      if(u.isSchoolGateEasterEgg) return '特殊物件｜仁愛國小校門';
+      return '其他場景｜'+(root.name||root.type||'未命名');
+    }
+    function countObjectMeshes(root){let n=0;root.traverse(o=>{if(o.isMesh)n++});return n}
+    function islandObjectGroups(){
+      const map=new Map(), accounted=new Set();
+      const push=(root,label)=>{
+        if(!root||!root.parent||!root.visible)return;
+        if(!map.has(label))map.set(label,[]);
+        map.get(label).push(root);accounted.add(root);
+      };
+      for(const root of spawnedIslandObjects)push(root,islandObjectLabel(root));
+      for(const root of layoutInitialTrees)push(root,islandObjectLabel(root));
+      // 尚未掛到 spawnedIslandObjects 的場景元素另外列成場景群組。
+      for(const root of scene.children){
+        if(accounted.has(root)||!root.visible||root.isLight||root.isCamera)continue;
+        // 避免場景父層與已分類子層重複控制：場景環境群組只列靜態其他根節點
+        if(root.children&&root.children.some(child=>accounted.has(child)))continue;
+        const groupName = root.name || root.userData?.layoutLabel || root.type || '未命名';
+        const hint = (root.children || []).find(c => c.name)?.name;
+        const detail = hint ? `（含 ${hint}）` : '';
+        const seq = scene.children.indexOf(root) + 1;
+        push(root,`其他場景｜${groupName}${detail} #${seq}`);
+      }
+      return [...map].map(([label,roots])=>({label,roots,count:roots.length,meshes:roots.reduce((v,r)=>v+countObjectMeshes(r),0)}));
+    }
+    objectAnalyzeBtn.addEventListener('click',()=>{
+      if(objectTestActive)return;
+      if(!perfMonitoring){objectStatus.textContent='請先按「開啟監控」';return;}
+      if(!renderer||!scene){objectStatus.textContent='渲染器尚未準備完成';return}
+      objectTestQueue=islandObjectGroups();objectTestRows=[];
+      objectTestActive=true;objectTestBase=0;
+      objectAnalyzeBtn.disabled=true;objectAnalyzeBtn.textContent='分析中…';
+      objectStatus.textContent=`準備分析 ${objectTestQueue.length} 組物件…`;
+      objectReportBox.textContent='測試中，請保持遊戲畫面開啟。';
+    });
+    function islandObjectAfterRender(calls){
+      if(!objectTestActive)return;
+      if(!objectTestBase){
+        objectTestBase=calls;
+        return;
+      }
+      const item=objectTestQueue.shift();
+      if(!item){
+        objectTestActive=false;objectAnalyzeBtn.disabled=false;objectAnalyzeBtn.textContent='重新分析島嶼物件';
+        objectTestRows.sort((a,b)=>b.calls-a.calls);
+        islandObjectReportText='我的夢想島 S.V02-12｜物件渲染測量\n'+
+          '基準 Draw Calls：'+objectTestBase+'\n'+
+          '說明：數值為暫時隱藏分組前後的 Draw Calls 差值；非獨立物件固定成本。InstancedMesh 的 Mesh 數不等於實例數。\n'+
+          '名稱 | 物件數 | Mesh數 | Draw Calls 差值\n'+
+          objectTestRows.map(r=>`${r.label} | ${r.count} | ${r.meshes} | ${r.calls}`).join('\n');
+        objectReportBox.textContent=islandObjectReportText;
+        objectStatus.textContent=`分析完成：${objectTestRows.length} 組，所有物件已恢復顯示`;
+        return;
+      }
+      // 額外 render 一次量測隱藏差值；立即還原，玩家的場景資料不變。
+      const states=item.roots.map(root=>[root,root.visible]);
+      try{
+        states.forEach(([root])=>root.visible=false);
+        renderer.render(scene,camera);
+        const hiddenCalls=renderer.info.render.calls;
+        objectTestRows.push({...item,calls:Math.max(0,objectTestBase-hiddenCalls)});
+      }finally{
+        states.forEach(([root,visible])=>root.visible=visible);
+      }
+      objectStatus.textContent=`分析中：${objectTestRows.length} / ${objectTestRows.length+objectTestQueue.length} 組`;
+    }
+    objectCopyBtn.addEventListener('click',()=>{
+      const value=islandObjectReportText;
+      if(navigator.clipboard?.writeText)navigator.clipboard.writeText(value).catch(()=>{});
+      else {const t=document.createElement('textarea');t.value=value;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}
+    });
+
     let lastTime = performance.now();
 
     function animate(currentTime) {
@@ -12361,6 +13720,9 @@ return {compose, length};
       });
 
       spawnedIslandObjects.forEach(obj => {
+        if (obj && obj.userData && obj.userData.isTaipei101 && typeof obj.userData.update === 'function') {
+          obj.userData.update(dt);
+        }
         if (obj && obj.userData && obj.userData.windTurbineData) {
           obj.userData.windTurbineData.update(dt, currentTime * 0.001);
         }
@@ -12561,6 +13923,9 @@ return {compose, length};
           f.mesh.rotation.z = Math.sin(t * f.speed + f.offset) * f.amp;
         }
       });
+      sunflowerBatches.forEach(group => {
+        if (group.parent && group.userData.updateSunflowerInstances) group.userData.updateSunflowerInstances();
+      });
 
       animatedWindows.forEach(w => {
         const swing = (Math.sin(t * w.speed + w.offset) + 1) * 0.5 * 1.2;
@@ -12689,13 +14054,19 @@ return {compose, length};
       currentCamDist += (targetCamDist - currentCamDist) * 0.12;
       layoutCameraBlend += ((layoutEditing ? 1 : 0) - layoutCameraBlend) * 0.08;
       applyCameraPosition(sphericalAngle, currentCamDist);
+      cargoUpdateVisit(dt);
       if (layoutSelectionRing && layoutSelectedObject && layoutEditing) {
         layoutSelectionRing.position.set(layoutSelectedObject.position.x, layoutSelectedObject.userData.layoutSea ? 0.18 : ISLAND_GRASS_SURFACE_Y + 0.07, layoutSelectedObject.position.z);
         layoutSelectionRing.scale.setScalar(layoutSelectedObject.userData.layoutTree ? 0.8 : 1.45);
       }
 
       if (renderer && scene && camera) {
+        const perfRenderStart = perfMonitoring ? performance.now() : 0;
         renderer.render(scene, camera);
+        if (perfMonitoring) {
+          if (objectTestActive) islandObjectAfterRender(renderer.info.render.calls);
+          sampleIslandPerf(currentTime - (lastTime - dt * 1000), performance.now() - perfRenderStart, currentTime);
+        }
       }
     }
 
@@ -12947,6 +14318,17 @@ return {compose, length};
         document.body.classList.remove('force-mobile-layout','force-desktop-layout');
         if(mode==='mobile')document.body.classList.add('force-mobile-layout');
         if(mode==='desktop')document.body.classList.add('force-desktop-layout');
+        // 切換版面時清掉手機拖曳留下的 fixed left/top/bottom 覆寫，
+        // 防止回到電腦模式時答題框仍留在螢幕外。
+        const question=document.getElementById('movableQuestionPanel');
+        if(question){
+          for(const prop of ['left','top','right','bottom']) question.style.removeProperty(prop);
+          question.style.removeProperty('--panel-drag-x');
+          question.style.removeProperty('--panel-drag-y');
+          if(!document.getElementById('layoutToolbar')?.classList.contains('hidden')){
+            // 佈置中仍維持隱藏；離開時原有流程恢復。
+          }else{question.style.removeProperty('display');}
+        }
         const isMobile=mode==='mobile'||(mode==='auto'&&window.matchMedia('(max-width:760px)').matches);
         mob.classList.toggle('active',isMobile); desk.classList.toggle('active',!isMobile);
         btn.setAttribute('aria-label',isMobile?'目前行動裝置版面，點擊切換電腦版':'目前電腦版面，點擊切換行動裝置版');
@@ -13034,6 +14416,594 @@ return {compose, length};
 <style id="mobileCardTransparentCornerFix161">
 @media (max-width:760px) {body:not(.force-desktop-layout) #movableQuestionPanel {background:transparent !important;border:0 !important;box-shadow:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;}body:not(.force-desktop-layout) #movableQuestionPanel > .w-full.bg-slate-900\/80 {border-radius:12px !important;overflow:hidden !important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}}
 @media (min-width:761px) {body.force-mobile-layout #movableQuestionPanel {background:transparent !important;border:0 !important;box-shadow:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;}body.force-mobile-layout #movableQuestionPanel > .w-full.bg-slate-900\/80 {border-radius:12px !important;overflow:hidden !important;}}
+</style>
+
+
+
+<script type="application/json" id="islandShopManifest">[{"id":"landmark-0","name":"紅色圓球","kind":"sphere","color":"#e86658","price":100,"category":"landmark","description":"","height":0,"status":"published","effect":"none","effectAmount":0}]</script>
+<script>window.islandShopGetProducts=()=>{try{return JSON.parse(document.getElementById('islandShopManifest').textContent)}catch(e){return []}}</script>
+<style id="cargoShopTrue3DStyle">
+  #cargoShelfOverlay{position:fixed;inset:0;z-index:1600;pointer-events:auto;background:rgba(5,14,21,.27);}
+  #cargoShelfOverlay[hidden],#cargoShelfProductDetail[hidden]{display:none!important}
+  #cargoShelfView{position:absolute;inset:0;touch-action:none;cursor:grab}
+  #cargoShelfView canvas{display:block;width:100%;height:100%}
+  #cargoShelfHint{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font:700 14px 'Noto Sans TC',sans-serif;color:white;text-shadow:0 2px 8px #000;background:#1b293590;padding:10px 18px;border-radius:10px;pointer-events:none;text-align:center;max-width:95vw}
+  #cargoShelfBalance{display:none!important} /* 僅取消商城左上角重複島嶼幣框；原有遊戲 HUD 保留 */
+  @media(max-width:640px){#cargoShelfBalance{left:10px;top:10px;font-size:12px}#cargoShelfHint{bottom:8px;font-size:11px}}
+
+  /* 只改商城商品卡：沿用遊戲答題區深藍玻璃質感；小尺寸、貨架偏下。 */
+  #cargoShelfProductDetail{
+    position:absolute;z-index:5;bottom:76px;left:50%;transform:translateX(-50%);
+    width:min(405px,calc(100vw - 28px));max-width:calc(100vw - 28px);
+    background:rgba(12,26,46,.94);color:#eef6ff;
+    border:1px solid rgba(155,206,237,.30);border-radius:19px;
+    box-shadow:0 15px 36px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.09);
+    padding:16px 17px 15px;text-align:left;
+    font-family:'Zen Maru Gothic','Noto Sans TC',sans-serif;
+    backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(13px);
+  }
+  .cargo-detail-name{font-size:20px;line-height:1.35;font-weight:900;letter-spacing:.03em;color:#f7fbff;margin-bottom:9px;overflow-wrap:anywhere}
+  .cargo-detail-feature{font-size:12px;line-height:1.55;color:#b7d1e6;font-weight:600;margin-bottom:10px}
+  .cargo-detail-price{display:flex;align-items:baseline;gap:8px;padding:8px 0 7px;margin:0 0 4px;border-top:1px solid rgba(255,255,255,.11);color:#dceeff;font-weight:800;font-size:14px}
+  .cargo-detail-price .cargo-amount{font-size:27px;font-weight:900;line-height:1;color:#fff4bf;font-variant-numeric:tabular-nums}
+  .cargo-detail-question{font-size:12px;font-weight:700;color:#aac5db;margin:4px 0 12px;text-align:center}
+  .cargo-detail-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px}
+  .cargo-detail-actions button{display:flex;justify-content:space-between;align-items:flex-end;gap:7px;min-width:0;min-height:56px;padding:10px 12px;border-radius:13px;border:1px solid rgba(255,255,255,.18);font-family:inherit;cursor:pointer;white-space:nowrap;box-shadow:0 5px 12px rgba(0,0,0,.17)}
+  .cargo-detail-actions button .cargo-action-main{font-size:35px;line-height:1;font-weight:900;flex:none;color:#fff}
+  .cargo-detail-actions button .cargo-action-sub{font-size:11px;line-height:1.1;font-weight:800;align-self:flex-end;text-align:right;white-space:nowrap;margin-bottom:2px;color:#fff}
+  .cargo-detail-actions #cargoDetailYes{background:linear-gradient(180deg,#198abd,#126a9b)}
+  .cargo-detail-actions #cargoDetailNo{background:linear-gradient(180deg,#64748b,#495a74)}
+  .cargo-detail-actions button:hover{filter:brightness(1.08)}
+  .cargo-detail-actions button:focus-visible{outline:2px solid #8fd8ff;outline-offset:3px}
+  @media(max-width:520px){#cargoShelfProductDetail{bottom:42px;padding:13px 14px;border-radius:16px}.cargo-detail-name{font-size:18px}.cargo-detail-feature{font-size:11px}.cargo-detail-actions button{min-height:52px;padding:9px 10px}.cargo-detail-actions button .cargo-action-main{font-size:31px}.cargo-detail-actions button .cargo-action-sub{font-size:10px}}
+
+</style>
+
+<script id="islandJsModelEngine">
+/* Only execute administrator-supplied, trusted JS model sources. No network code is added. */
+window.islandJsModelFactories = function(source){
+  const out=new Set();
+  for(const m of String(source||'').matchAll(/(?:function\s+|(?:const|let|var)\s+)(create[A-Za-z_$][\w$]*)\s*(?:=|\()/g))out.add(m[1]);
+  for(const m of String(source||'').matchAll(/(?:global|window)\.(create[A-Za-z_$][\w$]*)\s*=/g))out.add(m[1]);
+  return [...out];
+};
+window.islandCreateJsModel = function(item, THREE){
+  if(!item || !item.modelSource || !item.modelFactory)throw Error('商品缺少 JS 模型資料，請在後台重新匯入並匯出 HTML');
+  const name=item.modelFactory, source=String(item.modelSource);
+  if(!/^create[A-Za-z_$][\w$]*$/.test(name) || source.length>800000)throw Error('模型函式或檔案長度不符合限制');
+  // Only administrator-supplied JS is supported. The selected factory may be declared
+  // after comments, helpers or an IIFE; do NOT test only the very start of the file.
+  const factory=new Function('THREE','window','globalThis',source+'\n;return (typeof '+name+' === "function" ? '+name+' : (typeof window["'+name+'"] === "function" ? window["'+name+'"] : null));')(THREE,window,window);
+  if(typeof factory!=='function')throw Error('找不到模型建立函式 '+name);
+  // Read the FIRST parameter of the selected factory, rather than guessing from the
+  // beginning of the uploaded file (which usually starts with comments).
+  const escaped=name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const patterns=[
+    new RegExp('function\\s+'+escaped+'\\s*\\(\\s*([\\w$]+)'),
+    new RegExp('(?:const|let|var)\\s+'+escaped+'\\s*=\\s*(?:async\\s*)?(?:function\\s*)?\\(\\s*([\\w$]+)'),
+    new RegExp('(?:window|global|globalThis)\\.'+escaped+'\\s*=\\s*(?:function\\s*\\(|\\()\\s*([\\w$]+)')
+  ];
+  let first=null;
+  for(const pattern of patterns){const found=source.match(pattern);if(found){first=found[1];break;}}
+  // Function.prototype.toString() is a fallback for wrapped/global exports.
+  if(!first){const m=String(factory).match(/^(?:async\s*)?(?:function\s*[\w$]*\s*)?\(\s*([\w$]+)/);if(m)first=m[1];}
+  const isThree=/^(THREE|three|T)$/i.test(first||'');
+  let result;
+  try{result=isThree?factory(THREE,{night:false,shadows:false}):factory(undefined,{night:false,shadows:false});}
+  catch(error){throw Error('模型函式 '+name+' 執行失敗：'+error.message+'（請確認 JS 模型的參數及相依程式）');}
+  const model=result&&result.group&&result.group.isObject3D?result.group:result;
+  if(!model || !model.isObject3D)throw Error('模型函式 '+name+' 沒有回傳 THREE.Group / Object3D');
+  return model;
+};
+/* Respect InstancedMesh matrices (not expanded by Box3.setFromObject in r128).
+   Each imported factory may also provide userData.shopItem.bounds. */
+window.islandJsModelBounds=function(model,THREE){
+  model.updateMatrixWorld(true);
+  const bounds=new THREE.Box3().makeEmpty(),temp=new THREE.Matrix4(),world=new THREE.Matrix4();
+  model.traverse(o=>{
+    if(!o.isMesh||!o.geometry)return;
+    if(!o.geometry.boundingBox)o.geometry.computeBoundingBox();
+    const local=o.geometry.boundingBox;
+    if(!local||local.isEmpty())return;
+    if(o.isInstancedMesh){
+      for(let i=0;i<o.count;i++){
+        o.getMatrixAt(i,temp);world.multiplyMatrices(o.matrixWorld,temp);
+        bounds.union(local.clone().applyMatrix4(world));
+      }
+    }else bounds.union(local.clone().applyMatrix4(o.matrixWorld));
+  });
+  return bounds;
+};
+window.islandApplyJsHeight=function(model,height,THREE){
+  const target=Number(height);if(!(target>0))return;
+  const box=window.islandJsModelBounds(model,THREE),size=box.getSize(new THREE.Vector3());
+  if(size.y>0 && Number.isFinite(size.y)){
+    model.scale.multiplyScalar(target/size.y);
+    model.updateMatrixWorld(true);
+  }
+};
+</script>
+<script id="cargoShopTrue3DCode">
+(function(){
+  'use strict';
+  if(!window.THREE)return;
+  const T=THREE;
+  const manifest=window.islandShopGetProducts();
+  const catalogue={landmark:[],decor:[],person:[]};
+  for(const p of manifest){
+    if(p.status!=='published'||!catalogue[p.category])continue;
+    catalogue[p.category].push({id:p.id,category:p.category,name:p.name,kind:p.kind,color:parseInt(String(p.color).replace('#',''),16),price:Number(p.price),description:p.description||'',height:Number(p.height)||0,groundOffset:Number(p.groundOffset)||0,effect:p.effect||'none',effectAmount:Number(p.effectAmount)||0,modelSource:p.modelSource||'',modelFactory:p.modelFactory||'',walkMode:p.walkMode||'walk',walkRadius:Number(p.walkRadius)||4,walkSpeed:p.walkSpeed||'normal'});
+  }
+  let overlay,viewport,renderer,scene,camera,rack,raf=0,active='landmark',yaw=0.12,dragging=false,down=null;
+  let itemTargets=[],categoryTargets=[],owned=[];
+  function track(x){owned.push(x);return x;}
+  function woodTex(){const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');ctx.fillStyle='#876044';ctx.fillRect(0,0,1024,256);
+    let seed=18964;const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+    for(let i=0;i<340;i++){const yy=rand()*256;ctx.strokeStyle=i%3?'rgba(31,17,8,.18)':'rgba(234,192,137,.17)';ctx.lineWidth=.3+rand()*3.5;ctx.beginPath();ctx.moveTo(0,yy);for(let x=0;x<=1024;x+=20)ctx.lineTo(x,yy+Math.sin(x*.016+i)*1.8);ctx.stroke();}
+    for(let i=0;i<55;i++){ctx.strokeStyle='rgba(20,10,4,.36)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(rand()*1024,rand()*256,5+rand()*28,2+rand()*7,0,0,Math.PI*2);ctx.stroke();}
+    for(let i=0;i<140;i++){ctx.strokeStyle='rgba(25,14,5,.18)';ctx.lineWidth=.7;const x=rand()*1024,y=rand()*256;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+rand()*120,y+rand()*6);ctx.stroke();}
+    const tx=track(new T.CanvasTexture(c));tx.wrapS=tx.wrapT=T.RepeatWrapping;tx.encoding=T.sRGBEncoding;return tx;
+  }
+  function mat(color,map){return track(new T.MeshStandardMaterial({color,roughness:.96,map:map||null}));}
+  function box(parent,w,h,d,x,y,z,m){const o=new T.Mesh(track(new T.BoxGeometry(w,h,d)),m);o.position.set(x,y,z);parent.add(o);return o;}
+  // S.V02-12 商城木牌文字：純白厚實黑體，清晰透明貼圖、不加底色、金邊與發光。
+  function textTex(content,sz=55){
+    const c=document.createElement('canvas');c.width=2048;c.height=512;
+    const q=c.getContext('2d');q.clearRect(0,0,c.width,c.height);
+    q.textAlign='center';q.textBaseline='middle';
+    q.font=`900 ${Math.round(sz*3.0)}px "Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif`;
+    q.fillStyle='#ffffff';
+    q.shadowColor='rgba(10,6,3,.32)';q.shadowBlur=3;q.shadowOffsetX=0;q.shadowOffsetY=2;
+    q.fillText(content,1024,256,1920);
+    const t=track(new T.CanvasTexture(c));t.encoding=T.sRGBEncoding;t.anisotropy=8;
+    t.minFilter=T.LinearMipmapLinearFilter;t.magFilter=T.LinearFilter;
+    return t;
+  }
+  function label(parent,text,x,y,z,w=2.6,h=.60,size=65){
+    const material=track(new T.MeshBasicMaterial({map:textTex(text,size),transparent:true,depthWrite:false,side:T.DoubleSide}));
+    const mesh=new T.Mesh(track(new T.PlaneGeometry(w,h)),material);mesh.position.set(x,y,z);parent.add(mesh);return mesh;
+  }
+  function makeShape(parent,kind,color){const material=mat(color);let g;
+    if(kind==='figure'){
+      const skin=mat(0xf2ddd0);
+      const part=(geo,material,x,y,z,rz=0)=>{const m=new T.Mesh(track(geo),material);m.position.set(x,y,z);m.rotation.z=rz;parent.add(m);return m;};
+      part(new T.SphereGeometry(.31,14,10),skin,0,1.7,0);
+      part(new T.CapsuleGeometry(.36,.6,4,10),material,0,1.03,0);
+      for(const k of [-1,1]){part(new T.CapsuleGeometry(.12,.41,3,8),material,k*.21,.36,0,k*.08);part(new T.CapsuleGeometry(.12,.43,3,8),material,k*.48,1.15,0,k*.5);}
+      return parent;
+    }
+    if(kind==='sphere')g=new T.SphereGeometry(.68,22,16);
+    else if(kind==='cube')g=new T.BoxGeometry(1.28,1.28,1.28);
+    else if(kind==='pyramid')g=new T.ConeGeometry(.92,1.55,3);
+    else g=new T.ConeGeometry(.73,1.55,20);
+    const mesh=new T.Mesh(track(g),material);mesh.position.y=.82;parent.add(mesh);return mesh;
+  }
+  function build(){
+    if(rack){scene.remove(rack);rack.traverse(x=>{if(x.geometry)x.geometry.dispose();if(x.material){const ms=Array.isArray(x.material)?x.material:[x.material];ms.forEach(m=>m.dispose());}});}
+    itemTargets=[];categoryTargets=[];rack=new T.Group();scene.add(rack);
+    const tx=woodTex(),dark=mat(0x8a5d3c,tx),edge=mat(0x50301d),side=mat(0x684125,tx),iron=mat(0x4f4c48);
+    // 方案A：大尺寸深色舊木貨架，模型本體就是商城，不加面板。
+    for(const x of [-5.7,5.7])for(const z of [-1.05,1.05])box(rack,.4,8.9,.40,x,4.45,z,side);
+    for(const y of [1.04,2.90,4.76,6.62,8.35]){
+      box(rack,12.2,.31,2.85,0,y,0,dark);
+      box(rack,12.22,.075,2.9,0,y-.20,0,edge);
+      box(rack,11.9,.10,.20,0,y+.19,1.35,side);
+      for(const x of [-5.7,5.7]){
+        const bolt=new T.Mesh(track(new T.CylinderGeometry(.075,.075,.055,10)),iron);bolt.position.set(x,y+.22,1.38);bolt.rotation.x=Math.PI/2;rack.add(bolt);
+      }
+    }
+    for(let x of [-5.7,5.7])box(rack,.20,8.5,.16,x,4.45,-1.12,edge);
+    const cats=[['landmark','地標'],['decor','裝飾'],['person','人物']];
+    cats.forEach(([key,t],i)=>{const x=(i-1)*3.65;const sign=box(rack,2.92,.79,.19,x,9.22,.17,key===active?dark:side);label(rack,t,x,9.22,.285,2.65,.57,75);sign.userData.category=key;categoryTargets.push(sign);});
+    catalogue[active].slice(0,6).forEach((p,i)=>{
+      const {id,name,kind,color,price}=p;
+      const col=i%3,row=Math.floor(i/3),x=(col-1)*3.65,y=row===0?6.84:4.98;
+      const g=new T.Group();g.position.set(x,y,.1);rack.add(g);
+      if(p.modelSource&&p.modelFactory){
+        try{const displayModel=window.islandCreateJsModel(p,T);window.islandApplyJsHeight(displayModel,p.height,T);
+          // 只縮放「貨架展示副本」：每個方向獨立限制，再取最小倍率等比例縮放。
+          // 這不會更改商品的固定總高度，也不影響玩家購買後放在島上的模型。
+          displayModel.updateMatrixWorld(true);
+          const shelfBounds=window.islandJsModelBounds(displayModel,T);
+          const shelfSize=shelfBounds.getSize(new T.Vector3());
+          if(shelfBounds.isEmpty()||![shelfSize.x,shelfSize.y,shelfSize.z].every(Number.isFinite))throw new Error('展示模型尺寸無效');
+          const shelfLimits={width:1.72,height:1.08,depth:0.92};
+          const fitScale=Math.min(
+            shelfSize.x>0?shelfLimits.width/shelfSize.x:1,
+            shelfSize.y>0?shelfLimits.height/shelfSize.y:1,
+            shelfSize.z>0?shelfLimits.depth/shelfSize.z:1,
+            1
+          );
+          displayModel.scale.multiplyScalar(fitScale);
+          displayModel.updateMatrixWorld(true);
+          const fittedBounds=window.islandJsModelBounds(displayModel,T);
+          const fittedCenter=fittedBounds.getCenter(new T.Vector3());
+          displayModel.position.x-=fittedCenter.x;
+          displayModel.position.z-=fittedCenter.z;
+          displayModel.position.y+=.24-fittedBounds.min.y;
+          g.add(displayModel);
+        }catch(err){console.error('貨架 JS 模型無法顯示：',p.name,err);g.userData.modelError=err.message;}
+      }else makeShape(g,kind,color);
+      const plinth=box(g,2.18,.12,1.57,0,.14,0,edge);
+      label(g,name,0,-.22,1.0,2.5,.45,48); // 商品價格僅在點選後的介紹小卡顯示
+      g.userData.product=p;itemTargets.push(g);
+    });
+    rack.rotation.y=yaw;
+  }
+  function render(){if(!overlay||overlay.hidden)return;raf=requestAnimationFrame(render);renderer.render(scene,camera);}
+  function updateBalance(){const el=document.getElementById('cargoShelfBalance');if(el)el.textContent='島嶼幣 '+(window.cargoShopCoins?window.cargoShopCoins():0).toLocaleString('zh-TW');}
+  function hint(msg){document.getElementById('cargoShelfHint').textContent=msg;}
+  function close(){if(!overlay)return;dismissProduct();overlay.hidden=true;cancelAnimationFrame(raf);raf=0;}
+  let selectedProduct=null;
+  function selectProduct(item){
+    selectedProduct=item;
+    const detail=document.getElementById('cargoShelfProductDetail');
+    if(!detail)return;
+    const descriptions={figure:'可以擺放在島上的彩色造型人偶。',sphere:'能為島嶼增加色彩的小型圓球裝飾。',cube:'可以裝飾島嶼的立方體。',pyramid:'具有三角輪廓的特色小擺設。',cone:'適合佈置的圓錐形飾品。'};
+    detail.querySelector('.cargo-detail-name').textContent=item.name;
+    detail.querySelector('.cargo-detail-feature').textContent=item.description||('特殊功能：'+(descriptions[item.kind]||'島嶼佈置展示物件。'));
+    detail.querySelector('.cargo-detail-price').innerHTML='價格 <strong class="cargo-amount">'+Number(item.price).toLocaleString('zh-TW')+'</strong> 島嶼幣';
+    detail.hidden=false;
+  }
+  function dismissProduct(){selectedProduct=null;const detail=document.getElementById('cargoShelfProductDetail');if(detail)detail.hidden=true;}
+  function buy(item){
+    dismissProduct();
+    if(!window.cargoShopBuy){hint('尚未接上島嶼幣系統');return;}
+    if(!window.cargoShopBuy(item.price)){hint('島嶼幣不足，還需要 '+(item.price-(window.cargoShopCoins?.()||0))+' 島嶼幣');return;}
+    updateBalance();close();
+    const ok=window.cargoShopStartPlacement?.(item);
+    if(!ok){ // 若當下無法開啟佈置，退款避免商品遺失。
+      window.cargoShopRefund?.(item.price);updateBalance();
+    }
+  }
+  function init(){if(overlay)return;
+    overlay=document.createElement('div');overlay.id='cargoShelfOverlay';overlay.hidden=true;
+    overlay.innerHTML='<div id="cargoShelfView"></div><div id="cargoShelfBalance"></div><div id="cargoShelfHint">按下Esc或點擊小船，退出購買模式。</div><section id="cargoShelfProductDetail" hidden><div class="cargo-detail-name"></div><div class="cargo-detail-feature"></div><div class="cargo-detail-price"></div><div class="cargo-detail-question">確定購買這項商品嗎？</div><div class="cargo-detail-actions"><button id="cargoDetailYes" type="button"><span class="cargo-action-main">是</span><span class="cargo-action-sub">購買並佈置</span></button><button id="cargoDetailNo" type="button"><span class="cargo-action-main">否</span><span class="cargo-action-sub">返回貨架</span></button></div></section>';
+    document.body.appendChild(overlay);viewport=overlay.querySelector('#cargoShelfView');
+    renderer=new T.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setClearColor(0x000000,0);
+    viewport.appendChild(renderer.domElement);scene=new T.Scene();camera=new T.PerspectiveCamera(40,1,.1,100);
+    camera.position.set(0,5.0,21.5);camera.lookAt(0,4.9,0);
+    scene.add(new T.HemisphereLight(0xffffff,0x6d5540,2.0));const d=new T.DirectionalLight(0xffefdb,2.2);d.position.set(-4,12,9);scene.add(d);const fill=new T.DirectionalLight(0xffffff,1.1);fill.position.set(8,7,-7);scene.add(fill);
+    const resize=()=>{const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();};window.addEventListener('resize',resize);resize();build();
+    overlay.querySelector('#cargoDetailNo').addEventListener('click',dismissProduct);
+    overlay.querySelector('#cargoDetailYes').addEventListener('click',()=>{if(selectedProduct)buy(selectedProduct);});
+    const ray=new T.Raycaster(),pointer=new T.Vector2();
+    let sx=0,sy=0,oldX=0;
+    viewport.addEventListener('pointerdown',e=>{dragging=true;down={x:e.clientX,y:e.clientY};sx=e.clientX;sy=e.clientY;oldX=e.clientX;viewport.setPointerCapture(e.pointerId);});
+    viewport.addEventListener('pointermove',e=>{if(!dragging)return;yaw+=(e.clientX-oldX)*.006;oldX=e.clientX;rack.rotation.y=yaw;});
+    viewport.addEventListener('pointerup',e=>{
+      dragging=false;if(!down || Math.hypot(e.clientX-down.x,e.clientY-down.y)>8)return;
+      if(window.cargoShelfHitShipAt && window.cargoShelfHitShipAt(e.clientX,e.clientY)){close();return;}
+      const rect=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);ray.setFromCamera(pointer,camera);
+      const hits=ray.intersectObjects([...categoryTargets,...itemTargets],true);
+      for(const h of hits){let obj=h.object;while(obj && !obj.userData.category && !obj.userData.close && !obj.userData.product)obj=obj.parent;
+        if(obj?.userData.close){close();return;}
+        if(obj?.userData.category){dismissProduct();active=obj.userData.category;build();hint('按下Esc或點擊小船，退出購買模式。');return;}
+        if(obj?.userData.product){selectProduct(obj.userData.product);return;}
+      }
+    });
+    window.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay&&!overlay.hidden){e.stopImmediatePropagation();close();}},true);
+  }
+  window.openCargoShopShelf=()=>{if(window.cargoShopLayoutIsEditing?.())return;init();if(!overlay.hidden){close();return;}dismissProduct();overlay.hidden=false;updateBalance();hint('按下Esc或點擊小船，退出購買模式。');render();};
+  window.closeCargoShopShelf=close;
+})();
+</script>
+
+
+<style id="cargoPlacementGuideStyle">
+#cargoPlacementGuide{position:fixed;left:50%;top:15%;transform:translateX(-50%);z-index:1350;display:flex;align-items:center;gap:12px;padding:13px 20px;border-radius:18px;background:rgba(10,37,58,.94);border:1px solid rgba(171,232,255,.64);box-shadow:0 12px 36px rgba(0,0,0,.35),0 0 20px rgba(85,205,255,.12);color:#f0fbff;font:600 16px/1.5 'Noto Sans TC',sans-serif;pointer-events:none;animation:cargoGuideAppear .35s ease-out both;min-width:min(420px,calc(100vw - 28px));max-width:calc(100vw - 24px)}
+#cargoPlacementGuide>span:nth-child(2){display:flex;flex-direction:column;gap:2px;flex:1}#cargoPlacementGuide small{font-size:13px;color:#aeecff;font-weight:500}#cargoPlacementGuide kbd{font-size:11px;color:#c8dce9;white-space:nowrap}#cargoPlacementGuide .cargo-guide-icon{display:grid;place-items:center;background:rgba(54,197,255,.15);border:1px solid rgba(125,225,255,.45);border-radius:100%;width:38px;height:38px;font-size:25px;animation:cargoGuideArrow 1.2s ease-in-out infinite}
+#cargoPlacementGhost{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1340;pointer-events:none;display:flex;align-items:center;justify-content:center;animation:cargoGhostPulse 1.8s ease-in-out infinite}
+#cargoPlacementGhost .cargo-drop-indicator{display:block;width:58px;height:30px;animation:cargoLandingSeek 2.4s ease-in-out infinite;transform-origin:center center;border-radius:50%;background:rgba(255,255,255,.18);border:1.4px solid rgba(255,255,255,.96);box-shadow:0 0 10px rgba(255,255,255,.32),0 0 20px rgba(255,255,255,.18),inset 0 0 18px rgba(255,255,255,.08);backdrop-filter:blur(.2px);-webkit-backdrop-filter:blur(.2px)}
+@keyframes cargoLandingSeek{0%,100%{transform:scale(0.94)}50%{transform:scale(1.07)}}@media(prefers-reduced-motion:reduce){#cargoPlacementGhost .cargo-drop-indicator{animation:none}}@keyframes cargoGuideAppear{from{opacity:0;transform:translate(-50%,-12px)}to{opacity:1;transform:translate(-50%,0)}}@keyframes cargoGuideArrow{50%{transform:translate(2px,4px)}}@keyframes cargoGhostPulse{50%{opacity:.76;filter:drop-shadow(0 0 8px rgba(255,255,255,.28))}}@media(max-width:620px){#cargoPlacementGuide{top:19%;padding:11px 13px;font-size:13px;gap:8px}#cargoPlacementGuide small{font-size:11px}#cargoPlacementGuide kbd{font-size:9px}#cargoPlacementGhost .cargo-drop-indicator{width:46px;height:24px}}
+</style>
+
+<style id="islandAdminStyle">
+ #islandAdminEntry{position:absolute;right:13px;bottom:11px;z-index:3;width:25px;height:25px;display:grid;place-items:center;border:0;border-radius:50%;background:rgba(148,163,184,.09);color:rgba(200,211,221,.45);font-size:15px;cursor:pointer;opacity:.65}
+ #islandAdminEntry:hover{opacity:1;color:#cbd5e1;background:rgba(148,163,184,.20)}
+ #islandAdminOverlay{position:fixed;inset:0;z-index:3000;background:rgba(2,9,24,.91);backdrop-filter:blur(12px);color:#e5edf8;font:14px/1.5 'Noto Sans TC',sans-serif;overflow:auto;padding:26px 14px}
+ #islandAdminOverlay[hidden]{display:none!important}#islandAdminOverlay *{box-sizing:border-box}
+ #islandAdminOverlay .ia-panel{max-width:1000px;margin:3vh auto;padding:22px;background:#111e33;border:1px solid #38536a;border-radius:20px;box-shadow:0 24px 70px #0007}
+ #islandAdminOverlay h2{font-size:24px;font-weight:900;margin:0 0 8px;color:#f5fbff}
+ #islandAdminOverlay h3{font-size:17px;font-weight:800;margin:0 0 12px}
+ #islandAdminOverlay p{color:#a6b9ce;font-size:12px;margin-bottom:12px}
+ #islandAdminOverlay label{display:block;color:#b5cde1;font-size:12px;font-weight:700;margin:0 0 5px}
+ #islandAdminOverlay input,#islandAdminOverlay select,#islandAdminOverlay textarea{color:#eaf4ff;background:#09182a;border:1px solid #41576d;border-radius:10px;padding:10px 11px;width:100%;font:inherit;user-select:text;-webkit-user-select:text}
+ #islandAdminOverlay textarea{min-height:78px;resize:vertical}
+ #islandAdminOverlay .ia-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ #islandAdminOverlay .ia-tools{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
+ #islandAdminOverlay button.ia-btn{border:1px solid #51748c;border-radius:10px;padding:10px 15px;color:#fff;background:#23415c;cursor:pointer;font-weight:800}
+ #islandAdminOverlay button.ia-main{background:linear-gradient(100deg,#08ae91,#13b9b1);color:#061c25;border:none}
+ #islandAdminOverlay button.ia-danger{background:#552735;border-color:#8a4755}
+ #islandAdminOverlay .ia-list{max-height:310px;overflow:auto;border:1px solid #3b536a;border-radius:12px}
+ #islandAdminOverlay .ia-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #2b4159;cursor:pointer}
+ #islandAdminOverlay .ia-row:hover,#islandAdminOverlay .ia-row.active{background:#203953}
+ #islandAdminOverlay .ia-row small{color:#a6b9ce}
+ #islandAdminOverlay .ia-note{padding:11px;background:#0b2639;border:1px solid #31546c;border-radius:10px;color:#b9d4e4;font-size:12px;margin-top:10px}
+ #islandAdminOverlay #iaModelPreview{height:224px;background:radial-gradient(ellipse at 55% 42%,#2c4760,#0a1726 72%);border:1px solid #36536b;border-radius:13px;overflow:hidden;position:relative}
+ #islandAdminOverlay #iaModelPreview canvas{display:block;width:100%;height:100%}
+ #islandAdminOverlay #iaPersonMovement[hidden]{display:none!important}
+ #islandAdminOverlay .ia-model-note{font-size:11px;color:#aec4d6;margin:7px 0}
+ #islandAdminOverlay #iaModelFile{padding:9px;background:#0c2439}
+ #islandAdminOverlay #iaLoginView{max-width:380px}
+ @media(max-width:650px){#islandAdminOverlay .ia-grid{grid-template-columns:1fr}#islandAdminOverlay .ia-panel{padding:15px;margin:10px auto}}
+
+/* S.V02-12-rainbow 後台寬版工作區：商品清單／資料／即時預覽，各區獨立，不影響遊戲本體 */
+@media (min-width:1080px){
+ #islandAdminOverlay{padding:12px 16px;overflow:hidden}
+ #islandAdminOverlay #iaEditorView.ia-panel{max-width:1800px;width:100%;height:calc(100dvh - 24px);margin:0 auto;padding:15px 19px;display:flex;flex-direction:column;overflow:hidden}
+ #islandAdminOverlay #iaEditorView[hidden]{display:none!important}
+ #iaEditorView>.ia-tools{margin:5px 0 9px}
+ #islandAdminOverlay #iaEditorView>.ia-grid{display:grid;grid-template-columns:minmax(170px,.55fr) minmax(460px,1.7fr) minmax(310px,1.05fr)!important;gap:14px;min-height:0;flex:1;align-items:stretch}
+ #iaEditorView>.ia-grid>section:first-child{min-width:0;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+ #iaEditorView .ia-list{flex:1;max-height:none;overflow-y:auto}
+ #iaEditorView>.ia-grid>section:nth-child(2){display:contents}
+ #iaEditorView>.ia-grid>section:nth-child(2)>h3{display:none}
+ #iaEditorView>.ia-grid>section:nth-child(2)>.ia-grid{grid-column:2;grid-row:1;min-height:0;align-content:start;overflow-y:auto;padding:4px 7px 10px 1px;scrollbar-width:thin}
+
+ #islandAdminOverlay #iaModelPreview{height:min(52vh,490px)}
+ #islandAdminOverlay .ia-preview-side{grid-column:3;grid-row:1;min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px;background:#102338;border:1px solid #36536b;border-radius:14px;padding:13px}
+ #islandAdminOverlay .ia-preview-side .ia-model-note{margin:0}
+ #iaEditorView>.ia-note:last-child{margin-top:7px;padding:7px 10px;font-size:10px}
+ #islandAdminOverlay #iaEditorView textarea{min-height:55px}
+ #islandAdminOverlay #iaEditorView input,#islandAdminOverlay #iaEditorView select,#islandAdminOverlay #iaEditorView textarea{padding:8px 10px}
+ #islandAdminOverlay #iaEditorView h2{font-size:21px}
+ #islandAdminOverlay #iaEditorView h3{margin:0 0 8px}
+}
+@media(min-width:650px) and (max-width:1079px){
+ #islandAdminOverlay .ia-panel{max-width:calc(100vw - 24px)}
+ #iaEditorView>.ia-grid{grid-template-columns:minmax(185px,.5fr) minmax(0,1.5fr)!important}
+ #islandAdminOverlay .ia-preview-side{grid-column:2;min-width:0}
+}
+#islandAdminOverlay .ia-preview-caption{font-size:12px;color:#9bb9cb;line-height:1.55}
+#islandAdminOverlay .ia-preview-caption strong{color:#b9f2ef}
+</style>
+<div id="islandAdminOverlay" hidden>
+ <section class="ia-panel" id="iaLoginView">
+  <h2>管理員登入</h2><p>商城商品管理（本機編輯、匯出後自行上傳 GitHub）</p>
+  <label for="iaUser">帳號</label><input id="iaUser" autocomplete="username" placeholder="管理員帳號">
+  <label for="iaPassword" style="margin-top:12px">密碼</label><input type="password" id="iaPassword" autocomplete="current-password" placeholder="管理員密碼">
+  <div class="ia-tools"><button type="button" class="ia-btn ia-main" id="iaLogin">登入後台</button><button type="button" class="ia-btn" id="iaCloseLogin">返回開始畫面</button></div>
+  <p id="iaLoginError" role="alert"></p>
+ </section>
+ <section class="ia-panel" id="iaEditorView" hidden>
+   <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div><h2>島嶼商城後台</h2><p>編輯商品後，按「儲存並匯出完整遊戲」發布新檔案。</p></div><button class="ia-btn" type="button" id="iaLogout">返回遊戲開始畫面</button></div>
+   <div class="ia-tools"><button class="ia-btn ia-main" type="button" id="iaNew">＋ 新增商品</button><button class="ia-btn" type="button" id="iaSave">儲存目前商品</button><button class="ia-btn" type="button" id="iaExport">儲存並匯出完整遊戲 HTML</button><button type="button" class="ia-btn ia-danger" id="iaDelete" title="刪除目前選取的商品">刪除目前商品</button></div>
+   <div class="ia-grid" style="grid-template-columns:minmax(220px,1fr) minmax(0,1.6fr)">
+    <section><h3>商品清單</h3><div class="ia-list" id="iaList"></div><p style="margin-top:8px">每一個分類目前最多顯示 6 件上架商品，避免改動原有 3D 貨架結構。</p></section>
+    <section><h3 id="iaFormHeading">商品資料</h3><div class="ia-grid">
+       <div><label>商品編號（系統產生）</label><input id="iaId" readonly></div>
+       <div><label>商品狀態（上架／下架）</label><select id="iaStatus"><option value="published">上架（貨架顯示）</option><option value="hidden">下架（貨架隱藏）</option></select></div>
+       <div><label>商品名稱（最多 10 字）</label><input id="iaName" maxlength="10"><small id="iaNameCount">0 / 10</small></div>
+       <div><label>分類</label><select id="iaCategory"><option value="landmark">地標</option><option value="decor">裝飾</option><option value="person">人物</option></select></div>
+       <div style="grid-column:1/-1"><label>商品介紹（最多 30 字）</label><textarea id="iaDescription" maxlength="30"></textarea><small id="iaDescriptionCount">0 / 30</small></div>
+       <div><label>售價（島嶼幣）</label><input id="iaPrice" type="number" min="0" max="1000000" step="1"></div>
+       <div style="grid-column:1/-1"><label>JS 模型檔案（.js，請使用自己製作或信任的程式）</label><input id="iaModelFile" type="file" accept=".js,text/javascript,application/javascript"><p class="ia-model-note" id="iaModelStatus">尚未上傳新模型；原有測試商品保留原模型。</p></div>
+       <div style="grid-column:1/-1"><label>模型建立函式</label><select id="iaModelFactory"><option value="">請先匯入 JS 檔</option></select><p class="ia-model-note">支援回傳 THREE.Group／THREE.Object3D 的函式；常見格式：createName(pos, options)。若為其他介面，請先轉為相容格式。</p></div>
+       <div style="grid-column:1/-1"><label>3D 模型預覽（可拖曳旋轉）</label><div id="iaModelPreview"></div><p class="ia-model-note" id="iaPreviewError">未選擇模型。編輯既有測試商品時會保留原本造型。</p></div>
+       <div><label>模型固定總高度（3D 單位，0 為原尺寸）</label><input id="iaHeight" type="number" min="0" max="50" step="0.1"></div><div><label>離地高度偏移（3D 單位，0 為貼地）</label><input id="iaGroundOffset" type="number" min="-10" max="20" step="0.1" value="0"><small>正數提高、負數下降；可在下方預覽中查看地面位置。</small></div>
+       <div id="iaPersonMovement" style="grid-column:1/-1" hidden><label>人物活動設定（僅人物分類顯示）</label>
+         <div id="iaAnimationDetect" class="ia-model-note" style="margin:2px 0 5px;color:#93e5ce">模型動畫偵測：等待匯入人物模型</div>
+         <div class="ia-grid" style="padding:12px;border:1px solid #36536b;border-radius:12px;background:#122a3f">
+           <div><label>活動方式</label><select id="iaWalkMode"><option value="walk">環繞行走</option><option value="static">固定站立</option></select></div>
+           <div><label>行走速度</label><select id="iaWalkSpeed"><option value="slow">慢</option><option value="normal">正常</option><option value="fast">快</option></select></div>
+           <div style="grid-column:1/-1"><label>活動範圍半徑（3D 單位：1–10）</label><input id="iaWalkRadius" type="number" min="1" max="10" step="0.5" value="4"></div>
+           <p style="grid-column:1/-1;font-size:12px;color:#b6cddd">購買後先放置人物，按「完成佈置」才開始活動。模型若有 setAction 與 update(dt)，會自動啟用原生走路／待機動畫；沒有內建動畫則只會移動。</p>
+         </div>
+       </div>
+       <div><label>特殊功能（已實作）</label><select id="iaEffect"><option value="none">沒有特殊功能</option><option value="add_coins">完成佈置後增加島嶼幣</option></select></div>
+       <div><label>增加島嶼幣數量（最多 100,000）</label><input id="iaEffectAmount" type="number" min="0" max="100000" step="1"></div>
+      </div>
+      
+      <div class="ia-note" id="iaMessage">商城外觀與原有遊戲機制保留。上架商品僅在匯出檔案重新開啟後生效。</div>
+    </section>
+   </div>
+   <div class="ia-note">登入帳密只是本機操作門檻，不是安全的伺服器驗證。請自行保管 GitHub 寫入權限。新版支援 JS 程式模型（只使用自己製作或信任來源的檔案）。GLB 不在本版範圍。模型程式會嵌入匯出的 HTML，請留意檔案大小。</div>
+ </section>
+</div>
+<script id="islandAdminCode">
+(function(){'use strict';
+ const manifest=document.getElementById('islandShopManifest');
+ window.islandShopGetProducts=()=>{try{const items=JSON.parse(manifest.textContent);return Array.isArray(items)?items:[];}catch(e){return [];}};
+ const root=document.getElementById('islandAdminOverlay');
+ const login=document.getElementById('iaLoginView'),editor=document.getElementById('iaEditorView');
+ const id=id=>document.getElementById(id);
+ const entry=document.createElement('button');entry.id='islandAdminEntry';entry.type='button';entry.title='後台管理';entry.setAttribute('aria-label','後台管理');entry.textContent='⚙';
+ const start=id('startOverlay');const card=start?.querySelector('.rounded-3xl')||start?.querySelector('.rounded-2xl')||start?.firstElementChild;
+ if(card){card.style.position='relative';card.appendChild(entry);}
+ entry.addEventListener('click',()=>{root.hidden=false;login.hidden=false;editor.hidden=true;id('iaUser').focus();});
+ id('iaCloseLogin').onclick=()=>root.hidden=true;
+ id('iaLogin').onclick=()=>{if(id('iaUser').value==='admin'&&id('iaPassword').value==='99999'){login.hidden=true;editor.hidden=false;renderList();selectItem(items[0]?.id);}
+ else id('iaLoginError').textContent='帳號或密碼不正確';};
+ id('iaPassword').addEventListener('keydown',e=>{if(e.key==='Enter')id('iaLogin').click();});
+ id('iaLogout').onclick=()=>{root.hidden=true;id('iaPassword').value='';};
+ let items=window.islandShopGetProducts().map(x=>({...x,status:x.status==='published'?'published':'hidden'})),activeId=null;
+ const fields=['Id','Name','Category','Description','Price','Height','Status','Effect','EffectAmount'];
+ const selected=()=>items.find(x=>x.id===activeId);
+ const note=m=>id('iaMessage').textContent=m;
+ function renderList(){const list=id('iaList');list.innerHTML='';items.forEach(p=>{const r=document.createElement('div');r.className='ia-row'+(p.id===activeId?' active':'');const t=document.createElement('div');t.textContent=p.name||'未命名商品';const small=document.createElement('small');small.textContent=' '+({landmark:'地標',decor:'裝飾',person:'人物'}[p.category]||'')+' · '+({published:'上架',hidden:'下架'}[p.status]||'下架');t.appendChild(small);r.appendChild(t);r.onclick=()=>{if(!saveForm())return;selectItem(p.id);};list.appendChild(r);});}
+ function updatePersonFields(){const person=id('iaCategory').value==='person';id('iaPersonMovement').hidden=!person;id('iaWalkRadius').disabled=id('iaWalkSpeed').disabled=!person||id('iaWalkMode').value==='static';}
+ id('iaCategory').addEventListener('change',updatePersonFields);id('iaWalkMode').addEventListener('change',updatePersonFields);
+ function selectItem(key){activeId=key||null;const p=selected();fields.forEach(f=>{const el=id('ia'+f);if(el)el.value=p?.[f.toLowerCase().replace('effectamount','effectAmount')]??'';});
+ if(p){id('iaId').value=p.id;id('iaName').value=p.name;id('iaCategory').value=p.category;id('iaDescription').value=p.description||'';id('iaPrice').value=p.price;id('iaHeight').value=p.height||0;id('iaGroundOffset').value=p.groundOffset||0;id('iaStatus').value=p.status==='published'?'published':'hidden';id('iaEffect').value=p.effect||'none';id('iaEffectAmount').value=p.effectAmount||0;id('iaWalkMode').value=p.walkMode||'walk';id('iaWalkSpeed').value=p.walkSpeed||'normal';id('iaWalkRadius').value=p.walkRadius||4;}updatePersonFields();
+ counts();renderList();}
+ function counts(){id('iaNameCount').textContent=Array.from(id('iaName').value).length+' / 10';id('iaDescriptionCount').textContent=Array.from(id('iaDescription').value).length+' / 30';}
+ id('iaName').addEventListener('input',counts);id('iaDescription').addEventListener('input',counts);
+ function saveForm(){const p=selected();if(!p)return true;
+ const name=id('iaName').value.trim(),description=id('iaDescription').value.trim();
+ if(!name||Array.from(name).length>10||Array.from(description).length>30){note('請填寫商品名稱，並確認商品名稱最多 10 字、介紹最多 30 字。');return false;}
+ const price=Number(id('iaPrice').value),height=Number(id('iaHeight').value),groundOffset=Number(id('iaGroundOffset').value),amount=Number(id('iaEffectAmount').value);
+ if(!Number.isInteger(price)||price<0||price>1000000||!Number.isFinite(height)||height<0||height>50||!Number.isFinite(groundOffset)||groundOffset< -10||groundOffset>20||!Number.isInteger(amount)||amount<0||amount>100000){note('請確認價格、固定高度、特殊功能數量均符合限制。');return false;}
+ const cat=id('iaCategory').value,status=id('iaStatus').value;const walkRadius=Number(id('iaWalkRadius').value);if(cat==='person'&&(!Number.isFinite(walkRadius)||walkRadius<1||walkRadius>10)){note('人物活動半徑請設定 1 到 10。');return false;}
+ if(status==='published'&&items.filter(x=>x!==p&&x.status==='published'&&x.category===cat).length>=6){note('這個分類已上架 6 件商品。請先下架其他商品再上架。');return false;}
+ Object.assign(p,{name,description,price,height,groundOffset,effectAmount:amount,category:cat,status,effect:id('iaEffect').value,walkMode:id('iaWalkMode').value,walkRadius:walkRadius||4,walkSpeed:id('iaWalkSpeed').value});note('目前商品已更新在後台。請按「儲存並匯出完整遊戲 HTML」才會產生發布檔案。');renderList();return true;}
+ id('iaSave').onclick=saveForm;
+ id('iaNew').onclick=()=>{if(!saveForm())return;const p={id:'custom-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6),name:'新商品',kind:'sphere',color:'#7dbfe3',modelSource:'',modelFactory:'',price:100,category:'decor',description:'',height:0,groundOffset:0,status:'hidden',effect:'none',effectAmount:0,walkMode:'walk',walkRadius:4,walkSpeed:'normal'};items.push(p);selectItem(p.id);note('已新增下架商品，編輯完成後可切換為「上架」。');};
+ id('iaDelete').onclick=()=>{if(!selected())return;if(!confirm('確定刪除這件商品嗎？'))return;items=items.filter(p=>p.id!==activeId);selectItem(items[0]?.id);note('已從後台清單刪除，匯出後才會更新遊戲。');};
+
+ // JS file import, function selection and isolated in-page preview. Administrator files are executable code.
+ let previewRenderer=null,previewScene=null,previewCamera=null,previewMesh=null,previewFrame=0,previewDrag=null;
+ const previewBox=id('iaModelPreview');
+ // 將原預覽區移到右欄，DOM 元素不重建，原預覽互動與綁定照舊。
+ const editorColumns=editor.querySelector(':scope > .ia-grid');
+ const previewRegion=previewBox.parentElement;
+ const previewSide=document.createElement('aside');previewSide.className='ia-preview-side';
+ const previewHeading=document.createElement('h3');previewHeading.textContent='即時 3D 預覽';previewSide.appendChild(previewHeading);
+ previewSide.appendChild(previewRegion);
+ const scaleNote=document.createElement('div');scaleNote.className='ia-preview-caption';
+ scaleNote.innerHTML='<strong>比例尺：島上櫻花樹</strong><span>（約 3.4 個 3D 單位，粉紅色）</span><p>櫻花樹僅供預覽比較，並非商品的一部分，不會上架或放到島上。</p>';
+ previewSide.appendChild(scaleNote);editorColumns.appendChild(previewSide);
+ function previewInit(){
+   if(previewRenderer || !window.THREE)return;
+   const T=THREE;previewRenderer=new T.WebGLRenderer({antialias:true,alpha:true});previewRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+   previewRenderer.setClearColor(0,0);previewBox.appendChild(previewRenderer.domElement);
+   previewScene=new T.Scene();previewScene.add(new T.HemisphereLight(0xffffff,0x748297,2.0));
+   const lamp=new T.DirectionalLight(0xffffff,2.4);lamp.position.set(4,9,8);previewScene.add(lamp);
+   previewCamera=new T.PerspectiveCamera(35,1,.1,500);previewCamera.position.set(7,5,9);
+   const resize=()=>{const w=Math.max(1,previewBox.clientWidth),h=Math.max(1,previewBox.clientHeight);previewRenderer.setSize(w,h,false);previewCamera.aspect=w/h;previewCamera.updateProjectionMatrix();};
+   window.addEventListener('resize',resize);resize();
+   const canvas=previewRenderer.domElement;
+   canvas.addEventListener('pointerdown',e=>{previewDrag=e.clientX;canvas.setPointerCapture(e.pointerId);});
+   canvas.addEventListener('pointermove',e=>{if(previewDrag!==null&&previewMesh){previewMesh.rotation.y+=(e.clientX-previewDrag)*.012;previewDrag=e.clientX;}});
+   canvas.addEventListener('pointerup',()=>previewDrag=null);canvas.addEventListener('pointercancel',()=>previewDrag=null);
+   const tick=()=>{previewFrame=requestAnimationFrame(tick);if(!root.hidden && !editor.hidden)previewRenderer.render(previewScene,previewCamera);};tick();
+ }
+ function previewModel(){
+   id('iaPreviewError').textContent='';const p=selected();if(!p)return;
+   if(!p.modelSource||!p.modelFactory){id('iaPreviewError').textContent='此商品尚未匯入 JS 模型（既有測試商品仍使用內建造型）。';return;}
+   try{
+     previewInit();if(previewMesh)previewScene.remove(previewMesh);
+     previewMesh=window.islandCreateJsModel(p,THREE);window.islandApplyJsHeight(previewMesh,id('iaHeight').value,THREE);
+     previewMesh.updateMatrixWorld(true);const box=window.islandJsModelBounds(previewMesh,THREE),size=box.getSize(new THREE.Vector3());
+     if(!Number.isFinite(size.y)||size.y<=0)throw Error('模型沒有有效的高度');
+     const center=box.getCenter(new THREE.Vector3());
+     const holder=new THREE.Group();holder.add(previewMesh);
+     // 顯示模型真正落地關係：底部貼在 y=0 的參考地面，加上後台離地偏移。
+     const groundOffset=Number(id('iaGroundOffset').value)||0;
+     previewMesh.position.y+=groundOffset-box.min.y;
+     previewMesh.position.x-=center.x;previewMesh.position.z-=center.z;
+     // 與遊戲櫻花樹相同的樹幹、樹冠材質及大致尺寸，作為固定 3D 比例尺。
+     const refTree=new THREE.Group();refTree.name='預覽參考_島上櫻花樹_不會上架';
+     const bark=new THREE.MeshStandardMaterial({color:0x5c3822,roughness:.85});
+     const pinks=[0xffe4e6,0xfda4af,0xf472b6].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:.55}));
+     const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.20,.28,1.1,7),bark);trunk.position.set(.08,.95,.04);trunk.rotation.z=-.14;refTree.add(trunk);
+     const base=new THREE.Mesh(new THREE.CylinderGeometry(.28,.46,.5,7),bark);base.position.y=.25;refTree.add(base);
+     const blossoms=[[.1,2.55,0,.88,0],[-.15,2.35,.25,.72,1],[.85,2.1,.2,.78,2],[1.15,1.9,.35,.58,0],[-.75,2.05,-.15,.75,1],[.1,2.15,-.65,.68,2]];
+     blossoms.forEach(([x,y,z,r,idx])=>{const m=new THREE.Mesh(new THREE.IcosahedronGeometry(r,1),pinks[idx]);m.position.set(x,y,z);refTree.add(m);});
+     const referenceGap=Math.max(2.7,size.x*.6+1.35);
+     refTree.position.x=-referenceGap;refTree.position.y=0;
+     holder.add(refTree);
+
+     const line=new THREE.GridHelper(Math.max(5,size.x*1.6,size.z*1.6),10,0x53cbda,0x39556b);
+     line.position.y=0;holder.add(line);
+     previewMesh=holder;
+     const combinedBox=window.islandJsModelBounds(holder,THREE),combinedSize=combinedBox.getSize(new THREE.Vector3()),combinedCenter=combinedBox.getCenter(new THREE.Vector3());
+     const frameRadius=Math.max(combinedSize.x*1.1,combinedSize.y*1.5,combinedSize.z*1.5,4);
+     previewCamera.position.set(combinedCenter.x,combinedCenter.y+frameRadius*.32,frameRadius*2.15);
+     previewCamera.lookAt(combinedCenter);
+     previewScene.add(previewMesh);
+     id('iaPreviewError').textContent='預覽正常｜商品高度 '+size.y.toFixed(2)+' 單位；左側粉紅櫻花樹為比例尺。';
+   }catch(error){id('iaPreviewError').textContent='預覽失敗：'+error.message;console.error(error);}
+ }
+ function updateModelInputs(){const p=selected();const select=id('iaModelFactory');select.innerHTML='';
+  const names=p?.modelSource?window.islandJsModelFactories(p.modelSource):[];
+  if(!names.length){const o=document.createElement('option');o.value='';o.textContent='未找到 create... 建立函式';select.appendChild(o);}
+  else names.forEach(fn=>{const o=document.createElement('option');o.value=fn;o.textContent=fn;select.appendChild(o);});
+  if(names.includes(p?.modelFactory))select.value=p.modelFactory;
+  else if(names.length){select.value=names[0];p.modelFactory=names[0];}
+  id('iaModelStatus').textContent=p?.modelSource?('已匯入：'+(p.modelFileName||'JS 程式')+'（'+Math.round(p.modelSource.length/1024)+' KB）'):'尚未上傳 JS 模型；既有測試商品使用原造型。';
+  const animInfo=id('iaAnimationDetect');
+  if(animInfo){
+    const source=p?.modelSource||'';
+    const action=/(?:userData\.setAction|setAction\s*[:=])/.test(source);
+    const update=/(?:userData\.update|\bupdate\s*[:=])/.test(source);
+    animInfo.textContent=!source?'模型動畫偵測：尚未匯入 JS 模型':(action&&update?'模型動畫偵測：具備動作切換及逐幀更新介面（待機／走路依模型支援）':update?'模型動畫偵測：具有更新函式，但未偵測到動作切換':'模型動畫偵測：未辨識到標準走路動畫介面');
+  }
+  previewModel();
+ }
+ id('iaModelFile').addEventListener('change',async e=>{
+   const file=e.target.files?.[0],p=selected();if(!file||!p)return;
+   if(!/\.js$/i.test(file.name)){note('請選擇 .js 模型檔。');return;}
+   if(file.size>800000){note('單一 JS 模型上限 800 KB。請先簡化檔案或拆除不必要程式。');return;}
+   try{const source=await file.text(),candidates=window.islandJsModelFactories(source);
+     if(!candidates.length){note('找不到 create... 模型建立函式。請先將 JS 整理為可回傳 THREE.Group 的 createXXX 函式。');return;}
+     p.modelSource=source;p.modelFactory=candidates[0];p.modelFileName=file.name;updateModelInputs();note('已讀取模型。請確認右側預覽及固定總高度，再儲存匯出。');
+   }catch(err){note('模型讀取失敗：'+err.message);}
+ });
+ id('iaModelFactory').onchange=()=>{const p=selected();if(!p)return;p.modelFactory=id('iaModelFactory').value;previewModel();};
+ id('iaHeight').addEventListener('change',previewModel);id('iaGroundOffset').addEventListener('change',previewModel);
+ const originalSelectItem=selectItem;
+ selectItem=function(key){originalSelectItem(key);updateModelInputs();};
+ // Capture a self-contained HTML snapshot before the player starts the game. Export changes ONLY the manifest.
+ const originalHTML='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+ id('iaExport').onclick=()=>{if(!saveForm())return;const safe=JSON.stringify(items).replace(/</g,'\\u003c');
+ const updated=originalHTML.replace(/(<script type="application\/json" id="islandShopManifest">)[\s\S]*?(<\/script>)/,'$1'+safe+'$2');
+ if(updated===originalHTML&&safe!==manifest.textContent){note('匯出失敗：找不到商品資料區塊。');return;}
+ try{const blob=new Blob([updated],{type:'text/html;charset=utf-8'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='我的夢想島_S.V02-12-rainbow_商城後台JS模型上架版.html';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);note('完整遊戲 HTML 已匯出。請上傳這份檔案到 GitHub Pages。');}catch(e){note('匯出失敗：'+e.message);}
+ };
+})();
+</script>
+<style id="dreamIslandTitleHomeStyle">
+  #dreamIslandTitleStack h1{cursor:pointer;pointer-events:auto;touch-action:manipulation}
+  #dreamIslandTitleStack h1:focus-visible{outline:2px solid #fff;outline-offset:5px;border-radius:4px}
+</style>
+<script id="dreamIslandTitleHomeCode">
+/* BV.03-01：僅增加標題返回開始畫面與事前確認，其他遊戲控制保持原狀。 */
+(function(){
+  const title=document.querySelector('#dreamIslandTitleStack h1');
+  if(!title)return;
+  title.setAttribute('role','button');
+  title.setAttribute('tabindex','0');
+  title.setAttribute('title','返回開始畫面');
+  title.setAttribute('aria-label','返回開始畫面');
+  const goHome=()=>{
+    if(window.confirm('確定要返回開始畫面嗎？目前這一局的遊戲進度將結束。')){
+      window.location.reload();
+    }
+  };
+  title.addEventListener('click',goHome);
+  title.addEventListener('keydown',event=>{
+    if(event.key==='Enter'||event.key===' '){event.preventDefault();goHome();}
+  });
+})();
+</script>
+
+<style id="islandAdminCompactDesktopBV0302">
+/* S.V02-12-rainbow 後台舒適版：避免過度緊縮。以雙欄編輯、清楚字級與適度留白為主。 */
+@media (min-width:1080px){
+  #islandAdminOverlay{padding:12px 16px!important;overflow:hidden!important}
+  #islandAdminOverlay #iaEditorView.ia-panel{max-width:1850px!important;height:calc(100dvh - 24px)!important;padding:15px 19px!important}
+  #islandAdminOverlay #iaEditorView>.ia-grid{grid-template-columns:minmax(170px,.55fr) minmax(475px,1.85fr) minmax(285px,1.05fr)!important;gap:16px!important}
+  #iaEditorView>.ia-tools{margin:7px 0 11px!important;gap:9px!important}
+  #islandAdminOverlay #iaEditorView button.ia-btn{padding:9px 13px!important;font-size:13px!important;border-radius:9px!important}
+  #iaEditorView>.ia-grid>section:nth-child(2)>.ia-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    column-gap:13px!important;row-gap:12px!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    align-content:start!important;padding:5px 9px 15px 2px!important;
+    scrollbar-width:thin;
+  }
+  #iaEditorView>.ia-grid>section:nth-child(2)>.ia-grid>div{grid-column:auto!important;min-width:0!important}
+  #iaEditorView>.ia-grid>section:nth-child(2)>.ia-grid>div:has(#iaDescription),
+  #iaEditorView>.ia-grid>section:nth-child(2)>.ia-grid>div:has(#iaModelFile),
+  #iaEditorView>.ia-grid>section:nth-child(2)>.ia-grid>div:has(#iaModelFactory),
+  #iaEditorView>.ia-grid>section:nth-child(2)>.ia-grid>div#iaPersonMovement{grid-column:1/-1!important}
+  /* 3D 預覽移至右側，隱藏原本的占位。 */
+  #iaEditorView>.ia-grid>section:nth-child(2)>.ia-grid>div:has(#iaModelPreview){display:none!important}
+  #iaEditorView #iaPersonMovement>.ia-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;padding:12px!important}
+  #iaEditorView #iaPersonMovement>.ia-grid>div{grid-column:auto!important}
+  #iaEditorView #iaPersonMovement>.ia-grid>div:has(#iaWalkRadius),
+  #iaEditorView #iaPersonMovement>.ia-grid>p{grid-column:1/-1!important}
+  #islandAdminOverlay #iaEditorView input,#islandAdminOverlay #iaEditorView select,#islandAdminOverlay #iaEditorView textarea{min-height:40px!important;height:auto!important;padding:9px 11px!important;border-radius:9px!important;font-size:14px!important;line-height:1.4!important}
+  #islandAdminOverlay #iaEditorView textarea{min-height:64px!important;height:64px!important;resize:vertical!important}
+  #islandAdminOverlay #iaEditorView label{font-size:12px!important;line-height:1.4!important;margin:0 0 5px!important}
+  #islandAdminOverlay #iaEditorView small{font-size:11px!important;line-height:1.45!important}
+  #islandAdminOverlay #iaEditorView .ia-model-note{font-size:11px!important;line-height:1.5!important;margin:4px 0!important}
+  #islandAdminOverlay .ia-preview-side{padding:14px!important;gap:9px!important}
+  #islandAdminOverlay #iaModelPreview{height:clamp(230px,43vh,480px)!important}
+  #iaEditorView>.ia-grid>section:first-child h3{font-size:15px!important}
+  #iaEditorView .ia-row{padding:10px 12px!important}
+}
 </style>
 </body>
 </html>
