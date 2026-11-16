@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>我的夢想島：聖誕版（X.V04-19）</title>
+  <title>我的夢想島：聖誕版（X.V04-20）</title>
   <script>window.ISLAND_CHRISTMAS_MODE=true;</script>
   <script data-goatcounter="https://elsu.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
   <!-- 版本：SV.01-158｜安平古堡防重疊並調至第35位 -->
@@ -2539,7 +2539,7 @@ function createCurvedSchoolGate(pos,options={}){
     <footer class="w-full relative flex items-center justify-center text-[11px] font-medium text-slate-400 py-1 interactive px-2">
       <!-- 左下角版本標籤 (前方V.01固定，只遞增斜線後方碼數) -->
       <div class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 flex flex-col items-start gap-0.5 text-slate-400 select-none pointer-events-none">
-        <span id="gameVersionBadge" class="font-mono font-medium">(X.V04-19)</span>
+        <span id="gameVersionBadge" class="font-mono font-medium">(X.V04-20)</span>
         <span id="gameVisitCount" aria-live="polite">累積瀏覽次數：讀取中</span>
       </div>
       <script>
@@ -3081,11 +3081,7 @@ function createCurvedSchoolGate(pos,options={}){
         <!-- 難度選擇區 -->
         <div class="mb-6">
           <div class="text-xs font-bold text-slate-400 mb-2">選擇本次開拓難度（遊戲中不能再次選擇）：</div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <button data-diff="superEasy" class="start-diff-btn p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition flex flex-col items-center">
-              <span>超簡單</span>
-              <span class="text-[10px] text-slate-400 mt-0.5">單字為主</span>
-            </button>
+          <div class="grid grid-cols-3 gap-2">
             <button data-diff="easy" class="start-diff-btn p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/25 text-emerald-300 font-bold text-xs sm:text-sm transition flex flex-col items-center shadow-lg">
               <span>簡易</span>
               <span class="text-[10px] text-slate-400 mt-0.5">2字詞為主</span>
@@ -3135,8 +3131,7 @@ function createCurvedSchoolGate(pos,options={}){
       <!-- 結算難度重選 -->
       <div class="mb-5">
         <div class="text-xs font-bold text-slate-400 mb-2">重新選擇挑戰難度：</div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <button data-diff="superEasy" class="over-diff-btn py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs transition text-center">超簡單</button>
+        <div class="grid grid-cols-3 gap-2">
           <button data-diff="easy" class="over-diff-btn py-1.5 px-2 rounded-xl border border-emerald-500 bg-emerald-500/25 text-emerald-300 font-bold text-xs transition text-center shadow-lg">簡易</button>
           <button data-diff="medium" class="over-diff-btn py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs transition text-center">普通</button>
           <button data-diff="hard" class="over-diff-btn py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs transition text-center">困難</button>
@@ -19440,13 +19435,13 @@ function createFishingBoat(pos,options={}){
     }
 
     const DIFF_CONFIG = {
-      superEasy: { name: '超簡單', colorClass: 'text-sky-400', activeBg: 'bg-sky-500/25', border: 'border-sky-500', text: 'text-sky-300' },
       easy: { name: '簡易', colorClass: 'text-emerald-400', activeBg: 'bg-emerald-500/25', border: 'border-emerald-500', text: 'text-emerald-300' },
       medium: { name: '普通', colorClass: 'text-amber-400', activeBg: 'bg-amber-500/25', border: 'border-amber-500', text: 'text-amber-300' },
       hard: { name: '困難', colorClass: 'text-rose-400', activeBg: 'bg-rose-500/25', border: 'border-rose-500', text: 'text-rose-300' }
     };
 
     function setDifficulty(diff) {
+      if (!Object.prototype.hasOwnProperty.call(DIFF_CONFIG, diff)) diff = 'easy';
       currentDifficulty = diff;
       const conf = DIFF_CONFIG[diff];
 
@@ -19493,7 +19488,7 @@ function createFishingBoat(pos,options={}){
         ? activeTrial
         : (activeStormChallenge
           ? activeStormChallenge
-          : (currentWordList.length > 0 ? currentWordList[currentWordIndex % currentWordList.length] : (WORD_DB[currentDifficulty] ? WORD_DB[currentDifficulty][0] : WORD_DB.superEasy[0])));
+          : (currentWordList.length > 0 ? currentWordList[currentWordIndex % currentWordList.length] : (WORD_DB[currentDifficulty] ? WORD_DB[currentDifficulty][0] : WORD_DB.easy[0])));
 
       charCardsContainer.innerHTML = '';
 
@@ -19519,7 +19514,9 @@ function createFishingBoat(pos,options={}){
           nextUpgradeHint.textContent = '⚡ 閃電來襲！答對這題普通題目即可啟動防護罩，保護島嶼！';
         } else if (activeTrial) {
           nextUpgradeHint.innerHTML = `<span class="text-amber-300 font-black animate-pulse">★ 隱藏人物試煉：</span> 輸入「${item.word}」➔ 召喚【${activeTrial.announceName}】！`;
-        } else if ((correctCount + 1) % 5 === 0) {
+        } else if (window.ISLAND_CHRISTMAS_MODE
+            ? (specialMonumentsSpawned < 50 && currentCreationIndex >= (specialMonumentsSpawned + 1) * 3)
+            : ((correctCount + 1) % 5 === 0)) {
           const nextMonIdx = specialMonumentsSpawned % SPECIAL_MONUMENTS.length;
           nextUpgradeHint.textContent = `輸入目標：${item.word} ➔ 即將落成：【${SPECIAL_MONUMENTS[nextMonIdx].name}】！`;
         } else {
@@ -20864,8 +20861,12 @@ function createFishingBoat(pos,options={}){
           spawnMigratoryFlock();
         }
 
-        // 每 5 題落成特殊紀念地標
-        if (correctCount % 5 === 0) {
+        // X.V04-19：聖誕版累積每 3 個一般獎勵落成 1 座地標；
+        // 試煉題／防雷題不應打亂一般獎勵與地標的 3：1 比例。
+        // 非聖誕版保留原本每答對 5 題出一座地標的規則。
+        if (window.ISLAND_CHRISTMAS_MODE
+          ? (specialMonumentsSpawned < 50 && currentCreationIndex >= (specialMonumentsSpawned + 1) * 3)
+          : (correctCount % 5 === 0)) {
           spawnSpecialMonument();
           // 若落成的紀念地標達到試煉門檻，但當前是「超簡單」模式時，絕對不設定試煉題
           if (currentDifficulty !== 'superEasy' && MILESTONE_SPECIAL_TRIALS[specialMonumentsSpawned]) {
@@ -20965,6 +20966,10 @@ function createFishingBoat(pos,options={}){
       setTimeout(() => upgradeBanner.classList.add('hidden'), 3000);
       renderModeTimer = setInterval(() => {
         if (!renderModeActive) return;
+        if (window.ISLAND_CHRISTMAS_MODE && specialMonumentsSpawned >= 50 && currentCreationIndex >= 150) {
+          stopRenderMode('聖誕算圖完成：150 個一般獎勵與 50 座地標已解鎖。');
+          return;
+        }
         // SV.01-83：保留原本里程碑試煉答題流程，不清除 activeTrial。
         // 當第 10、15、20……50 座地標觸發人物試煉時，自動答對該試煉題，
         // 由 onWordCorrect() 按原本流程召喚對應人物，不再每 5 題額外亂數召喚。
@@ -20972,8 +20977,12 @@ function createFishingBoat(pos,options={}){
 
         const detail = document.getElementById('renderModeDetail');
         if (detail) detail.textContent = `自動答題中｜正確題數 ${correctCount}｜地標 ${Math.min(specialMonumentsSpawned, 50)} / 50｜植物與動物持續生成。`;
-        if (specialMonumentsSpawned >= 50 && isEternalVitality) {
-          stopRenderMode('所有 50 座地標已解鎖，島嶼已進入永恆綠洲模式。');
+        if (window.ISLAND_CHRISTMAS_MODE
+          ? (specialMonumentsSpawned >= 50 && currentCreationIndex >= 150)
+          : (specialMonumentsSpawned >= 50 && isEternalVitality)) {
+          stopRenderMode(window.ISLAND_CHRISTMAS_MODE
+            ? '聖誕算圖完成：150 個一般獎勵與 50 座地標已解鎖。'
+            : '所有 50 座地標已解鎖，島嶼已進入永恆綠洲模式。');
         }
       }, 320);
     }
@@ -23523,7 +23532,7 @@ window.islandApplyJsHeight=function(model,height,THREE){
    </div>
    <section id="iaWordsView" hidden aria-label="題庫管理">
       <div class="ia-word-top"><div><h3>題庫管理</h3><p>直接查看、修改遊戲內的四級題庫。修改後請匯出完整 HTML 才會發布。</p></div><div class="ia-word-actions"><button type="button" class="ia-btn" id="iaWordAdd">＋ 新增題目</button><button type="button" class="ia-btn ia-main" id="iaWordExport">儲存並匯出完整遊戲 HTML</button></div></div>
-      <div class="ia-word-controls"><div><label for="iaWordLevel">難度</label><select id="iaWordLevel"><option value="superEasy">超簡單</option><option value="easy">簡單</option><option value="normal">普通</option><option value="hard">困難</option></select></div><div><label for="iaWordSearch">搜尋中文或注音</label><input id="iaWordSearch" placeholder="輸入關鍵字篩選"></div><span id="iaWordStats" class="ia-word-stats"></span></div>
+      <div class="ia-word-controls"><div><label for="iaWordLevel">難度</label><select id="iaWordLevel"><option value="easy">簡單</option><option value="normal">普通</option><option value="hard">困難</option></select></div><div><label for="iaWordSearch">搜尋中文或注音</label><input id="iaWordSearch" placeholder="輸入關鍵字篩選"></div><span id="iaWordStats" class="ia-word-stats"></span></div>
       <div class="ia-word-layout"><div class="ia-word-list-wrap"><table class="ia-word-table"><thead><tr><th scope="col">序號</th><th scope="col">題目</th><th scope="col">注音</th><th scope="col">操作</th></tr></thead><tbody id="iaWordRows"></tbody></table><p id="iaWordEmpty" hidden>沒有符合條件的題目。</p></div><div class="ia-word-editor" id="iaWordEditorPanel" hidden><h3 id="iaWordEditTitle">編輯題目</h3><label for="iaWordText">題目（中文）</label><input id="iaWordText" maxlength="20" placeholder="例如：彩虹"><label for="iaWordRuby">注音（每字一組，用空白隔開）</label><input id="iaWordRuby" placeholder="例如：ㄘㄞˇ ㄏㄨㄥˊ"><p>注音依照每個中文字依序填寫。修改既有題目後會立即更新遊戲的題庫資料，匯出才會保留到檔案。</p><div class="ia-word-actions"><button type="button" class="ia-btn ia-main" id="iaWordSave">儲存題目</button><button type="button" class="ia-btn ia-danger" id="iaWordDelete">刪除此題</button><button type="button" class="ia-btn" id="iaWordCancel">取消／關閉</button></div><p id="iaWordMessage" role="status"></p></div></div>
    </section>
    <div class="ia-note">登入帳密只是本機操作門檻，不是安全的伺服器驗證。請自行保管 GitHub 寫入權限。新版支援 JS 程式模型（只使用自己製作或信任來源的檔案）。GLB 不在本版範圍。模型程式會嵌入匯出的 HTML，請留意檔案大小。</div>
@@ -23743,7 +23752,7 @@ window.islandApplyJsHeight=function(model,height,THREE){
  }
  function render(){
   const list=arr(),q=search.value.trim().toLowerCase();rows.textContent='';
-  const all=['superEasy','easy','normal','hard'].reduce((sum,k)=>sum+(bank[k]?.length||0),0);
+  const all=['easy','normal','hard'].reduce((sum,k)=>sum+(bank[k]?.length||0),0);
   let found=0;
   list.forEach((item,i)=>{
    if(q&&!((item.word||'')+' '+(item.ruby||[]).join(' ')).toLowerCase().includes(q))return;
