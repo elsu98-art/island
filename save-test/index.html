@@ -2695,11 +2695,7 @@ function createCurvedSchoolGate(pos,options={}){
         <!-- 難度選擇區 -->
         <div class="mb-6">
           <div class="text-xs font-bold text-slate-400 mb-2">選擇本次開拓難度（遊戲中不能再次選擇）：</div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <button data-diff="superEasy" class="start-diff-btn p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition flex flex-col items-center">
-              <span>超簡單</span>
-              <span class="text-[10px] text-slate-400 mt-0.5">單字為主</span>
-            </button>
+          <div class="grid grid-cols-3 gap-2">
             <button data-diff="easy" class="start-diff-btn p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/25 text-emerald-300 font-bold text-xs sm:text-sm transition flex flex-col items-center shadow-lg">
               <span>簡易</span>
               <span class="text-[10px] text-slate-400 mt-0.5">2字詞為主</span>
@@ -2773,8 +2769,7 @@ function createCurvedSchoolGate(pos,options={}){
       <!-- 結算難度重選 -->
       <div class="mb-5">
         <div class="text-xs font-bold text-slate-400 mb-2">重新選擇挑戰難度：</div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <button data-diff="superEasy" class="over-diff-btn py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs transition text-center">超簡單</button>
+        <div class="grid grid-cols-3 gap-2">
           <button data-diff="easy" class="over-diff-btn py-1.5 px-2 rounded-xl border border-emerald-500 bg-emerald-500/25 text-emerald-300 font-bold text-xs transition text-center shadow-lg">簡易</button>
           <button data-diff="medium" class="over-diff-btn py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs transition text-center">普通</button>
           <button data-diff="hard" class="over-diff-btn py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs transition text-center">困難</button>
@@ -14462,7 +14457,7 @@ function createFishingBoat(pos,options={}){
       islandCoins=Math.max(0,Number(snapshot.coins)||0);
       islandCorrectStreak=Math.max(0,Number(snapshot.streak)||0);
       lightningNextAt=correctCount+7+Math.floor(Math.random()*4);
-      currentDifficulty=['superEasy','easy','medium','hard'].includes(snapshot.difficulty)?snapshot.difficulty:'easy';
+      currentDifficulty=['easy','medium','hard'].includes(snapshot.difficulty)?snapshot.difficulty:'easy';
       currentWordList=[...WORD_DB[currentDifficulty]];currentWordIndex=0;
       scoreEl.textContent=String(score);
       islandCoinCounter.textContent=islandCoins.toLocaleString('zh-TW');
@@ -16166,6 +16161,25 @@ window.islandApplyJsHeight=function(model,height,THREE){
 }
 @media(min-width:761px) and (max-height:620px){#startOverlay>.island-start-shell{margin:0 auto!important}}
 </style>
+
+<style id="islandSaveV0504StableStartLayout">
+/* SV.05-04: fixed-size start window independent of login state / save-slot rendering. */
+@media (min-width:761px) {
+  #startOverlay > .island-start-shell {height: min(670px, calc(100dvh - 28px)) !important;min-height:0;}
+  #startOverlay .island-start-card {height:100% !important;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
+  #startOverlay .island-start-grid {flex:1;min-height:0;}
+  #startOverlay .island-start-left {min-height:0;}
+  #startOverlay .island-start-right {min-height:0;overflow-y:auto;scrollbar-width:thin;overscroll-behavior:contain;padding-right:3px;}
+}
+@media (max-width:760px) {
+  #startOverlay > .island-start-shell {min-height:0;}
+  #startOverlay .island-start-card {height: min(920px, calc(100dvh - 54px)) !important;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
+  #startOverlay .island-start-grid {flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;overscroll-behavior:contain;}
+  #startOverlay .island-start-left #startBtn {min-height:50px;}
+}
+/* The original small gear remains the existing admin control, moved to top right. */
+#startOverlay #islandAdminEntry {top:14px !important;right:14px !important;bottom:auto !important;}
+</style>
 <style id="islandSaveV0503Style">
 #islandSaveSlots[hidden],#islandSaveDialog[hidden],#islandSaveGameButton[hidden]{display:none!important}
 #islandSaveSlots{padding:13px;border:1px solid rgba(129,206,196,.34);border-radius:15px;background:rgba(5,31,45,.57);text-align:left;margin:0 0 14px}
@@ -16479,7 +16493,7 @@ if(!ready){
    </div>
    <section id="iaWordsView" hidden aria-label="題庫管理">
       <div class="ia-word-top"><div><h3>題庫管理</h3><p>直接查看、修改遊戲內的四級題庫。修改後請匯出完整 HTML 才會發布。</p></div><div class="ia-word-actions"><button type="button" class="ia-btn" id="iaWordAdd">＋ 新增題目</button><button type="button" class="ia-btn ia-main" id="iaWordExport">儲存並匯出完整遊戲 HTML</button></div></div>
-      <div class="ia-word-controls"><div><label for="iaWordLevel">難度</label><select id="iaWordLevel"><option value="superEasy">超簡單</option><option value="easy">簡單</option><option value="normal">普通</option><option value="hard">困難</option></select></div><div><label for="iaWordSearch">搜尋中文或注音</label><input id="iaWordSearch" placeholder="輸入關鍵字篩選"></div><span id="iaWordStats" class="ia-word-stats"></span></div>
+      <div class="ia-word-controls"><div><label for="iaWordLevel">難度</label><select id="iaWordLevel"><option value="easy">簡單</option><option value="normal">普通</option><option value="hard">困難</option></select></div><div><label for="iaWordSearch">搜尋中文或注音</label><input id="iaWordSearch" placeholder="輸入關鍵字篩選"></div><span id="iaWordStats" class="ia-word-stats"></span></div>
       <div class="ia-word-layout"><div class="ia-word-list-wrap"><table class="ia-word-table"><thead><tr><th scope="col">序號</th><th scope="col">題目</th><th scope="col">注音</th><th scope="col">操作</th></tr></thead><tbody id="iaWordRows"></tbody></table><p id="iaWordEmpty" hidden>沒有符合條件的題目。</p></div><div class="ia-word-editor" id="iaWordEditorPanel" hidden><h3 id="iaWordEditTitle">編輯題目</h3><label for="iaWordText">題目（中文）</label><input id="iaWordText" maxlength="20" placeholder="例如：彩虹"><label for="iaWordRuby">注音（每字一組，用空白隔開）</label><input id="iaWordRuby" placeholder="例如：ㄘㄞˇ ㄏㄨㄥˊ"><p>注音依照每個中文字依序填寫。修改既有題目後會立即更新遊戲的題庫資料，匯出才會保留到檔案。</p><div class="ia-word-actions"><button type="button" class="ia-btn ia-main" id="iaWordSave">儲存題目</button><button type="button" class="ia-btn ia-danger" id="iaWordDelete">刪除此題</button><button type="button" class="ia-btn" id="iaWordCancel">取消／關閉</button></div><p id="iaWordMessage" role="status"></p></div></div>
    </section>
    <div class="ia-note">登入帳密只是本機操作門檻，不是安全的伺服器驗證。請自行保管 GitHub 寫入權限。新版支援 JS 程式模型（只使用自己製作或信任來源的檔案）。GLB 不在本版範圍。模型程式會嵌入匯出的 HTML，請留意檔案大小。</div>
