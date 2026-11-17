@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>我的夢想島：中文打字開拓記（SV.05 - 01）</title>
+  <title>我的夢想島：中文打字開拓記（SV.05 - 02）</title>
   <script data-goatcounter="https://elsu.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
   <!-- 版本：SV.01-158｜安平古堡防重疊並調至第35位 -->
   <!-- Tailwind CSS CDN -->
@@ -2712,7 +2712,7 @@ function createCurvedSchoolGate(pos,options={}){
         </div>
 
 
-        <!-- SV.05 - 01 學生登入：帳號身分與遊戲存檔分開處理。尚未連接雲端存檔。 -->
+        <!-- SV.05 - 02 學生登入：帳號身分與遊戲存檔分開處理。尚未連接雲端存檔。 -->
         <section id="studentIdentityBox" class="island-student-identity" aria-label="學生登入">
           <div class="island-student-title">學生身分</div>
           <div id="studentIdentityStatus" class="island-student-status" role="status">目前為訪客模式，遊戲進度尚未連結雲端。</div>
@@ -16022,10 +16022,12 @@ window.islandApplyJsHeight=function(model,height,THREE){
 </style>
 
 <script id="islandStudentFirebaseConfig" type="application/json">{
-  "apiKey":"",
-  "authDomain":"",
-  "projectId":"",
-  "appId":""
+  "apiKey": "AIzaSyCtnIBT5PkD6la7aQjHqkGNhdqiv5x0rXk",
+  "authDomain": "dream-island-save.firebaseapp.com",
+  "projectId": "dream-island-save",
+  "storageBucket": "dream-island-save.firebasestorage.app",
+  "messagingSenderId": "351896526172",
+  "appId": "1:351896526172:web:4641af491062bd049fb599"
 }</script>
 <style id="islandStudentAuthStyle">
 #startOverlay .island-student-identity{margin:0 0 15px;padding:12px 13px;border:1px solid rgba(148,163,184,.24);border-radius:15px;background:rgba(15,23,42,.5);text-align:left}
@@ -16041,7 +16043,7 @@ window.islandApplyJsHeight=function(model,height,THREE){
 @media(max-height:740px){#startOverlay{overflow-y:auto;align-items:flex-start!important}#startOverlay>.max-w-md{margin:auto 0}}
 </style>
 <script id="islandStudentAuthCode" type="module">
-/* SV.05 - 01 登入測試版：只處理登入身分；暫不寫入任何學生資料或島嶼存檔。 */
+/* SV.05 - 02 Google 登入連線版：已設定 Firebase Authentication；尚未啟用雲端島嶼存檔。 */
 const byId=id=>document.getElementById(id);
 const login=byId('studentGoogleLogin'),logout=byId('studentGoogleLogout');
 const status=byId('studentIdentityStatus'),hint=byId('studentLoginHint');
@@ -16314,7 +16316,7 @@ if(!ready){
  const wordSafe=JSON.stringify(window.islandWordBank||{}).replace(/</g,'\\u003c');
  updated=updated.replace(/(<script type="application\/json" id="islandWordManifest">)[\s\S]*?(<\/script>)/,'$1'+wordSafe+'$2');
  if(updated===originalHTML&&safe!==manifest.textContent){note('匯出失敗：找不到商品資料區塊。');return;}
- try{const blob=new Blob([updated],{type:'text/html;charset=utf-8'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='我的夢想島_SV.05 - 01_學生Google登入測試版.html';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);note('完整遊戲 HTML 已匯出。請上傳這份檔案到 GitHub Pages。');}catch(e){note('匯出失敗：'+e.message);}
+ try{const blob=new Blob([updated],{type:'text/html;charset=utf-8'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='我的夢想島_SV.05 - 02_學生Google登入連線版.html';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);note('完整遊戲 HTML 已匯出。請上傳這份檔案到 GitHub Pages。');}catch(e){note('匯出失敗：'+e.message);}
  };
 })();
 </script>
