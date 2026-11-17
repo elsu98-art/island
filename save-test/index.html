@@ -2074,6 +2074,8 @@ function createCurvedSchoolGate(pos,options={}){
         <button id="screensaverBtn" aria-haspopup="true" aria-expanded="false" aria-controls="screensaverChoiceMenu" class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95 flex items-center gap-1">
           <span>螢幕保護 ▾</span>
         </button>
+        <!-- SV.05 - 04：雲端存檔入口緊接在「螢幕保護」右側；手機版隨系統選單收合。 -->
+        <button type="button" id="islandSaveGameButton" hidden class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95 whitespace-nowrap">儲存島嶼</button>
         <button id="islandPerfToggle" type="button" hidden aria-controls="islandPerfPanel" aria-expanded="false" aria-pressed="false" class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-700/60 transition active:scale-95 whitespace-nowrap">效能診斷 OFF</button>
       </div>
     </header>
@@ -2664,10 +2666,12 @@ function createCurvedSchoolGate(pos,options={}){
 
   <!-- 遊戲開始視窗 (依使用者要求之簡短 3 點說明與進場難度選擇) -->
   <div id="startOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md">
-    <div class="max-w-md w-full flex flex-col gap-2">
-      <div class="w-full bg-slate-900/95 border-2 border-emerald-500/40 rounded-3xl p-6 sm:p-8 text-center shadow-2xl">
+    <div class="max-w-md w-full flex flex-col gap-2 island-start-shell">
+      <div class="w-full bg-slate-900/95 border-2 border-emerald-500/40 rounded-3xl p-6 sm:p-8 text-center shadow-2xl island-start-card">
         <h2 class="text-2xl font-black text-white mb-1">我的夢想島</h2>
         
+        <div class="island-start-grid">
+          <div class="island-start-left">
         <!-- 遊戲簡介說明 -->
         <div class="bg-slate-800/80 rounded-2xl p-4 my-5 text-left text-xs sm:text-sm text-slate-200 space-y-2 border border-slate-700">
           <p class="flex items-start gap-2">
@@ -2712,6 +2716,12 @@ function createCurvedSchoolGate(pos,options={}){
         </div>
 
 
+
+        <button id="startBtn" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 active:scale-95 text-slate-950 font-black text-lg rounded-2xl shadow-xl transition">
+          開始開拓小島
+        </button>
+          </div>
+          <div class="island-start-right">
         <!-- SV.05 - 03 島主登入、三個手動存檔位置 -->
         <section id="studentIdentityBox" class="island-student-identity" aria-label="島主登入">
           <div class="island-student-title">島主</div>
@@ -2727,12 +2737,11 @@ function createCurvedSchoolGate(pos,options={}){
           <div class="island-save-heading">我的島嶼存檔 <small>最多三座・只在手動儲存時上傳</small></div>
           <p id="islandSaveListStatus" class="island-save-status" role="status">正在讀取雲端存檔…</p>
           <div id="islandSaveSlotRows" class="island-save-rows"></div>
-          <p class="island-save-footnote">「讀取」會以該存檔開始遊戲；「複製」可另存一份到其他位置。原本的「開始開拓小島」會建立新的島嶼，不會刪除雲端存檔。</p>
+          <p class="island-save-footnote">「讀取」會以該存檔開始遊戲；「複製」可另存一份到其他位置；「刪除」會清除指定位置，且無法復原。原本的「開始開拓小島」會建立新的島嶼，不會刪除雲端存檔。</p>
         </section>
+          </div>
+        </div>
 
-        <button id="startBtn" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 active:scale-95 text-slate-950 font-black text-lg rounded-2xl shadow-xl transition">
-          開始開拓小島
-        </button>
       </div>
 
       <!-- 字卡外部下方：齊左排列、低調小字 -->
@@ -15468,7 +15477,7 @@ function createFishingBoat(pos,options={}){
   // SV.01-133：將既有控制按鈕移入手機／平板右側可收合選單；桌面寬度時還原原始 DOM 位置與布局。
   (function () {
     const mq = window.matchMedia('(max-width: 760px)');
-    const controlIds = ['bgmBtn','muteBtn','ambientSoundBtn','graphicsQualityBtn','ambientVolSlider','lightningSystemBtn','screensaverBtn','inspectorBtn'];
+    const controlIds = ['bgmBtn','muteBtn','ambientSoundBtn','graphicsQualityBtn','ambientVolSlider','lightningSystemBtn','screensaverBtn','islandSaveGameButton','inspectorBtn'];
     const nodes = new Map();
     const dock = document.createElement('aside');
     dock.id = 'mobileControlDock';
@@ -15572,7 +15581,7 @@ function createFishingBoat(pos,options={}){
       if (isMobile) return;
       isMobile = true;
       const audioIds = ['bgmBtn','muteBtn','ambientSoundBtn','graphicsQualityBtn','ambientVolSlider'];
-      const systemIds = ['lightningSystemBtn','screensaverBtn','inspectorBtn'];
+      const systemIds = ['lightningSystemBtn','screensaverBtn','islandSaveGameButton','inspectorBtn'];
       audioIds.forEach(id => {
         const info = nodes.get(id); if (!info) return;
         if (id === 'ambientVolSlider' && info.wrap) {
@@ -16128,6 +16137,35 @@ window.islandApplyJsHeight=function(model,height,THREE){
 </style>
 
 
+
+<style id="islandSaveV0504TwoColumnStyle">
+/* SV.05-04: start screen compact two-column layout; preserve all auth and save element IDs. */
+#startOverlay{overflow-y:auto;overscroll-behavior:contain;padding:14px!important}
+#startOverlay>.island-start-shell{max-width:920px!important;width:min(920px,100%)!important;margin:auto!important}
+#startOverlay .island-start-card{padding:22px 25px!important}
+#startOverlay .island-start-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:stretch;margin-top:16px;text-align:left}
+#startOverlay .island-start-left,#startOverlay .island-start-right{min-width:0;display:flex;flex-direction:column}
+#startOverlay .island-start-left>.bg-slate-800\/80{margin:0 0 16px!important;padding:13px!important}
+#startOverlay .island-start-left>.mb-6{margin-bottom:14px!important}
+#startOverlay .island-start-left .start-diff-btn{padding:9px 5px!important;min-width:0}
+#startOverlay .island-start-left #startBtn{margin-top:auto;min-height:51px}
+#startOverlay .island-start-right #studentIdentityBox{margin-bottom:12px!important}
+#startOverlay .island-start-right #islandSaveSlots{margin-bottom:0!important;flex:1}
+#startOverlay .island-save-row{padding:8px;gap:5px;flex-wrap:wrap}
+#startOverlay .island-save-info{flex:1 1 140px}
+#startOverlay .island-save-row-actions{flex:0 0 auto;gap:4px}
+#startOverlay .island-save-row-actions button{padding:6px 8px}
+#startOverlay .island-save-footnote{font-size:10px;line-height:1.5}
+@media(max-width:760px){
+ #startOverlay>.island-start-shell{max-width:480px!important}
+ #startOverlay .island-start-card{padding:20px 16px!important}
+ #startOverlay .island-start-grid{grid-template-columns:minmax(0,1fr);gap:14px;margin-top:13px}
+ #startOverlay .island-start-left>.bg-slate-800\/80{margin-bottom:14px!important}
+ #startOverlay .island-start-left>.mb-6{margin-bottom:12px!important}
+ #startOverlay .island-start-left #startBtn{margin-top:0}
+}
+@media(min-width:761px) and (max-height:620px){#startOverlay>.island-start-shell{margin:0 auto!important}}
+</style>
 <style id="islandSaveV0503Style">
 #islandSaveSlots[hidden],#islandSaveDialog[hidden],#islandSaveGameButton[hidden]{display:none!important}
 #islandSaveSlots{padding:13px;border:1px solid rgba(129,206,196,.34);border-radius:15px;background:rgba(5,31,45,.57);text-align:left;margin:0 0 14px}
@@ -16138,9 +16176,9 @@ window.islandApplyJsHeight=function(model,height,THREE){
 .island-save-row{display:flex;gap:9px;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,.13);background:rgba(15,23,42,.65);border-radius:11px;padding:9px}
 .island-save-info{flex:1;min-width:0}.island-save-info strong{display:block;color:white;font-size:12px}.island-save-info small{display:block;color:#b6c6d5;font-size:10px;line-height:1.5;overflow-wrap:anywhere}
 .island-save-row-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}.island-save-row-actions button{font-size:11px;color:white;background:#176b67;padding:6px 8px;border-radius:7px;cursor:pointer}
-.island-save-row-actions button:disabled{opacity:.4;cursor:default}.island-save-row-actions button.island-copy{background:#37526b}
+.island-save-row-actions button:disabled{opacity:.4;cursor:default}.island-save-row-actions button.island-copy{background:#37526b}.island-save-row-actions button.island-delete{background:#7f293c}.island-save-row-actions button.island-delete:not(:disabled):hover{background:#a63249}
 .island-save-footnote{font-size:10px;color:#acc5cd;line-height:1.65;margin:8px 0 0}
-#islandSaveGameButton{position:fixed;z-index:44;top:85px;left:18px;border-radius:12px;background:rgba(6,42,57,.85);border:1px solid rgba(146,236,212,.7);padding:9px 13px;color:#eafff5;font-size:12px;pointer-events:auto;cursor:pointer}
+#islandSaveGameButton{position:relative;z-index:30;flex-shrink:0;pointer-events:auto;cursor:pointer;touch-action:manipulation}
 body.island-screensaver-active #islandSaveGameButton{display:none!important}
 #islandSaveDialog{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;background:rgba(4,12,25,.75);backdrop-filter:blur(7px);padding:15px;pointer-events:auto}
 #islandSaveDialog .island-save-dialog-card{width:min(440px,100%);max-height:90dvh;overflow:auto;background:#092036;border:1px solid rgba(140,235,222,.55);padding:23px;border-radius:19px;color:white;box-shadow:0 18px 55px #001a}
@@ -16152,9 +16190,8 @@ body.island-screensaver-active #islandSaveGameButton{display:none!important}
 #islandSaveDialog button.island-primary{background:#087d77;border-color:#12b5a5;font-weight:750}
 #islandSaveDialog button:disabled{opacity:.5;cursor:wait}
 #islandSaveDialog .island-save-dialog-message{color:#ffdab6;font-size:11px;margin:10px 0 0}
-@media(max-width:760px){#islandSaveGameButton{top:auto;bottom:calc(env(safe-area-inset-bottom) + 155px);left:10px;padding:7px 10px}#startOverlay{overflow-y:auto;align-items:flex-start!important}#startOverlay>.max-w-md{margin:auto 0}}
+@media(max-width:760px){#islandSaveGameButton{width:100%;min-height:42px;justify-content:flex-start}#startOverlay{overflow-y:auto;align-items:flex-start!important}#startOverlay>.max-w-md{margin:auto 0}}
 </style>
-<button type="button" id="islandSaveGameButton" hidden>儲存島嶼</button>
 <div id="islandSaveDialog" hidden role="dialog" aria-modal="true" aria-labelledby="islandSaveDialogTitle">
   <div class="island-save-dialog-card">
     <h2 id="islandSaveDialogTitle">儲存島嶼</h2>
@@ -16224,7 +16261,7 @@ if(!ready){
 }else{
   try{
     // 只有配置完 Firebase 才載入 SDK；沒有 Firebase 設定也不影響原本遊戲。
-    const [{initializeApp},{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged},{getFirestore,doc,getDoc,setDoc}]=await Promise.all([
+    const [{initializeApp},{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged},{getFirestore,doc,getDoc,setDoc,updateDoc,deleteField}]=await Promise.all([
       import('https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js'),
       import('https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js'),
       import('https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js')
@@ -16241,6 +16278,11 @@ if(!ready){
         const payload=JSON.stringify(data);
         if(new TextEncoder().encode(payload).length>260000)throw new Error('這座島的存檔資料太大，請暫停存檔並回報開發者。');
         await setDoc(ownRef(),{schemaVersion:1,edition:'regular',slots:{['slot'+slot]:data}},{merge:true});
+      },
+      async remove(slot){
+        if(![1,2,3].includes(Number(slot)))throw new Error('存檔位置無效');
+        // 僅刪除指定的欄位，不影響另外兩個存檔位置。
+        await updateDoc(ownRef(),{['slots.slot'+slot]:deleteField()});
       }
     };
     const provider=new GoogleAuthProvider();
@@ -16298,6 +16340,8 @@ if(!ready){
      load.addEventListener('click',()=>loadSlot(n));actions.append(load);
      const copy=document.createElement('button');copy.className='island-copy';copy.textContent='複製';copy.disabled=!data||busy;
      copy.addEventListener('click',()=>copySlot(n));actions.append(copy);
+     const remove=document.createElement('button');remove.className='island-delete';remove.textContent='刪除';remove.disabled=!data||busy;
+     remove.addEventListener('click',()=>deleteSlot(n));actions.append(remove);
      row.append(actions);rows.append(row);
    }
  }
@@ -16334,6 +16378,22 @@ if(!ready){
    busy=true;render();status('正在複製…');
    try{const source=slots['slot'+from];const copy=JSON.parse(JSON.stringify(source));copy.savedAt=new Date().toISOString();await window.islandSaveCloud.save(to,copy);slots['slot'+to]=copy;status('複製完成。');}
    catch(e){status('複製失敗：'+(e.message||e.code));}
+   finally{busy=false;render();}
+ }
+ async function deleteSlot(n){
+   if(busy||!slots['slot'+n])return;
+   if(!getOwner()){status('請先登入島主帳號。');return;}
+   if(!confirm('確定要永久刪除「存檔 0'+n+'」嗎？\n這座島嶼的雲端資料無法復原，其他兩個位置不受影響。'))return;
+   busy=true;render();status('正在刪除存檔 0'+n+'…');
+   try{
+     // 讀取最新資料，避免另一個裝置已刪除或更新的進度被誤處理。
+     const latest=await window.islandSaveCloud.readAll();
+     if(!latest['slot'+n]){slots=latest;if(activeSlot===n)activeSlot=null;status('存檔 0'+n+' 已經是空白位置。');return;}
+     await window.islandSaveCloud.remove(n);
+     delete latest['slot'+n];slots=latest;
+     if(activeSlot===n)activeSlot=null;
+     status('已刪除存檔 0'+n+'。其他位置保留。');
+   }catch(e){status('刪除失敗：'+(e.message||e.code));alert('雲端存檔刪除失敗：'+(e.message||e.code));}
    finally{busy=false;render();}
  }
  function closeDialog(){dialog.hidden=true;message.textContent='';}
