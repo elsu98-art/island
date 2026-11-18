@@ -2075,7 +2075,7 @@ function createCurvedSchoolGate(pos,options={}){
           <span>螢幕保護 ▾</span>
         </button>
         <!-- SV.05 - 04：雲端存檔入口緊接在「螢幕保護」右側；手機版隨系統選單收合。 -->
-        <button type="button" id="islandSaveGameButton" hidden class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95 whitespace-nowrap">儲存島嶼</button>
+        <button type="button" id="islandSaveGameButton" hidden class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-emerald-300 hover:text-white hover:bg-slate-700/60 transition active:scale-95 whitespace-nowrap">儲存</button>
         <button id="islandPerfToggle" type="button" hidden aria-controls="islandPerfPanel" aria-expanded="false" aria-pressed="false" class="glass-hud px-3 py-2 rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-700/60 transition active:scale-95 whitespace-nowrap">效能診斷 OFF</button>
       </div>
     </header>
@@ -2664,90 +2664,141 @@ function createCurvedSchoolGate(pos,options={}){
     </div>
   </div>
 
-  <!-- 遊戲開始視窗 (依使用者要求之簡短 3 點說明與進場難度選擇) -->
+  <!-- 遊戲開始視窗（SV.05-04：右側頁籤整合 開始畫面／島主登入／開發者的話） -->
   <div id="startOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md">
-    <div class="max-w-md w-full flex flex-col gap-2 island-start-shell">
+    <div class="w-full flex flex-col gap-3 island-start-shell">
       <div class="w-full bg-slate-900/95 border-2 border-emerald-500/40 rounded-3xl p-6 sm:p-8 text-center shadow-2xl island-start-card">
-        <h2 class="text-2xl font-black text-white mb-1">我的夢想島</h2>
-        
-        <div class="island-start-grid">
-          <div class="island-start-left">
-        <!-- 遊戲簡介說明 -->
-        <div class="bg-slate-800/80 rounded-2xl p-4 my-5 text-left text-xs sm:text-sm text-slate-200 space-y-2 border border-slate-700">
-          <p class="flex items-start gap-2">
-            <span class="font-bold text-emerald-400">1.</span>
-            <span>根據字卡的題目鍵盤打字，輸入中文詞彙</span>
-          </p>
-          <p class="flex items-start gap-2">
-            <span class="font-bold text-emerald-400">2.</span>
-            <span>輸入正確會為島嶼注入活力，誕生新物件</span>
-          </p>
-          <p class="flex items-start gap-2">
-            <span class="font-bold text-emerald-400">3.</span>
-            <span>每5題獲得「紀念地標」，還有傳奇明星準備登島</span>
-          </p>
-          <p class="flex items-start gap-2">
-            <span class="font-bold text-emerald-400">4.</span>
-            <span>滿50級解鎖綠洲效果，美麗島嶼變成螢幕保護程式</span>
-          </p>
-        </div>
+        <h2 class="text-2xl font-black text-white mb-2">我的夢想島</h2>
 
-        <!-- 難度選擇區 -->
-        <div class="mb-6">
-          <div class="text-xs font-bold text-slate-400 mb-2">選擇本次開拓難度（遊戲中不能再次選擇）：</div>
-          <div class="grid grid-cols-3 gap-2">
-            <button data-diff="easy" class="start-diff-btn p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/25 text-emerald-300 font-bold text-xs sm:text-sm transition flex flex-col items-center shadow-lg">
-              <span>簡易</span>
-              <span class="text-[10px] text-slate-400 mt-0.5">2字詞為主</span>
-            </button>
-            <button data-diff="medium" class="start-diff-btn p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition flex flex-col items-center">
-              <span>普通</span>
-              <span class="text-[10px] text-slate-400 mt-0.5">2~3字均衡</span>
-            </button>
-            <button data-diff="hard" class="start-diff-btn p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition flex flex-col items-center">
-              <span>困難</span>
-              <span class="text-[10px] text-slate-400 mt-0.5">3~4字成語</span>
-            </button>
+        <div class="island-start-tab-wrap">
+          <div class="island-start-panels">
+            <section class="island-start-panel active" data-start-panel="home" aria-labelledby="startTabHome">
+              <div class="bg-slate-800/80 rounded-2xl p-4 text-left text-xs sm:text-sm text-slate-200 space-y-2 border border-slate-700 island-home-guide">
+                <p class="flex items-start gap-2">
+                  <span class="font-bold text-emerald-400">1.</span>
+                  <span>根據字卡的題目鍵盤打字，輸入中文詞彙</span>
+                </p>
+                <p class="flex items-start gap-2">
+                  <span class="font-bold text-emerald-400">2.</span>
+                  <span>輸入正確會為島嶼注入活力，誕生新物件</span>
+                </p>
+                <p class="flex items-start gap-2">
+                  <span class="font-bold text-emerald-400">3.</span>
+                  <span>每 3 個一般獎勵可獲得「紀念地標」，還有傳奇明星準備登島</span>
+                </p>
+                <p class="flex items-start gap-2">
+                  <span class="font-bold text-emerald-400">4.</span>
+                  <span>滿50級解鎖綠洲效果，美麗島嶼變成螢幕保護程式</span>
+                </p>
+              </div>
+
+              <div class="mb-6 island-home-difficulty">
+                <div class="text-xs font-bold text-slate-400 mb-2">選擇本次開拓難度（遊戲中不能再次選擇）：</div>
+                <div class="grid grid-cols-3 gap-2">
+                  <button data-diff="easy" class="start-diff-btn p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/25 text-emerald-300 font-bold text-xs sm:text-sm transition flex flex-col items-center shadow-lg">
+                    <span>簡易</span>
+                    <span class="text-[10px] text-slate-400 mt-0.5">2字詞為主</span>
+                  </button>
+                  <button data-diff="medium" class="start-diff-btn p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition flex flex-col items-center">
+                    <span>普通</span>
+                    <span class="text-[10px] text-slate-400 mt-0.5">2~3字均衡</span>
+                  </button>
+                  <button data-diff="hard" class="start-diff-btn p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition flex flex-col items-center">
+                    <span>困難</span>
+                    <span class="text-[10px] text-slate-400 mt-0.5">3~4字成語</span>
+                  </button>
+                </div>
+              </div>
+
+              <button id="startBtn" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 active:scale-95 text-slate-950 font-black text-lg rounded-2xl shadow-xl transition">
+                開始開拓小島
+              </button>
+            </section>
+
+            <section class="island-start-panel" data-start-panel="owner" aria-labelledby="startTabOwner" hidden>
+              <div class="island-owner-panel-scroll">
+                <section id="studentIdentityBox" class="island-student-identity" aria-label="島主登入">
+                  <div class="island-student-title">島主登入</div>
+                  <div id="studentIdentityStatus" class="island-student-status" role="status">目前為訪客模式，遊戲進度尚未連結雲端。</div>
+                  <div class="island-student-actions">
+                    <button type="button" id="studentGoogleLogin" class="island-google-login"><span class="island-google-mark">G</span> 使用 Google 帳號登入</button>
+                    <button type="button" id="studentGoogleLogout" class="island-student-logout" hidden>登出帳號</button>
+                  </div>
+                  <p class="island-student-hint" id="studentLoginHint">未登入也可直接遊玩；登入後可使用三個雲端存檔。</p>
+                </section>
+
+                <section id="islandSaveSlots" class="island-save-slots" hidden aria-label="島主的三個雲端存檔">
+                  <div class="island-save-heading">我的島嶼存檔 <small>最多三座・只在手動儲存時上傳</small></div>
+                  <p id="islandSaveListStatus" class="island-save-status" role="status">正在讀取雲端存檔…</p>
+                  <div id="islandSaveSlotRows" class="island-save-rows"></div>
+                  <p class="island-save-footnote">「讀取」會以該存檔開始遊戲；「複製」可另存一份到其他位置；「刪除」會清除指定位置，且無法復原。原本的「開始開拓小島」會建立新的島嶼，不會刪除雲端存檔。</p>
+                </section>
+              </div>
+            </section>
+
+            <section class="island-start-panel" data-start-panel="dev" aria-labelledby="startTabDev" hidden>
+              <div class="island-dev-note">
+                <div class="island-dev-note-title">開發者的話</div>
+                <div class="island-dev-note-content">目前尚無開發者公告。</div>
+              </div>
+            </section>
+          </div>
+
+          <div class="island-start-tabs" role="tablist" aria-label="開始畫面頁籤">
+            <button type="button" class="island-start-tab active" id="startTabHome" data-start-tab="home" role="tab" aria-selected="true">開始畫面</button>
+            <button type="button" class="island-start-tab" id="startTabOwner" data-start-tab="owner" role="tab" aria-selected="false">島主登入</button>
+            <button type="button" class="island-start-tab" id="startTabDev" data-start-tab="dev" role="tab" aria-selected="false">開發者的話</button>
           </div>
         </div>
-
-
-
-        <button id="startBtn" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 active:scale-95 text-slate-950 font-black text-lg rounded-2xl shadow-xl transition">
-          開始開拓小島
-        </button>
-          </div>
-          <div class="island-start-right">
-        <!-- SV.05 - 03 島主登入、三個手動存檔位置 -->
-        <section id="studentIdentityBox" class="island-student-identity" aria-label="島主登入">
-          <div class="island-student-title">島主</div>
-          <div id="studentIdentityStatus" class="island-student-status" role="status">目前為訪客模式，遊戲進度尚未連結雲端。</div>
-          <div class="island-student-actions">
-            <button type="button" id="studentGoogleLogin" class="island-google-login"><span class="island-google-mark">G</span> 使用 Google 帳號登入</button>
-            <button type="button" id="studentGoogleLogout" class="island-student-logout" hidden>登出帳號</button>
-          </div>
-          <p class="island-student-hint" id="studentLoginHint">未登入也可直接遊玩；登入後可使用三個雲端存檔。</p>
-        </section>
-
-        <section id="islandSaveSlots" class="island-save-slots" hidden aria-label="島主的三個雲端存檔">
-          <div class="island-save-heading">我的島嶼存檔 <small>最多三座・只在手動儲存時上傳</small></div>
-          <p id="islandSaveListStatus" class="island-save-status" role="status">正在讀取雲端存檔…</p>
-          <div id="islandSaveSlotRows" class="island-save-rows"></div>
-          <p class="island-save-footnote">「讀取」會以該存檔開始遊戲；「複製」可另存一份到其他位置；「刪除」會清除指定位置，且無法復原。原本的「開始開拓小島」會建立新的島嶼，不會刪除雲端存檔。</p>
-        </section>
-          </div>
-        </div>
-
       </div>
 
-      <!-- 字卡外部下方：齊左排列、低調小字 -->
-      <div class="w-full px-2 text-left">
-        <p class="text-[11px] text-slate-400/80 font-medium tracking-wide">
-          Designed and developed by Elsu Wu with AI assistance from Gemini and ChatGPT.
-        </p>
+      <div class="island-start-footer">
+        <nav class="island-start-socials" aria-label="社群與聯絡方式">
+        <a href="https://www.threads.com/@mydreamisland.tw?igshid=NTc4MTIwNjQ2YQ==" target="_blank" rel="noopener noreferrer" aria-label="Threads" title="Threads">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M17.6 7.6C16.4 4.9 14.5 3.5 11.7 3.5c-4.6 0-7.5 3.4-7.5 8.6s2.8 8.5 7.6 8.5c4.3 0 7-2.7 7-6.2 0-2.8-1.6-4.5-4.9-4.9-3.8-.4-6.7 1.1-6.7 3.8 0 1.9 1.5 3.2 3.5 3.2 2.5 0 4.2-2.2 4.2-5.1 0-2.3-.7-3.7-2.1-4.4"/>
+          </svg>
+        </a>
+        <a href="https://www.instagram.com/mydreamisland.tw?mdxt=am9ncXhxNnY0dDFy&amp;utm_source=qr" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2.8" y="2.8" width="18.4" height="18.4" rx="5.2"/>
+            <circle cx="12" cy="12" r="4.1"/>
+            <circle cx="17.7" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+          </svg>
+        </a>
+        <a href="mailto:elsu98@raps.ptc.edu.tw" aria-label="Email" title="Email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2.4" y="5" width="19.2" height="14" rx="2.3"/>
+            <path d="m3.5 6.4 8.5 6.7 8.5-6.7"/>
+          </svg>
+        </a>
+      </nav>
+        <p class="island-start-credit">Designed and developed by Elsu Wu with AI assistance from Gemini and ChatGPT.</p>
       </div>
     </div>
   </div>
+
+  <script id="islandStartTabsScript">
+  (()=>{
+    const tabs=[...document.querySelectorAll('#startOverlay .island-start-tab')];
+    const panels=[...document.querySelectorAll('#startOverlay .island-start-panel')];
+    if(!tabs.length||!panels.length)return;
+    function setTab(name){
+      tabs.forEach(tab=>{
+        const active=tab.dataset.startTab===name;
+        tab.classList.toggle('active',active);
+        tab.setAttribute('aria-selected',active?'true':'false');
+      });
+      panels.forEach(panel=>{
+        const active=panel.dataset.startPanel===name;
+        panel.classList.toggle('active',active);
+        panel.hidden=!active;
+      });
+    }
+    tabs.forEach(tab=>tab.addEventListener('click',()=>setTab(tab.dataset.startTab)));
+    setTab('home');
+  })();
+  </script>
 
   <!-- 遊戲結算視窗 -->
   <div id="gameOverOverlay" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
@@ -16133,53 +16184,57 @@ window.islandApplyJsHeight=function(model,height,THREE){
 
 
 
-<style id="islandSaveV0504TwoColumnStyle">
-/* SV.05-04: start screen compact two-column layout; preserve all auth and save element IDs. */
-#startOverlay{overflow-y:auto;overscroll-behavior:contain;padding:14px!important}
-#startOverlay>.island-start-shell{max-width:920px!important;width:min(920px,100%)!important;margin:auto!important}
-#startOverlay .island-start-card{padding:22px 25px!important}
-#startOverlay .island-start-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:stretch;margin-top:16px;text-align:left}
-#startOverlay .island-start-left,#startOverlay .island-start-right{min-width:0;display:flex;flex-direction:column}
-#startOverlay .island-start-left>.bg-slate-800\/80{margin:0 0 16px!important;padding:13px!important}
-#startOverlay .island-start-left>.mb-6{margin-bottom:14px!important}
-#startOverlay .island-start-left .start-diff-btn{padding:9px 5px!important;min-width:0}
-#startOverlay .island-start-left #startBtn{margin-top:auto;min-height:51px}
-#startOverlay .island-start-right #studentIdentityBox{margin-bottom:12px!important}
-#startOverlay .island-start-right #islandSaveSlots{margin-bottom:0!important;flex:1}
-#startOverlay .island-save-row{padding:8px;gap:5px;flex-wrap:wrap}
-#startOverlay .island-save-info{flex:1 1 140px}
-#startOverlay .island-save-row-actions{flex:0 0 auto;gap:4px}
-#startOverlay .island-save-row-actions button{padding:6px 8px}
-#startOverlay .island-save-footnote{font-size:10px;line-height:1.5}
-@media(max-width:760px){
- #startOverlay>.island-start-shell{max-width:480px!important}
- #startOverlay .island-start-card{padding:20px 16px!important}
- #startOverlay .island-start-grid{grid-template-columns:minmax(0,1fr);gap:14px;margin-top:13px}
- #startOverlay .island-start-left>.bg-slate-800\/80{margin-bottom:14px!important}
- #startOverlay .island-start-left>.mb-6{margin-bottom:12px!important}
- #startOverlay .island-start-left #startBtn{margin-top:0}
+<style id="islandSaveV0504TabbedStartStyle">
+/* SV.05-04 reference: original compact start-card footprint, no resizing on auth or tabs. */
+#startOverlay{overflow:auto!important;overscroll-behavior:contain;padding:14px 56px 14px 14px!important}
+#startOverlay>.island-start-shell{width:445px!important;min-width:0!important;max-width:445px!important;margin:auto!important;gap:10px!important}
+#startOverlay .island-start-card{position:relative!important;box-sizing:border-box!important;width:100%!important;height:480px!important;min-height:480px!important;max-height:480px!important;padding:26px 31px 24px!important;display:flex!important;flex-direction:column!important;overflow:visible!important}
+#startOverlay .island-start-card>h2{font-size:24px!important;line-height:1.4!important;margin:0 0 8px!important;flex:none}
+#startOverlay .island-start-tab-wrap{position:relative!important;margin:0!important;flex:1!important;min-height:0!important}
+#startOverlay .island-start-panels{height:100%!important;min-height:0!important;max-height:100%!important;overflow:hidden!important}
+#startOverlay .island-start-panel{height:100%!important;min-height:0!important;display:none!important;flex-direction:column!important;text-align:left!important}
+#startOverlay .island-start-panel.active:not([hidden]){display:flex!important}
+#startOverlay .island-start-panel[hidden]{display:none!important}
+#startOverlay .island-home-guide{margin:6px 0 19px!important;padding:14px!important;font-size:12px!important;flex:none}
+#startOverlay .island-home-guide p{line-height:1.55}
+#startOverlay .island-home-difficulty{margin:0 0 12px!important}
+#startOverlay .island-home-difficulty .start-diff-btn{padding:10px 5px!important;min-height:64px!important}
+#startOverlay #startBtn{margin-top:auto!important;min-height:59px!important;padding:12px!important;flex:none}
+/* The same narrow file tabs as the reference; all three fit inside the 480px card height. */
+#startOverlay .island-start-tabs{position:absolute!important;left:calc(100% + 30px)!important;right:auto!important;top:13px!important;display:flex!important;flex-direction:column!important;gap:7px!important;align-items:flex-start!important;z-index:3!important}
+#startOverlay .island-start-tab{writing-mode:vertical-rl!important;text-orientation:mixed!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:42px!important;min-width:42px!important;height:111px!important;min-height:111px!important;padding:9px 8px!important;border-radius:0 11px 11px 0!important;border:1px solid rgba(103,212,205,.46)!important;border-left:0!important;background:rgba(19,40,56,.93)!important;color:#c5d7e4!important;font-size:12px!important;font-weight:800!important;letter-spacing:.04em!important;box-shadow:0 7px 18px rgba(0,0,0,.18)!important;transform:none!important}
+#startOverlay .island-start-tab.active{background:rgba(8,39,47,.96)!important;color:#fff!important;border-color:rgba(52,211,153,.75)!important}
+#startOverlay .island-owner-panel-scroll{height:100%;min-height:0;overflow-y:auto;padding-right:3px;scrollbar-width:thin;overscroll-behavior:contain}
+#startOverlay #studentIdentityBox{margin:0 0 11px!important;padding:12px!important}
+#startOverlay #islandSaveSlots{margin:0!important;padding:10px!important}
+#startOverlay .island-save-row{padding:7px!important;gap:5px!important;flex-wrap:wrap}
+#startOverlay .island-save-info{flex:1 1 135px}
+#startOverlay .island-save-row-actions{gap:4px}
+#startOverlay .island-save-row-actions button{padding:6px 7px}
+#startOverlay .island-save-footnote{font-size:10px;line-height:1.45}
+#startOverlay .island-dev-note{height:100%;padding:15px!important;overflow-y:auto;scrollbar-width:thin;border:1px solid rgba(148,163,184,.24);border-radius:15px;background:rgba(15,23,42,.52)}
+#startOverlay .island-dev-note-title{font-size:17px;font-weight:800;color:white;margin:0 0 14px}
+#startOverlay .island-dev-note-content{font-size:13px;color:#e6eef8;line-height:1.85;white-space:pre-wrap}
+#startOverlay .island-start-footer{display:flex;flex-direction:column;align-items:center;gap:9px!important}
+#startOverlay .island-start-socials{display:flex;gap:13px;justify-content:center;margin:0}
+#startOverlay .island-start-socials a{display:flex;align-items:center;justify-content:center;width:33px;height:33px;border-radius:50%;border:1px solid rgba(226,232,240,.25);background:rgba(15,23,42,.38);color:#cbd5e1;text-decoration:none}
+#startOverlay .island-start-socials svg{width:17px;height:17px}
+#startOverlay .island-start-credit{font-size:11px;color:rgba(148,163,184,.86);text-align:center;white-space:nowrap}
+#startOverlay #islandAdminEntry{top:14px!important;right:14px!important;bottom:auto!important}
+@media(max-width:530px){
+ #startOverlay{padding:10px 45px 10px 8px!important}
+ #startOverlay>.island-start-shell{width:min(445px,calc(100vw - 55px))!important;max-width:445px!important}
+ #startOverlay .island-start-card{height:480px!important;min-height:480px!important;max-height:480px!important;padding:23px 15px 19px!important}
+ #startOverlay .island-start-card>h2{font-size:21px!important}
+ #startOverlay .island-start-tabs{left:calc(100% + 14px)!important;top:11px!important}
+ #startOverlay .island-start-tab{width:39px!important;min-width:39px!important;height:106px!important;min-height:106px!important;font-size:11px!important}
+ #startOverlay .island-home-guide{padding:10px!important;font-size:11px!important}
+ #startOverlay .island-home-difficulty .start-diff-btn{min-height:60px!important}
+ #startOverlay .island-start-credit{font-size:9px;white-space:normal}
 }
-@media(min-width:761px) and (max-height:620px){#startOverlay>.island-start-shell{margin:0 auto!important}}
+@media(max-height:575px){#startOverlay{align-items:flex-start!important}}
 </style>
 
-<style id="islandSaveV0504StableStartLayout">
-/* SV.05-04: fixed-size start window independent of login state / save-slot rendering. */
-@media (min-width:761px) {
-  #startOverlay > .island-start-shell {height: min(670px, calc(100dvh - 28px)) !important;min-height:0;}
-  #startOverlay .island-start-card {height:100% !important;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
-  #startOverlay .island-start-grid {flex:1;min-height:0;}
-  #startOverlay .island-start-left {min-height:0;}
-  #startOverlay .island-start-right {min-height:0;overflow-y:auto;scrollbar-width:thin;overscroll-behavior:contain;padding-right:3px;}
-}
-@media (max-width:760px) {
-  #startOverlay > .island-start-shell {min-height:0;}
-  #startOverlay .island-start-card {height: min(920px, calc(100dvh - 54px)) !important;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
-  #startOverlay .island-start-grid {flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;overscroll-behavior:contain;}
-  #startOverlay .island-start-left #startBtn {min-height:50px;}
-}
-/* The original small gear remains the existing admin control, moved to top right. */
-#startOverlay #islandAdminEntry {top:14px !important;right:14px !important;bottom:auto !important;}
-</style>
 <style id="islandSaveV0503Style">
 #islandSaveSlots[hidden],#islandSaveDialog[hidden],#islandSaveGameButton[hidden]{display:none!important}
 #islandSaveSlots{padding:13px;border:1px solid rgba(129,206,196,.34);border-radius:15px;background:rgba(5,31,45,.57);text-align:left;margin:0 0 14px}
@@ -16208,7 +16263,7 @@ body.island-screensaver-active #islandSaveGameButton{display:none!important}
 </style>
 <div id="islandSaveDialog" hidden role="dialog" aria-modal="true" aria-labelledby="islandSaveDialogTitle">
   <div class="island-save-dialog-card">
-    <h2 id="islandSaveDialogTitle">儲存島嶼</h2>
+    <h2 id="islandSaveDialogTitle">儲存</h2>
     <p id="islandSaveDialogText">選擇存檔位置：</p>
     <select id="islandSaveDialogSlot" aria-label="存檔位置"><option value="1">存檔 01</option><option value="2">存檔 02</option><option value="3">存檔 03</option></select>
     <div class="island-save-dialog-actions">
@@ -16415,11 +16470,18 @@ if(!ready){
    if(!window.islandSaveGame?.isPlaying?.()){
      if(leaving&&confirm('要返回開始畫面嗎？')){window.__islandSaveLeaving=true;location.reload();}return;
    }
+   // 訪客沒有雲端存檔資格；離開遊戲時直接回首頁，不顯示雲端儲存對話框。
+   if(leaving&&!getOwner()){
+     window.__islandSaveLeaving=true;
+     location.reload();
+     return;
+   }
+   if(!getOwner())return; // 未登入不可開啟雲端存檔介面
    dialogMode=leaving?'leave':'save';dialog.hidden=false;
    title.textContent=leaving?'離開前要儲存島嶼嗎？':'儲存島嶼';
    detail.textContent=leaving?'親愛的島主，離開之前，要把目前的島嶼進度儲存到雲端嗎？':'請選擇要儲存的島嶼位置。';
    slotSelect.value=String(activeSlot||1);slotSelect.hidden=!getOwner();
-   yes.hidden=!getOwner();yes.textContent=leaving?'儲存並離開':'儲存島嶼';
+   yes.hidden=!getOwner();yes.textContent=leaving?'儲存並離開':'儲存';
    no.hidden=!leaving;no.textContent='不儲存並離開';
    message.textContent=getOwner()?'三個位置彼此獨立。覆蓋前會再次詢問。':'訪客模式無法雲端儲存，可以選擇不儲存並離開。';
  }
