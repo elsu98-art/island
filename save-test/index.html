@@ -2724,14 +2724,14 @@ function createCurvedSchoolGate(pos,options={}){
                     <button type="button" id="studentGoogleLogin" class="island-google-login"><span class="island-google-mark">G</span> 使用 Google 帳號登入</button>
                     <button type="button" id="studentGoogleLogout" class="island-student-logout" hidden>登出帳號</button>
                   </div>
-                  <p class="island-student-hint" id="studentLoginHint">未登入也可直接遊玩；登入後可使用三個雲端存檔。</p>
+                  <p class="island-student-hint" id="studentLoginHint" hidden></p>
                 </section>
 
                 <section id="islandSaveSlots" class="island-save-slots" hidden aria-label="島主的三個雲端存檔">
-                  <div class="island-save-heading">我的島嶼存檔 <small>最多三座・只在手動儲存時上傳</small></div>
+                  <div class="island-save-heading">我的島嶼存檔</div>
                   <p id="islandSaveListStatus" class="island-save-status" role="status">正在讀取雲端存檔…</p>
                   <div id="islandSaveSlotRows" class="island-save-rows"></div>
-                  <p class="island-save-footnote">「讀取」會以該存檔開始遊戲；「複製」可另存一份到其他位置；「刪除」會清除指定位置，且無法復原。原本的「開始開拓小島」會建立新的島嶼，不會刪除雲端存檔。</p>
+                  
                 </section>
               </div>
             </section>
@@ -12930,6 +12930,12 @@ function createFishingBoat(pos,options={}){
 
     // 清除島上所有生成物件 (c / clear)
     function clearAllIslandCreations() {
+      // SV.05-04 修正 FULL → CLEAR：先停下仍在逐幀生成的程序，避免 CLEAR 後又生出獎勵。
+      if (fullModeTimer !== null) {
+        clearInterval(fullModeTimer);
+        fullModeTimer = null;
+      }
+      if (renderModeActive) stopRenderMode('已清空島嶼，算圖模式結束。');
       // clear 清除所有已放置的商城裝飾，以及購買放置中的暫存狀態。
       cargoShopPending=null;cargoGuideClear();
       if(layoutSelectedObject?.userData?.cargoShopPlaced)layoutSetSelected(null);
@@ -13007,6 +13013,14 @@ function createFishingBoat(pos,options={}){
         whaleUnlocked = false;
       }
 
+      // FULL 與一般答題共用此生成游標；物件已清空時也必須歸零，否則雲端讀檔會憑舊數字重建 250 個獎勵。
+      currentCreationIndex = 0;
+      updateGeneralRewardCounter();
+      // 清除佈置功能的本局解鎖狀態；下次仍依彩虹／FULL 條件重新解鎖。
+      layoutUnlocked = false;
+      layoutDebugPending = false;
+      if (islandLayoutUnlockNotice) islandLayoutUnlockNotice.hidden = true;
+      updateLayoutEntry();
       // 重設計數與狀態
       specialMonumentsSpawned = 0;
       correctCount = 0;
@@ -16235,6 +16249,10 @@ window.islandApplyJsHeight=function(model,height,THREE){
 @media(max-height:575px){#startOverlay{align-items:flex-start!important}}
 </style>
 
+<style id="islandSaveV0504TrimmedCopy">
+#startOverlay #studentLoginHint{display:none!important}
+#startOverlay #islandSaveListStatus:empty{display:none!important}
+</style>
 <style id="islandSaveV0503Style">
 #islandSaveSlots[hidden],#islandSaveDialog[hidden],#islandSaveGameButton[hidden]{display:none!important}
 #islandSaveSlots{padding:13px;border:1px solid rgba(129,206,196,.34);border-radius:15px;background:rgba(5,31,45,.57);text-align:left;margin:0 0 14px}
@@ -16418,7 +16436,7 @@ if(!ready){
    refreshButtons();if(!getOwner())return;
    if(!window.islandSaveCloud){status('雲端資料庫尚未連接，請檢查網路。');return;}
    const uid=getOwner().uid;status('正在讀取島嶼存檔…');
-   try{const result=await window.islandSaveCloud.readAll();if(getOwner()?.uid!==uid)return;slots=result;status('三個雲端存檔位置已準備好。');render();}
+   try{const result=await window.islandSaveCloud.readAll();if(getOwner()?.uid!==uid)return;slots=result;status('');render();}
    catch(e){status('無法讀取雲端存檔：'+(e.message||e.code));}
  }
  async function saveSlot(n){
